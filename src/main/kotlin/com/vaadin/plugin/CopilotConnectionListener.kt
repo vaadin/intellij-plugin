@@ -1,15 +1,15 @@
-package com.vaadin.`intellij-plugin`
+package com.vaadin.plugin
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.StartupActivity
+import com.intellij.openapi.startup.ProjectActivity
 
-class CopilotConnectionListener : StartupActivity {
+class CopilotConnectionListener : ProjectActivity {
 
     private val LOG: Logger = Logger.getInstance(CopilotConnectionListener::class.java)
 
-    override fun runActivity(project: Project) {
-        LOG.info("Copilot Starting Up...")
+    override suspend fun execute(project: Project) {
+        LOG.error("Copilot Starting Up...")
     }
 
 }
