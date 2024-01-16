@@ -5,40 +5,43 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.command.CommandProcessor
+import com.intellij.openapi.command.UndoConfirmationPolicy
+import com.intellij.openapi.command.undo.UndoManager
+import com.intellij.openapi.command.undo.UndoableAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
-import com.vaadin.plugin.copilot.handlers.WriteFileContent
+import com.vaadin.plugin.copilot.handlers.UndoHandler
+import com.vaadin.plugin.copilot.handlers.WriteHandler
 import io.ktor.util.network.*
+import java.io.File
+import java.io.FileWriter
 import java.nio.ByteBuffer
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
+import java.util.*
 
 
 class CopilotServer : ProjectActivity {
 
-    private val handlers: HashMap<String, CommandHandler> = HashMap()
-
     fun interface CommandHandler {
-        fun handle(message: Map<String, Object>): CommandResponse
+        fun handle()
     }
 
-    data class CommandRequest(val command: String, val data: Map<String, Object>)
-
-    data class CommandResponse(val status: Boolean)
+    data class CommandRequest(val command: String, val data: Map<String, Any>)
 
     override suspend fun execute(project: Project) {
-
-        registerHandlers(project)
-
         try {
-            val server = ServerSocketChannel.open().bind(null);
-            notify("Copilot Plugin listening at port " + server.localAddress.port, NotificationType.INFORMATION)
+            val server = ServerSocketChannel.open().bind(null)
+            notify("Copilot Plugin Started", NotificationType.INFORMATION)
+            saveInDotFile(project, server.localAddress.port)
 
-            while(true) {
-                notify("waiting for client...", NotificationType.INFORMATION)
+            while (true) {
                 val client: SocketChannel = server.accept()
-                if ((client != null) && (client.isOpen)) {
-                    this.handleClientConnection(client)
+                if (client.isOpen) {
+                    this.handleClientConnection(project, client)
                 }
                 client.close()
             }
@@ -47,29 +50,45 @@ class CopilotServer : ProjectActivity {
         }
     }
 
-    fun registerHandlers(project: Project) {
-        handlers["write-file"] = WriteFileContent(project)
-    }
-
-    fun handleClientConnection(client: SocketChannel) {
+    private fun handleClientConnection(project: Project, client: SocketChannel) {
         val buffer: ByteBuffer = ByteBuffer.allocate(2048)
         client.read(buffer)
 
         val data: String = String(buffer.array()).trim { it <= ' ' }
-        var command: CommandRequest = jacksonObjectMapper().readValue(data)
+        val command: CommandRequest = jacksonObjectMapper().readValue(data)
 
-        notify("Received from client: " + data, NotificationType.INFORMATION)
-        val response = handlers[command.command]?.handle(command.data)
-        if (response !== null) {
-            buffer.flip()
-            buffer.clear()
-            client.write(ByteBuffer.wrap(jacksonObjectMapper().writeValueAsBytes(response)))
-            notify("Writing back to client: " + response, NotificationType.INFORMATION)
+        ApplicationManager.getApplication().executeOnPooledThread {
+            runInEdt {
+                val handler = createHandler(command.command, project, command.data)
+                if (handler !== null) {
+                    CommandProcessor.getInstance().executeCommand(project, {
+                        handler.handle()
+                        if (handler is UndoableAction) {
+                            UndoManager.getInstance(project).undoableActionPerformed(handler)
+                        }
+                    }, "copilot-" + command.command, null, UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
+                }
+            }
         }
     }
 
-    fun notify(message: String, type: NotificationType) {
+    private fun createHandler(command: String, project: Project, data: Map<String, Any>): CommandHandler? {
+        when (command) {
+            "write" -> return WriteHandler(project, data)
+            "undo" -> return UndoHandler(project)
+        }
+        return null
+    }
+
+    private fun notify(message: String, type: NotificationType) {
         Notifications.Bus.notify(Notification("Copilot", message, type))
+    }
+
+    private fun saveInDotFile(project: Project, port: Int) {
+        val ioFile = project.basePath + File.separator + ".copilot-plugin"
+        val props = Properties()
+        props.setProperty("port", port.toString())
+        props.store(FileWriter(ioFile), "Copilot Plugin Runtime Properties")
     }
 
 }
