@@ -1,35 +1,29 @@
 package com.vaadin.plugin.copilot.handlers
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.WriteAction
-import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.command.impl.DocumentUndoProvider
 import com.intellij.openapi.command.undo.DocumentReference
 import com.intellij.openapi.command.undo.DocumentReferenceManager
 import com.intellij.openapi.command.undo.UndoableAction
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.readText
-import com.intellij.openapi.vfs.writeText
+import com.intellij.openapi.vfs.*
 import com.vaadin.plugin.copilot.CopilotServer
 import java.io.File
 import java.io.IOException
 
 class WriteHandler(project: Project, data: Map<String, Any>) : CopilotServer.CommandHandler, UndoableAction {
 
-    private lateinit var originalContent: String
-    private val content: String
-    private val filePath: String
+    private var originalContent: String
+    private val content: String = data["content"] as String
+    private val vfsFile: VirtualFile?
+    private val vfsDoc: Document?
 
     init {
-        content = data["content"] as String
-        filePath = project.basePath + File.separator + data["file"]
-        ApplicationManager.getApplication().executeOnPooledThread {
-            runInEdt {
-                val ioFile = File(filePath)
-                val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
-                originalContent = vfsFile?.readText().toString()
-            }
-        }
+        val ioFile = File(project.basePath + File.separator + data["file"])
+        vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
+        vfsDoc = vfsFile?.findDocument()
+        originalContent = vfsFile?.readText().toString()
     }
 
     override fun handle() {
@@ -37,19 +31,17 @@ class WriteHandler(project: Project, data: Map<String, Any>) : CopilotServer.Com
     }
 
     override fun undo() {
-        WriteAction.run<IOException> {
-            val ioFile = File(filePath)
-            val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
-            if (vfsFile?.isWritable == true) {
+        if (vfsFile?.isWritable == true) {
+            DocumentUndoProvider.startDocumentUndo(vfsDoc)
+            WriteAction.run<IOException> {
                 vfsFile.writeText(originalContent)
             }
+            DocumentUndoProvider.finishDocumentUndo(vfsDoc)
         }
     }
 
     override fun redo() {
         WriteAction.run<IOException> {
-            val ioFile = File(filePath)
-            val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
             if (vfsFile?.isWritable == true) {
                 vfsFile.writeText(content)
             }
@@ -57,9 +49,11 @@ class WriteHandler(project: Project, data: Map<String, Any>) : CopilotServer.Com
     }
 
     override fun getAffectedDocuments(): Array<DocumentReference> {
-        val ioFile = File(filePath)
-        val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)!!
-        return arrayOf(DocumentReferenceManager.getInstance().create(vfsFile))
+        if (vfsDoc != null) {
+            return arrayOf(DocumentReferenceManager.getInstance().create(vfsDoc))
+        } else {
+            return emptyArray()
+        }
     }
 
     override fun isGlobal(): Boolean {
