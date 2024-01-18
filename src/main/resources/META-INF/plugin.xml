@@ -23,7 +23,7 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         
-        <backgroundPostStartupActivity implementation="com.vaadin.plugin.copilot.CopilotServer" />
+        <backgroundPostStartupActivity implementation="com.vaadin.plugin.copilot.CopilotPlugin" />
 
         <notificationGroup id="Copilot" displayType="BALLOON" />
 

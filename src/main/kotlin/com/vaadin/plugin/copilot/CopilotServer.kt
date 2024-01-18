@@ -1,24 +1,6 @@
 package com.vaadin.plugin.copilot
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.command.UndoConfirmationPolicy
-import com.intellij.openapi.command.undo.UndoManager
-import com.intellij.openapi.command.undo.UndoableAction
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectCloseListener
-import com.intellij.openapi.startup.ProjectActivity
-import com.vaadin.plugin.copilot.handlers.UndoHandler
-import com.vaadin.plugin.copilot.handlers.WriteHandler
 import io.ktor.util.network.*
-import java.io.File
-import java.io.FileWriter
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -29,7 +11,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 // Server implementation based on https://github.com/teocci/NioSocketCodeSample/tree/master
-class CopilotServer : ProjectActivity, ProjectCloseListener {
+class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { }) {
 
     private val TIMEOUT: Long = 500
 
@@ -38,17 +20,13 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
 
     private var serverRunning = AtomicBoolean(true)
 
-    private fun init(project: Project) {
-        println("initializing server")
+    init {
+//        println("initializing server")
 
         try {
             serverChannel = ServerSocketChannel.open()
             serverChannel!!.configureBlocking(false)
             serverChannel!!.socket().bind(null)
-
-            notify("Copilot Plugin Started", NotificationType.INFORMATION)
-            saveInDotFile(project, serverChannel!!.localAddress.port)
-
             selector = Selector.open()
             serverChannel!!.register(selector, SelectionKey.OP_ACCEPT)
         } catch (e: IOException) {
@@ -56,23 +34,15 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
         }
     }
 
-    override fun projectClosing(project: Project) {
+    fun getPort(): Int {
+        return serverChannel!!.socket().localPort
+    }
+
+    fun stop() {
         serverRunning.set(false)
-        super.projectClosing(project)
     }
 
-    fun interface CommandHandler {
-        fun handle()
-    }
-
-    data class CommandRequest(val command: String, val data: Map<String, Any>)
-
-    override suspend fun execute(project: Project) {
-
-        init(project)
-
-        project.messageBus.connect().subscribe(ProjectCloseListener.TOPIC, this)
-
+    fun start() {
         try {
             while (!Thread.currentThread().isInterrupted && serverRunning.get()) {
                 selector!!.select(TIMEOUT)
@@ -85,7 +55,7 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
                         continue
                     }
                     if (key.isAcceptable) {
-                        println("Accepting connection")
+//                        println("Accepting connection")
                         accept(key)
                     }
 //                    if (key.isWritable) {
@@ -93,8 +63,8 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
 //                        write(key)
 //                    }
                     if (key.isReadable) {
-                        println("Reading connection")
-                        read(key, project)
+//                        println("Reading connection")
+                        read(key)
                     }
                 }
             }
@@ -106,7 +76,7 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
     }
 
     private fun closeConnection() {
-        println("Closing server down")
+//        println("Closing server down")
         if (selector != null) {
             try {
                 selector!!.close()
@@ -127,7 +97,7 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
     }
 
     @Throws(IOException::class)
-    private fun read(key: SelectionKey, project: Project) {
+    private fun read(key: SelectionKey) {
         val channel = key.channel() as SocketChannel
         val readBuffer = ByteBuffer.allocate(4096)
         readBuffer.clear()
@@ -143,7 +113,7 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
         }
 
         if (read == -1) {
-            println("Nothing was there to be read, closing connection")
+//            println("Nothing was there to be read, closing connection")
             channel.close()
             key.cancel()
             return
@@ -153,44 +123,7 @@ class CopilotServer : ProjectActivity, ProjectCloseListener {
         val data = ByteArray(4096)
         readBuffer[data, 0, read]
 
-        handleClientData(project, data)
-    }
-
-    private fun handleClientData(project: Project, data: ByteArray) {
-        val command: CommandRequest = jacksonObjectMapper().readValue(data)
-        ApplicationManager.getApplication().executeOnPooledThread {
-            runInEdt {
-                val handler = createHandler(command.command, project, command.data)
-                if (handler !== null) {
-                    CommandProcessor.getInstance().executeCommand(project, {
-                        handler.handle()
-                        if (handler is UndoableAction) {
-                            UndoManager.getInstance(project).undoableActionPerformed(handler)
-                        }
-                    }, "copilot-" + command.command, null, UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
-                }
-            }
-        }
-    }
-
-    private fun createHandler(command: String, project: Project, data: Map<String, Any>): CommandHandler? {
-        when (command) {
-            "write" -> return WriteHandler(project, data)
-            "undo" -> return UndoHandler(project)
-        }
-        return null
-    }
-
-    private fun notify(message: String, type: NotificationType) {
-        Notifications.Bus.notify(Notification("Copilot", message, type))
-    }
-
-    private fun saveInDotFile(project: Project, port: Int) {
-        val ioFile = project.basePath + File.separator + ".copilot-plugin"
-        val props = Properties()
-        props.setProperty("port", port.toString())
-        props.store(FileWriter(ioFile), "Copilot Plugin Runtime Properties")
-        File(ioFile).deleteOnExit()
+        dataReceivedCallback.invoke(data)
     }
 
 }
