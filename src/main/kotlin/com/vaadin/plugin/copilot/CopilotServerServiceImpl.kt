@@ -1,6 +1,9 @@
 package com.vaadin.plugin.copilot
 
+import com.intellij.openapi.project.Project
 import io.ktor.util.network.*
+import java.io.File
+import java.io.FileWriter
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -8,20 +11,31 @@ import java.nio.channels.Selector
 import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 // Server implementation based on https://github.com/teocci/NioSocketCodeSample/tree/master
-class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { }) {
+class CopilotServerServiceImpl(private val project: Project): CopilotServerService {
 
-    private val TIMEOUT: Long = 500
+    private val timeout: Long = 500
 
     private var serverChannel: ServerSocketChannel? = null
     private var selector: Selector? = null
 
-    private var serverRunning = AtomicBoolean(true)
+    private var serverRunning = false
 
-    init {
-//        println("initializing server")
+    override fun getPort(): Int {
+        return serverChannel!!.socket().localPort
+    }
+
+    override fun stop() {
+        serverRunning = false
+        removeDotFile()
+    }
+
+    override fun isRunning(): Boolean {
+        return serverRunning
+    }
+
+    override fun start(dataReceivedCallback: (ByteArray) -> Unit) {
 
         try {
             serverChannel = ServerSocketChannel.open()
@@ -29,23 +43,15 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
             serverChannel!!.socket().bind(null)
             selector = Selector.open()
             serverChannel!!.register(selector, SelectionKey.OP_ACCEPT)
+            serverRunning = true
         } catch (e: IOException) {
             e.printStackTrace()
         }
-    }
 
-    fun getPort(): Int {
-        return serverChannel!!.socket().localPort
-    }
-
-    fun stop() {
-        serverRunning.set(false)
-    }
-
-    fun start() {
+        savePortInDotFile(getPort())
         try {
-            while (!Thread.currentThread().isInterrupted && serverRunning.get()) {
-                selector!!.select(TIMEOUT)
+            while (!Thread.currentThread().isInterrupted && serverRunning) {
+                selector!!.select(timeout)
                 val keys = selector!!.selectedKeys().iterator()
 
                 while (keys.hasNext()) {
@@ -55,7 +61,6 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
                         continue
                     }
                     if (key.isAcceptable) {
-//                        println("Accepting connection")
                         accept(key)
                     }
 //                    if (key.isWritable) {
@@ -63,8 +68,10 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
 //                        write(key)
 //                    }
                     if (key.isReadable) {
-//                        println("Reading connection")
-                        read(key)
+                        val data = read(key)
+                        if (data != null) {
+                            dataReceivedCallback.invoke(data)
+                        }
                     }
                 }
             }
@@ -76,7 +83,6 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
     }
 
     private fun closeConnection() {
-//        println("Closing server down")
         if (selector != null) {
             try {
                 selector!!.close()
@@ -97,7 +103,7 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
     }
 
     @Throws(IOException::class)
-    private fun read(key: SelectionKey) {
+    private fun read(key: SelectionKey): ByteArray? {
         val channel = key.channel() as SocketChannel
         val readBuffer = ByteBuffer.allocate(4096)
         readBuffer.clear()
@@ -109,21 +115,31 @@ class CopilotServer(private val dataReceivedCallback: (ByteArray) -> Unit = { })
             e.printStackTrace()
             key.cancel()
             channel.close()
-            return
+            return null
         }
 
         if (read == -1) {
-//            println("Nothing was there to be read, closing connection")
             channel.close()
             key.cancel()
-            return
+            return null
         }
         // IMPORTANT - don't forget the flip() the buffer. It is like a reset without clearing it.
         readBuffer.flip()
         val data = ByteArray(4096)
         readBuffer[data, 0, read]
+        return data
+    }
 
-        dataReceivedCallback.invoke(data)
+    private fun savePortInDotFile(port: Int) {
+        val ioFile = File(project.basePath + File.separator + ".copilot-plugin")
+        val props = Properties()
+        props.setProperty("port", port.toString())
+        props.store(FileWriter(ioFile), "Copilot Plugin Runtime Properties")
+    }
+
+    private fun removeDotFile() {
+        val ioFile = File(project.basePath + File.separator + ".copilot-plugin")
+        ioFile.delete()
     }
 
 }

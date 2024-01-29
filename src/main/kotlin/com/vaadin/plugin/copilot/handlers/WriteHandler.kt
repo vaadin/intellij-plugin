@@ -8,11 +8,11 @@ import com.intellij.openapi.command.undo.UndoableAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.*
-import com.vaadin.plugin.copilot.CopilotPlugin
+import com.vaadin.plugin.copilot.CommandHandler
 import java.io.File
 import java.io.IOException
 
-class WriteHandler(project: Project, data: Map<String, Any>) : CopilotPlugin.CommandHandler, UndoableAction {
+class WriteHandler(project: Project, data: Map<String, Any>) : CommandHandler, UndoableAction {
 
     private var originalContent: String
     private val content: String = data["content"] as String

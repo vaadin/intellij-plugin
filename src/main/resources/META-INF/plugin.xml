@@ -22,10 +22,24 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        
-        <backgroundPostStartupActivity implementation="com.vaadin.plugin.copilot.CopilotPlugin" />
-
-        <notificationGroup id="Copilot" displayType="BALLOON" />
-
+        <notificationGroup id="Copilot" displayType="BALLOON"/>
+        <projectService serviceImplementation="com.vaadin.plugin.copilot.CopilotServerServiceImpl"
+                        serviceInterface="com.vaadin.plugin.copilot.CopilotServerService"/>
     </extensions>
+
+    <actions>
+        <action id="com.vaadin.plugin.copilot.CopilotServerStartAction"
+                class="com.vaadin.plugin.copilot.CopilotServerStartAction" text="Start Copilot Plugin">
+            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
+        </action>
+        <action id="com.vaadin.plugin.copilot.CopilotServerStopAction"
+                class="com.vaadin.plugin.copilot.CopilotServerStopAction" text="Stop Copilot Plugin">
+            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
+        </action>
+    </actions>
+
+    <projectListeners>
+        <listener class="com.vaadin.plugin.copilot.CopilotProjectLifecycleListener"
+                  topic="com.intellij.openapi.project.ProjectCloseListener"/>
+    </projectListeners>
 </idea-plugin>
