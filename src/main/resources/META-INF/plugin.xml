@@ -28,12 +28,9 @@
     </extensions>
 
     <actions>
-        <action id="com.vaadin.plugin.copilot.CopilotServerStartAction"
-                class="com.vaadin.plugin.copilot.CopilotServerStartAction" text="Start Copilot Plugin">
-            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
-        </action>
-        <action id="com.vaadin.plugin.copilot.CopilotServerStopAction"
-                class="com.vaadin.plugin.copilot.CopilotServerStopAction" text="Stop Copilot Plugin">
+        <action id="com.vaadin.plugin.copilot.CopilotServerProjectAction"
+                class="com.vaadin.plugin.copilot.CopilotServerProjectAction"
+                icon="/icons/copilot.svg">
             <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
         </action>
     </actions>

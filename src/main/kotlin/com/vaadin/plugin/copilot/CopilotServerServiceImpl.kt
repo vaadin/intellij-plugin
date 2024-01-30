@@ -2,8 +2,6 @@ package com.vaadin.plugin.copilot
 
 import com.intellij.openapi.project.Project
 import io.ktor.util.network.*
-import java.io.File
-import java.io.FileWriter
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -22,21 +20,19 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
 
     private var serverRunning = false
 
-    override fun getPort(): Int {
-        return serverChannel!!.socket().localPort
+    override fun getPort(): Int? {
+        return serverChannel?.socket()?.localPort
     }
 
     override fun stop() {
         serverRunning = false
-        removeDotFile()
     }
 
     override fun isRunning(): Boolean {
         return serverRunning
     }
 
-    override fun start(dataReceivedCallback: (ByteArray) -> Unit) {
-
+    override fun init() {
         try {
             serverChannel = ServerSocketChannel.open()
             serverChannel!!.configureBlocking(false)
@@ -47,8 +43,9 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
 
-        savePortInDotFile(getPort())
+    override fun start(dataReceivedCallback: (ByteArray) -> Unit) {
         try {
             while (!Thread.currentThread().isInterrupted && serverRunning) {
                 selector!!.select(timeout)
@@ -128,18 +125,6 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
         val data = ByteArray(4096)
         readBuffer[data, 0, read]
         return data
-    }
-
-    private fun savePortInDotFile(port: Int) {
-        val ioFile = File(project.basePath + File.separator + ".copilot-plugin")
-        val props = Properties()
-        props.setProperty("port", port.toString())
-        props.store(FileWriter(ioFile), "Copilot Plugin Runtime Properties")
-    }
-
-    private fun removeDotFile() {
-        val ioFile = File(project.basePath + File.separator + ".copilot-plugin")
-        ioFile.delete()
     }
 
 }
