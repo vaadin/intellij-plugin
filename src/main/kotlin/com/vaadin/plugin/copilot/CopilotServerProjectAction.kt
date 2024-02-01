@@ -11,15 +11,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.vaadin.plugin.copilot.handlers.UndoHandler
-import com.vaadin.plugin.copilot.handlers.WriteHandler
+import com.vaadin.plugin.copilot.handlers.WriteFileAction
 import java.io.File
 import java.io.FileWriter
-import java.util.*
+import java.util.Properties
 
 class CopilotServerProjectAction : AnAction() {
 
@@ -66,11 +63,7 @@ class CopilotServerProjectAction : AnAction() {
         val command: CommandRequest = jacksonObjectMapper().readValue(data)
         println("Running action " + command.command)
         runInEdt {
-            val handler = createCommandHandler(command.command, project, command.data)
-            if (handler !== null) {
-                CommandProcessor.getInstance().executeCommand(project, handler,
-                    "copilot-" + command.command, null, UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
-            }
+            createCommandHandler(command.command, project, command.data)?.run()
         }
     }
 
@@ -80,8 +73,7 @@ class CopilotServerProjectAction : AnAction() {
         data: Map<String, Any>
     ): Runnable? {
         when (command) {
-            "write" -> return WriteHandler(project, data)
-            "undo" -> return UndoHandler(project)
+            "write" -> return WriteFileAction(project, data)
         }
         return null
     }
