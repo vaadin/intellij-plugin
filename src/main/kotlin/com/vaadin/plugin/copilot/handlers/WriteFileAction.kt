@@ -17,7 +17,7 @@ import java.nio.file.Path
 class WriteFileAction(private val project: Project, data: Map<String, Any>) : Runnable {
 
     private val content: String = data["content"] as String
-    private val vfsFile: VirtualFile?
+    private val undoLabel: String? = data["undoLabel"] as String?
     private val vfsDoc: Document?
 
     init {
@@ -25,23 +25,21 @@ class WriteFileAction(private val project: Project, data: Map<String, Any>) : Ru
         if (!isFileInsideProject(project, file)) {
             throw Exception("File is not a part of a project")
         }
-        vfsFile = VfsUtil.findFileByIoFile(file, true)
+        val vfsFile = VfsUtil.findFileByIoFile(file, true)
         vfsDoc = vfsFile?.findDocument()
     }
 
     override fun run() {
-        if (vfsDoc != null) {
+        if (vfsDoc != null && vfsDoc.isWritable) {
             CommandProcessor.getInstance().executeCommand(
                 project,
                 {
                     WriteCommandAction.runWriteCommandAction(project) {
-                        if (vfsFile != null && vfsFile.isWritable) {
-                            vfsFile.writeText(content)
-                            PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
-                        }
+                        vfsDoc.setText(content)
+                        PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
                     }
                 },
-                "Copilot Write File",
+                undoLabel ?: "Copilot Write File",
                 DocCommandGroupId.noneGroupId(vfsDoc),
                 UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
             )
