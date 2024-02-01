@@ -13,8 +13,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
-import com.intellij.openapi.command.undo.UndoManager
-import com.intellij.openapi.command.undo.UndoableAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.vaadin.plugin.copilot.handlers.UndoHandler
@@ -67,26 +65,20 @@ class CopilotServerProjectAction : AnAction() {
     private fun handleClientData(project: Project, data: ByteArray) {
         val command: CommandRequest = jacksonObjectMapper().readValue(data)
         println("Running action " + command.command)
-        ApplicationManager.getApplication().executeOnPooledThread {
-            runInEdt {
-                val handler = createHandler(command.command, project, command.data)
-                if (handler !== null) {
-                    CommandProcessor.getInstance().executeCommand(project, {
-                        handler.handle()
-                        if (handler is UndoableAction) {
-                            UndoManager.getInstance(project).undoableActionPerformed(handler)
-                        }
-                    }, "copilot-" + command.command, null, UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
-                }
+        runInEdt {
+            val handler = createCommandHandler(command.command, project, command.data)
+            if (handler !== null) {
+                CommandProcessor.getInstance().executeCommand(project, handler,
+                    "copilot-" + command.command, null, UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
             }
         }
     }
 
-    private fun createHandler(
+    private fun createCommandHandler(
         command: String,
         project: Project,
         data: Map<String, Any>
-    ): CommandHandler? {
+    ): Runnable? {
         when (command) {
             "write" -> return WriteHandler(project, data)
             "undo" -> return UndoHandler(project)

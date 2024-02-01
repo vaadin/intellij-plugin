@@ -1,18 +1,19 @@
 package com.vaadin.plugin.copilot.handlers
 
-import com.intellij.openapi.application.WriteAction
-import com.intellij.openapi.command.impl.DocumentUndoProvider
-import com.intellij.openapi.command.undo.DocumentReference
-import com.intellij.openapi.command.undo.DocumentReferenceManager
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.undo.GlobalUndoableAction
+import com.intellij.openapi.command.undo.UndoManager
 import com.intellij.openapi.command.undo.UndoableAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.*
-import com.vaadin.plugin.copilot.CommandHandler
+import com.intellij.psi.ExternalChangeAction.ExternalDocumentChange
 import java.io.File
 import java.io.IOException
+import java.nio.file.NoSuchFileException
+import java.nio.file.Path
 
-class WriteHandler(project: Project, data: Map<String, Any>) : CommandHandler, UndoableAction {
+class WriteHandler(private val project: Project, data: Map<String, Any>) : Runnable {
 
     private var originalContent: String
     private val content: String = data["content"] as String
@@ -20,44 +21,67 @@ class WriteHandler(project: Project, data: Map<String, Any>) : CommandHandler, U
     private val vfsDoc: Document?
 
     init {
-        val ioFile = File(project.basePath + File.separator + data["file"])
-        vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
+        val file = File(data["file"] as String)
+        if (!isFileInsideProject(project, file)) {
+            throw Exception("File is not a part of a project")
+        }
+        vfsFile = VfsUtil.findFileByIoFile(file, true)
         vfsDoc = vfsFile?.findDocument()
         originalContent = vfsFile?.readText().toString()
     }
 
-    override fun handle() {
-        redo()
+    override fun run() {
+        write(content)
     }
 
-    override fun undo() {
-        if (vfsFile?.isWritable == true) {
-            DocumentUndoProvider.startDocumentUndo(vfsDoc)
-            WriteAction.run<IOException> {
-                vfsFile.writeText(originalContent)
+    private fun registerUndoableAction(): UndoableAction? {
+        val undoManager = UndoManager.getInstance(project)
+        if (vfsDoc != null && !undoManager.isUndoInProgress) {
+            undoManager.undoableActionPerformed(
+                object : GlobalUndoableAction(vfsDoc) {
+                    override fun undo() {
+                        write(originalContent)
+                    }
+
+                    override fun redo() {
+                        write(content)
+                    }
+                })
+        }
+
+        return null
+    }
+
+    private fun write(content: String) {
+        if (vfsFile != null) {
+            ApplicationManager.getApplication().runWriteAction {
+                object : ExternalDocumentChange(vfsDoc, project) {
+                    override fun run() {
+                        if (vfsFile.isWritable) {
+                            vfsFile.writeText(content)
+                        }
+                        registerUndoableAction()
+                    }
+                }.run()
             }
-            DocumentUndoProvider.finishDocumentUndo(vfsDoc)
         }
     }
 
-    override fun redo() {
-        WriteAction.run<IOException> {
-            if (vfsFile?.isWritable == true) {
-                vfsFile.writeText(content)
-            }
-        }
+    @Throws(IOException::class)
+    fun isFileInsideProject(project: Project, file: File): Boolean {
+        val path = getRealPath(file)
+        return (path.startsWith(project.basePath))
     }
 
-    override fun getAffectedDocuments(): Array<DocumentReference> {
-        if (vfsDoc != null) {
-            return arrayOf(DocumentReferenceManager.getInstance().create(vfsDoc))
-        } else {
-            return emptyArray()
+    @Throws(IOException::class)
+    private fun getRealPath(file: File): Path {
+        val path = file.toPath()
+        return try {
+            path.toRealPath()
+        } catch (e: NoSuchFileException) {
+            // As we allow creating new files, we check the directory instead
+            path.parent.toRealPath().resolve(path.fileName)
         }
-    }
-
-    override fun isGlobal(): Boolean {
-        return true
     }
 
 }

@@ -1,15 +1,16 @@
 package com.vaadin.plugin.copilot.handlers
 
 import com.intellij.openapi.command.impl.UndoManagerImpl
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.vaadin.plugin.copilot.CommandHandler
 
-class UndoHandler(private val project: Project) : CommandHandler {
+class UndoHandler(private val project: Project) : Runnable {
 
-    override fun handle() {
+    override fun run() {
         val undoManager = UndoManagerImpl.getInstance(project)
-        if (undoManager.isUndoAvailable(null)) {
-            undoManager.undo(null)
+        val editor = FileEditorManager.getInstance(project).selectedEditor
+        if (undoManager.isUndoAvailable(editor)) {
+            undoManager.undo(editor)
         }
     }
 
