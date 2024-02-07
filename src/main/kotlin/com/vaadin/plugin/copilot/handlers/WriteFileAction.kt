@@ -6,6 +6,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.command.undo.*
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.*
 import com.intellij.psi.PsiDocumentManager
@@ -30,13 +31,14 @@ class WriteFileAction(private val project: Project, data: Map<String, Any>) : Ru
     }
 
     override fun run() {
-        if (vfsDoc != null && vfsDoc.isWritable) {
+        if (vfsDoc != null && ReadonlyStatusHandler.ensureDocumentWritable(project, vfsDoc)) {
             CommandProcessor.getInstance().executeCommand(
                 project,
                 {
                     WriteCommandAction.runWriteCommandAction(project) {
                         vfsDoc.setText(content)
                         PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
+                        FileDocumentManager.getInstance().saveDocument(vfsDoc);
                     }
                 },
                 undoLabel ?: "Copilot Write File",

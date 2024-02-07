@@ -2,6 +2,7 @@ package com.vaadin.plugin.copilot
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -12,6 +13,8 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.vaadin.plugin.copilot.handlers.WriteFileAction
 import java.io.File
@@ -19,6 +22,8 @@ import java.io.FileWriter
 import java.util.Properties
 
 class CopilotServerProjectAction : AnAction() {
+
+    private val LOG: Logger = Logger.getInstance(CopilotServerProjectAction::class.java)
 
     override fun actionPerformed(p0: AnActionEvent) {
         val project = p0.project
@@ -61,7 +66,7 @@ class CopilotServerProjectAction : AnAction() {
 
     private fun handleClientData(project: Project, data: ByteArray) {
         val command: CommandRequest = jacksonObjectMapper().readValue(data)
-        println("Running action " + command.command)
+        LOG.info("Running action " + command.command)
         runInEdt {
             createCommandHandler(command.command, project, command.data)?.run()
         }
@@ -88,7 +93,7 @@ class CopilotServerProjectAction : AnAction() {
             val props = Properties()
             props.setProperty("port", port.toString())
             props.setProperty("ide", "intellij")
-            props.setProperty("version", "1.0.0")
+            props.setProperty("version", PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version)
             props.store(FileWriter(ioFile), "Copilot Plugin Runtime Properties")
         }
     }
