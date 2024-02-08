@@ -25,6 +25,7 @@
         <notificationGroup id="Copilot" displayType="BALLOON"/>
         <projectService serviceImplementation="com.vaadin.plugin.copilot.CopilotServerServiceImpl"
                         serviceInterface="com.vaadin.plugin.copilot.CopilotServerService"/>
+        <postStartupActivity implementation="com.vaadin.plugin.copilot.CopilotPostStartupProjectActivity" />
     </extensions>
 
     <actions>
