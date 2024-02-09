@@ -9,6 +9,7 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.module.ModuleManager
@@ -28,6 +29,8 @@ import java.util.Properties
 class CopilotPluginUtil {
 
     companion object {
+
+        private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
         private const val DOTFILE = ".copilot-plugin"
 
@@ -82,8 +85,8 @@ class CopilotPluginUtil {
                 notify("Copilot plugin is not running", NotificationType.INFORMATION)
                 return
             }
-            server.stop()
             removeDotFile(project)
+            server.stop()
             notify("Copilot plugin Stopped", NotificationType.INFORMATION)
         }
 
@@ -101,6 +104,9 @@ class CopilotPluginUtil {
         ): Runnable? {
             when (command) {
                 ACTIONS.WRITE.command -> return WriteFileAction(project, data)
+                else -> {
+                    LOG.warn("Command $command not supported by plugin")
+                }
             }
             return null
         }
