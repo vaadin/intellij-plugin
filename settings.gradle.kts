@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "vaadin-intellij-plugin"
+rootProject.name = "intellij-plugin"
