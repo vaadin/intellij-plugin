@@ -8,7 +8,7 @@
     <name>Vaadin</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="intellij@vaadin.com" url="https://vaadin.com/">Vaadin Ltd</vendor>
+    <vendor email="intellij@vaadin.com" url="https://vaadin.com">Vaadin Ltd</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
