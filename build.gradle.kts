@@ -5,7 +5,16 @@ plugins {
 }
 
 group = "com.vaadin"
-version = "1.1-SNAPSHOT"
+version = if (hasProperty("projVersion")) {
+  property("projVersion") as String
+} else {
+  "1.0-SNAPSHOT"
+}
+val publishChannel = if (hasProperty("publishChannel")) {
+  property("publishChannel") as String
+} else {
+  "Stable"
+}
 
 repositories {
   mavenCentral()
@@ -42,6 +51,7 @@ tasks {
   }
 
   publishPlugin {
+    channels.set(listOf(publishChannel))
     token.set(System.getenv("PUBLISH_TOKEN"))
   }
 }
