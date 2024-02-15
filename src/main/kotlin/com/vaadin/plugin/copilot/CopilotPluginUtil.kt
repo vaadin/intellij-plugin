@@ -20,7 +20,10 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
-import com.vaadin.plugin.copilot.handlers.WriteFileAction
+import com.vaadin.plugin.copilot.handler.RedoHandler
+import com.vaadin.plugin.copilot.handler.UndoHandler
+import com.vaadin.plugin.copilot.handler.WriteFileHandler
+import com.vaadin.plugin.copilot.service.CopilotServerService
 import java.io.File
 import java.io.StringWriter
 import java.util.Properties
@@ -34,7 +37,11 @@ class CopilotPluginUtil {
 
         private const val DOTFILE = ".copilot-plugin"
 
-        private enum class ACTIONS(val command: String) { WRITE("write") }
+        private enum class HANDLERS(val command: String) {
+            WRITE("write"),
+            UNDO("undo"),
+            REDO("redo")
+        }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
 
@@ -103,7 +110,9 @@ class CopilotPluginUtil {
             data: Map<String, Any>
         ): Runnable? {
             when (command) {
-                ACTIONS.WRITE.command -> return WriteFileAction(project, data)
+                HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
+                HANDLERS.UNDO.command -> return UndoHandler(project)
+                HANDLERS.REDO.command -> return RedoHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                 }
@@ -118,7 +127,7 @@ class CopilotPluginUtil {
                 props.setProperty("port", port.toString())
                 props.setProperty("ide", "intellij")
                 props.setProperty("version", pluginVersion)
-                props.setProperty("supportedActions", ACTIONS.values().map { a -> a.command }.joinToString(","))
+                props.setProperty("supportedActions", HANDLERS.values().map { a -> a.command }.joinToString(","))
 
                 val stringWriter = StringWriter()
                 props.store(stringWriter, "Copilot Plugin Runtime Properties")

@@ -1,4 +1,4 @@
-package com.vaadin.plugin.copilot
+package com.vaadin.plugin.copilot.service
 
 import com.intellij.openapi.project.Project
 import io.ktor.util.network.*
@@ -26,6 +26,12 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
 
     override fun stop() {
         serverRunning = false
+    }
+
+    override fun dispose() {
+        if (serverRunning) {
+            stop()
+        }
     }
 
     override fun isRunning(): Boolean {
