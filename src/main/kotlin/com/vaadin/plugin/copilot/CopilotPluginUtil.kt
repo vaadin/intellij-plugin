@@ -111,8 +111,8 @@ class CopilotPluginUtil {
         ): Runnable? {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
-                HANDLERS.UNDO.command -> return UndoHandler(project)
-                HANDLERS.REDO.command -> return RedoHandler(project)
+                HANDLERS.UNDO.command -> return UndoHandler(project, data)
+                HANDLERS.REDO.command -> return RedoHandler(project, data)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                 }

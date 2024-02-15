@@ -1,48 +1,46 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.openapi.command.impl.UndoManagerImpl
-import com.intellij.openapi.components.service
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.FileEditor
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
-import com.intellij.psi.PsiDocumentManager
-import com.vaadin.plugin.copilot.service.CopilotFileTrackingService
+import java.io.File
 
-open class UndoHandler(private val project: Project) : Runnable {
+open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
 
     private val copilotActionPrefix = "_Undo Copilot"
 
-    override fun run() {
-        val vfsFile = project.service<CopilotFileTrackingService>().getLastModified() ?: return
-        val editor = getEditor(vfsFile)
+    protected val vfsFiles: ArrayList<VirtualFile> = ArrayList()
 
-        val undoManager = UndoManagerImpl.getInstance(project)
-        if (undoManager.isUndoAvailable(editor)) {
-            val undo = undoManager.getUndoActionNameAndDescription(editor).first
-            if (undo.startsWith(copilotActionPrefix)) {
-                undoManager.undo(editor)
-                commitAndFlush(vfsFile)
+    init {
+        val paths = data["files"] as Collection<String>
+        for (path in paths) {
+            val file = File(path)
+            if (!isFileInsideProject(project, file)) {
+                throw Exception("File is not a part of a project")
+            }
+            val virtualFile = VfsUtil.findFileByIoFile(file, true)
+            if (virtualFile != null) {
+                vfsFiles.add(virtualFile)
             }
         }
     }
 
-    fun getEditor(vfsFile: VirtualFile): FileEditor? {
-        val editors = FileEditorManager.getInstance(project).getEditors(vfsFile)
-
-        if (editors.isEmpty()) {
-            return null
-        }
-        return editors.first()
-    }
-
-    fun commitAndFlush(vfsFile: VirtualFile) {
-        val vfsDoc = vfsFile.findDocument()
-        if (vfsDoc != null) {
-            PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
-            FileDocumentManager.getInstance().saveDocument(vfsDoc)
+    override fun run() {
+        for (vfsFile in vfsFiles) {
+            getEditorWrapper(vfsFile).use {wrapper ->
+                val undoManager = UndoManagerImpl.getInstance(project)
+                val editor = wrapper.getFileEditor()
+                if (undoManager.isUndoAvailable(editor)) {
+                    val undo = undoManager.getUndoActionNameAndDescription(editor).first
+                    if (undo.startsWith(copilotActionPrefix)) {
+                        undoManager.undo(editor)
+                        commitAndFlush(vfsFile.findDocument())
+                        return
+                    }
+                }
+            }
         }
     }
 
