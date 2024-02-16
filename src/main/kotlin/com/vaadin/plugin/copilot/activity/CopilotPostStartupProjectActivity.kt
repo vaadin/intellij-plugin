@@ -1,7 +1,8 @@
-package com.vaadin.plugin.copilot
+package com.vaadin.plugin.copilot.activity
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 
 class CopilotPostStartupProjectActivity: ProjectActivity {
 

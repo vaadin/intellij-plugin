@@ -1,6 +1,8 @@
-package com.vaadin.plugin.copilot
+package com.vaadin.plugin.copilot.service
 
-interface CopilotServerService {
+import com.intellij.openapi.Disposable
+
+interface CopilotServerService : Disposable {
 
     // binds to port
     fun init()

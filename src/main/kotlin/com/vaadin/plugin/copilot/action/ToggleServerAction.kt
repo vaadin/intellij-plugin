@@ -1,12 +1,13 @@
-package com.vaadin.plugin.copilot
+package com.vaadin.plugin.copilot.action
 
 import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 
-class CopilotServerProjectAction : AnAction() {
+class ToggleServerAction : AnAction() {
 
     override fun actionPerformed(p0: AnActionEvent) {
         val project = p0.project

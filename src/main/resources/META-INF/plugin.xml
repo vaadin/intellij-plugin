@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin>
+<idea-plugin require-restart="false">
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>com.vaadin.intellij-plugin</id>
 
@@ -13,7 +13,7 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description><![CDATA[Official Vaadin plugin that enables better cooperation with Vaadin applications.]]></description>
+    <description><![CDATA[Vaadin official integration for IntelliJ]]></description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -23,21 +23,21 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="Copilot" displayType="BALLOON"/>
-        <projectService serviceImplementation="com.vaadin.plugin.copilot.CopilotServerServiceImpl"
-                        serviceInterface="com.vaadin.plugin.copilot.CopilotServerService"/>
-        <postStartupActivity implementation="com.vaadin.plugin.copilot.CopilotPostStartupProjectActivity" />
+        <projectService serviceImplementation="com.vaadin.plugin.copilot.service.CopilotServerServiceImpl"
+                        serviceInterface="com.vaadin.plugin.copilot.service.CopilotServerService" />
+        <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity" />
     </extensions>
 
     <actions>
-        <action id="com.vaadin.plugin.copilot.CopilotServerProjectAction"
-                class="com.vaadin.plugin.copilot.CopilotServerProjectAction"
+        <action id="com.vaadin.plugin.copilot.action.ToggleServerAction"
+                class="com.vaadin.plugin.copilot.action.ToggleServerAction"
                 icon="/icons/copilot.svg">
             <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
         </action>
     </actions>
 
     <projectListeners>
-        <listener class="com.vaadin.plugin.copilot.CopilotProjectLifecycleListener"
-                  topic="com.intellij.openapi.project.ProjectCloseListener"/>
+        <listener class="com.vaadin.plugin.copilot.listener.CopilotProjectLifecycleListener"
+                  topic="com.intellij.openapi.project.ProjectCloseListener" />
     </projectListeners>
 </idea-plugin>
