@@ -16,6 +16,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.libraries.Library
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
@@ -37,6 +38,8 @@ class CopilotPluginUtil {
 
         private const val DOTFILE = ".copilot-plugin"
 
+        private val isVaadinProjectKey = Key<Boolean>("isVaadinProject")
+
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
             UNDO("undo"),
@@ -46,16 +49,20 @@ class CopilotPluginUtil {
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
 
         fun isVaadinProject(project: Project): Boolean {
-            var isVaadinProject = false
+            var isVaadinProject = project.getUserData(isVaadinProjectKey)
+            if (isVaadinProject != null) {
+                return isVaadinProject
+            }
             for (module in ModuleManager.getInstance(project).modules) {
                 ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                    if (!isVaadinProject && library.name?.contains("com.vaadin") == true) {
+                    if (library.name?.contains("com.vaadin") == true) {
                         isVaadinProject = true
                     }
                     true
                 }
             }
-            return isVaadinProject
+            project.putUserData(isVaadinProjectKey, isVaadinProject ?: false)
+            return isVaadinProject == true
         }
 
         fun notify(content: String, type: NotificationType) {
