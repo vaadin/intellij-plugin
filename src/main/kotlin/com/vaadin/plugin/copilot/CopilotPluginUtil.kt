@@ -38,6 +38,8 @@ class CopilotPluginUtil {
 
         private const val DOTFILE = ".copilot-plugin"
 
+        private const val VAADIN_LIB_PREFIX = "com.vaadin"
+
         private val isVaadinProjectKey = Key<Boolean>("isVaadinProject")
 
         private enum class HANDLERS(val command: String) {
@@ -55,7 +57,7 @@ class CopilotPluginUtil {
             }
             for (module in ModuleManager.getInstance(project).modules) {
                 ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                    if (library.name?.contains("com.vaadin") == true) {
+                    if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
                         isVaadinProject = true
                     }
                     true
