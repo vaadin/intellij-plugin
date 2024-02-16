@@ -59,6 +59,7 @@ class CopilotPluginUtil {
                 ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
                     if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
                         isVaadinProject = true
+                        return@forEachLibrary true
                     }
                     true
                 }
