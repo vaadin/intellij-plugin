@@ -13,7 +13,13 @@
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description><![CDATA[Vaadin official integration for IntelliJ]]></description>
+    <description>
+        <![CDATA[
+        <p>Official Vaadin plugin for JetBrains IntelliJ, currently featuring undo support for Vaadin Copilot modifications.</p>
+        <p>This plugin integrates directly with IntelliJ’s undo stack, allowing developers to easily reverse changes made by Vaadin Copilot.</p>
+        <p>While initially focused on enhancing undo functionality, the plugin is designed for future expansion with additional features to streamline your Vaadin development workflow.</p>
+        ]]>
+    </description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
@@ -24,8 +30,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="Copilot" displayType="BALLOON"/>
         <projectService serviceImplementation="com.vaadin.plugin.copilot.service.CopilotServerServiceImpl"
-                        serviceInterface="com.vaadin.plugin.copilot.service.CopilotServerService" />
-        <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity" />
+                        serviceInterface="com.vaadin.plugin.copilot.service.CopilotServerService"/>
+        <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
     </extensions>
 
     <actions>
@@ -38,6 +44,6 @@
 
     <projectListeners>
         <listener class="com.vaadin.plugin.copilot.listener.CopilotProjectLifecycleListener"
-                  topic="com.intellij.openapi.project.ProjectCloseListener" />
+                  topic="com.intellij.openapi.project.ProjectCloseListener"/>
     </projectListeners>
 </idea-plugin>
