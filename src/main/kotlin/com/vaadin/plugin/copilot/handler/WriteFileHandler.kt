@@ -71,9 +71,8 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
                     val newFile = PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)
                     it2.add(newFile)
+                    LOG.info("File ${ioFile.name} contents saved")
                 }
-                VfsUtil.findFileByIoFile(ioFile, true)
-                LOG.info("File ${ioFile.name} contents saved")
             }
         }
     }
