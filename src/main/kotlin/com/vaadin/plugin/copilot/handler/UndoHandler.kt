@@ -17,12 +17,12 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         val paths = data["files"] as Collection<String>
         for (path in paths) {
             val file = File(path)
-            if (!isFileInsideProject(project, file)) {
-                throw Exception("File is not a part of a project")
-            }
-            val virtualFile = VfsUtil.findFileByIoFile(file, true)
-            if (virtualFile != null) {
-                vfsFiles.add(virtualFile)
+            if (isFileInsideProject(project, file)) {
+                VfsUtil.findFileByIoFile(file, true)?.let {
+                    vfsFiles.add(it)
+                }
+            } else {
+                LOG.warn("File ${file.name} is not a part of a project")
             }
         }
     }
@@ -37,6 +37,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     if (undo.startsWith(copilotActionPrefix)) {
                         undoManager.undo(editor)
                         commitAndFlush(vfsFile.findDocument())
+                        LOG.info("$undo performed on ${vfsFile.name}")
                         return
                     }
                 }

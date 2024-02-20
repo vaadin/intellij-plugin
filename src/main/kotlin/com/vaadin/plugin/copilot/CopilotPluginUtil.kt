@@ -16,7 +16,6 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.libraries.Library
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
@@ -40,7 +39,7 @@ class CopilotPluginUtil {
 
         private const val VAADIN_LIB_PREFIX = "com.vaadin"
 
-        private val isVaadinProjectKey = Key<Boolean>("isVaadinProject")
+        private var isVaadinProject = false
 
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
@@ -51,21 +50,19 @@ class CopilotPluginUtil {
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
 
         fun isVaadinProject(project: Project): Boolean {
-            var isVaadinProject = project.getUserData(isVaadinProjectKey)
-            if (isVaadinProject != null) {
-                return isVaadinProject
-            }
-            for (module in ModuleManager.getInstance(project).modules) {
-                ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                    if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
-                        isVaadinProject = true
-                        return@forEachLibrary true
+            // after first opening project, when libs are not analyzed yet this will return false
+            if (!isVaadinProject) {
+                for (module in ModuleManager.getInstance(project).modules) {
+                    ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
+                        if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
+                            isVaadinProject = true
+                            return@forEachLibrary true
+                        }
+                        true
                     }
-                    true
                 }
             }
-            project.putUserData(isVaadinProjectKey, isVaadinProject ?: false)
-            return isVaadinProject == true
+            return isVaadinProject
         }
 
         fun notify(content: String, type: NotificationType) {
