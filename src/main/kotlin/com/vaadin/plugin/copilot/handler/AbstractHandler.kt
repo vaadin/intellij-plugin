@@ -1,5 +1,6 @@
 package com.vaadin.plugin.copilot.handler
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditor
@@ -7,12 +8,15 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 import java.io.File
 import java.io.IOException
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 
 abstract class AbstractHandler(val project: Project) : Runnable {
+
+    val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
     class FileEditorWrapper(private val fileEditor: FileEditor, private val project: Project, private val closable: Boolean): AutoCloseable {
 

@@ -14,10 +14,11 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
                 val editor = wrapper.getFileEditor()
                 val undoManager = UndoManagerImpl.getInstance(project)
                 if (undoManager.isRedoAvailable(editor)) {
-                    val undo = undoManager.getRedoActionNameAndDescription(editor).first
-                    if (undo.startsWith(copilotActionPrefix)) {
+                    val redo = undoManager.getRedoActionNameAndDescription(editor).first
+                    if (redo.startsWith(copilotActionPrefix)) {
                         undoManager.redo(editor)
                         commitAndFlush(vfsFile.findDocument())
+                        LOG.info("$redo performed on ${vfsFile.name}")
                         return
                     }
                 }
