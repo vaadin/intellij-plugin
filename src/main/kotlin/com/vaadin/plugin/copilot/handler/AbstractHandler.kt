@@ -30,7 +30,13 @@ abstract class AbstractHandler(val project: Project) : Runnable {
     }
 
     fun isFileInsideProject(project: Project, file: File): Boolean {
-        return project.basePath?.let { file.path.startsWith(it) } == true
+        if (file.exists()) {
+            val path = file.toPath()
+            return path.toRealPath().startsWith(project.basePath)
+        } else {
+            // New file
+            return isFileInsideProject(project, file.parentFile)
+        }
     }
 
     fun getEditorWrapper(vfsFile: VirtualFile): FileEditorWrapper {

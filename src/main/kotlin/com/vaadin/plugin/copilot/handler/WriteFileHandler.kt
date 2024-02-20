@@ -20,34 +20,29 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
     private val content: String = data["content"] as String
     private val undoLabel: String? = data["undoLabel"] as String?
     private val ioFile: File = File(data["file"] as String)
-    private val vfsFile: VirtualFile?
-
-    init {
-        if (isFileInsideProject(project, ioFile)) {
-            vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
-        } else {
-            LOG.warn("File $ioFile is not a part of a project")
-            vfsFile = null
-        }
-    }
 
     override fun run() {
-        // file exists, write content
-        if (vfsFile?.exists() == true) {
-            if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
-                writeAndFlush()
+        if (isFileInsideProject(project, ioFile)) {
+            // file exists, write content
+            val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
+            if (vfsFile?.exists() == true) {
+                if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
+                    writeAndFlush(vfsFile)
+                } else {
+                    LOG.warn("File ${vfsFile.name} is not writable")
+                }
             } else {
-                LOG.warn("File ${vfsFile.name} is not writable")
+                // file does not exist, create new one
+                LOG.info("File $ioFile does not exist, creating new file")
+                create()
             }
         } else {
-            // file does not exist, create new one
-            LOG.info("File $ioFile does not exist, creating new file")
-            create()
+            LOG.warn("File $ioFile is not a part of a project")
         }
     }
 
-    private fun writeAndFlush() {
-        vfsFile?.findDocument()?.let {
+    private fun writeAndFlush(vfsFile: VirtualFile) {
+        vfsFile.findDocument()?.let {
             CommandProcessor.getInstance().executeCommand(
                 project,
                 {
