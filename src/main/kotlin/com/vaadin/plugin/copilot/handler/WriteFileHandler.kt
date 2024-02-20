@@ -65,7 +65,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
     }
 
     private fun create() {
-        VfsUtil.findFileByIoFile(ioFile.parentFile, true)?.let {
+        getOrCreateParentDir()?.let {
             PsiManager.getInstance(project).findDirectory(it)?.let {it2 ->
                 ApplicationManager.getApplication().runWriteAction {
                     val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
@@ -76,6 +76,14 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 LOG.info("File ${ioFile.name} contents saved")
             }
         }
+    }
+
+    private fun getOrCreateParentDir(): VirtualFile? {
+        if (!ioFile.parentFile.exists() && !ioFile.parentFile.mkdirs()) {
+            LOG.warn("Cannot create parent directories for ${ioFile.parent}")
+            return null
+        }
+        return VfsUtil.findFileByIoFile(ioFile.parentFile, true)
     }
 
 

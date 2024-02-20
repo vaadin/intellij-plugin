@@ -10,9 +10,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import java.io.File
-import java.io.IOException
-import java.nio.file.NoSuchFileException
-import java.nio.file.Path
 
 abstract class AbstractHandler(val project: Project) : Runnable {
 
@@ -32,21 +29,8 @@ abstract class AbstractHandler(val project: Project) : Runnable {
 
     }
 
-    @Throws(IOException::class)
     fun isFileInsideProject(project: Project, file: File): Boolean {
-        val path = getRealPath(file)
-        return (path.startsWith(project.basePath))
-    }
-
-    @Throws(IOException::class)
-    private fun getRealPath(file: File): Path {
-        val path = file.toPath()
-        return try {
-            path.toRealPath()
-        } catch (e: NoSuchFileException) {
-            // As we allow creating new files, we check the directory instead
-            path.parent.toRealPath().resolve(path.fileName)
-        }
+        return project.basePath?.let { file.path.startsWith(it) } == true
     }
 
     fun getEditorWrapper(vfsFile: VirtualFile): FileEditorWrapper {
