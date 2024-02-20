@@ -1,16 +1,18 @@
 package com.vaadin.plugin.copilot.handler
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.CommandProcessor
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiManager
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.ReadonlyStatusHandler
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
+import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.PsiManager
 import java.io.File
 
 class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
