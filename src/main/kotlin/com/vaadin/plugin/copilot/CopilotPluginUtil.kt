@@ -20,6 +20,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
+import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.RedoHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
@@ -44,7 +45,8 @@ class CopilotPluginUtil {
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
             UNDO("undo"),
-            REDO("redo")
+            REDO("redo"),
+            SHOW_IN_IDE("showInIde")
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -120,6 +122,7 @@ class CopilotPluginUtil {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
                 HANDLERS.UNDO.command -> return UndoHandler(project, data)
                 HANDLERS.REDO.command -> return RedoHandler(project, data)
+                HANDLERS.SHOW_IN_IDE.command -> return ShowInIdeHandler(project, data)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                 }
