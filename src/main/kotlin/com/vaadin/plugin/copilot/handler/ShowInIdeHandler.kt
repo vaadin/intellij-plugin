@@ -20,7 +20,7 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 val openFileDescriptor = OpenFileDescriptor(project, it)
                 FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.
                 caretModel?.currentCaret?.moveToVisualPosition(VisualPosition(line, column))
-                LOG.info("File $ioFile opened in IDE at $line:$column")
+                LOG.info("File $ioFile opened at $line:$column")
                 true
             }
             if (result != true){

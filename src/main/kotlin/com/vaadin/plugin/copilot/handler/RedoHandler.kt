@@ -18,7 +18,7 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
                     if (redo.startsWith(copilotActionPrefix)) {
                         undoManager.redo(editor)
                         commitAndFlush(vfsFile.findDocument())
-                        LOG.info("$redo performed on ${vfsFile.name}")
+                        LOG.info("$redo performed on ${vfsFile.path}")
                         return
                     }
                 }

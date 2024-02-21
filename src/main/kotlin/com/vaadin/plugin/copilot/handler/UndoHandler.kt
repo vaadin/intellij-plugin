@@ -22,7 +22,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     vfsFiles.add(it)
                 }
             } else {
-                LOG.warn("File ${file.name} is not a part of a project")
+                LOG.warn("File $file is not a part of a project")
             }
         }
     }
@@ -37,7 +37,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     if (undo.startsWith(copilotActionPrefix)) {
                         undoManager.undo(editor)
                         commitAndFlush(vfsFile.findDocument())
-                        LOG.info("$undo performed on ${vfsFile.name}")
+                        LOG.info("$undo performed on ${vfsFile.path}")
                         return
                     }
                 }

@@ -29,7 +29,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
                     writeAndFlush(vfsFile)
                 } else {
-                    LOG.warn("File ${vfsFile.name} is not writable")
+                    LOG.warn("File $ioFile is not writable")
                 }
             } else {
                 // file does not exist, create new one
@@ -49,7 +49,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     WriteCommandAction.runWriteCommandAction(project) {
                         it.setText(content)
                         commitAndFlush(it)
-                        LOG.info("File ${vfsFile.name} contents saved")
+                        LOG.info("File $ioFile contents saved")
                     }
                 },
                 undoLabel ?: "Copilot Write File",
@@ -68,7 +68,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     it2.add(newFile)
                 }
                 VfsUtil.findFileByIoFile(ioFile, true)
-                LOG.info("File ${ioFile.name} contents saved")
+                LOG.info("File $ioFile contents saved")
             }
         }
     }
