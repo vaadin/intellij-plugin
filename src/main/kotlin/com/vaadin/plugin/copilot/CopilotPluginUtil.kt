@@ -27,7 +27,7 @@ import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotServerService
 import java.io.File
 import java.io.StringWriter
-import java.util.Properties
+import java.util.*
 
 
 class CopilotPluginUtil {
@@ -39,6 +39,8 @@ class CopilotPluginUtil {
         private const val DOTFILE = ".copilot-plugin"
 
         private const val VAADIN_LIB_PREFIX = "com.vaadin"
+
+        private const val IDEA_DIR = ".idea"
 
         private var isVaadinProject = false
 
@@ -82,13 +84,13 @@ class CopilotPluginUtil {
         fun startServer(project: Project) {
             val server = project.service<CopilotServerService>()
             if (server.isRunning()) {
-                notify("Copilot plugin already started", NotificationType.INFORMATION)
+                LOG.info("Cannot start Copilot plugin as it is already started")
                 return
             }
             server.init()
             savePortInDotFile(project, server.getPort()!!)
             ApplicationManager.getApplication().executeOnPooledThread {
-                notify("Copilot plugin Started", NotificationType.INFORMATION)
+                notify("Copilot plugin started", NotificationType.INFORMATION)
                 server.start { data ->
                     handleClientData(project, data)
                 }
@@ -98,12 +100,12 @@ class CopilotPluginUtil {
         fun stopServer(project: Project) {
             val server = project.service<CopilotServerService>()
             if (!server.isRunning()) {
-                notify("Copilot plugin is not running", NotificationType.INFORMATION)
+                LOG.info("Cannot stop Copilot plugin as it is not running")
                 return
             }
             removeDotFile(project)
             server.stop()
-            notify("Copilot plugin Stopped", NotificationType.INFORMATION)
+            notify("Copilot plugin stopped", NotificationType.INFORMATION)
         }
 
         private fun handleClientData(project: Project, data: ByteArray) {
@@ -149,14 +151,23 @@ class CopilotPluginUtil {
                         val file = PsiFileFactory.getInstance(project)
                             .createFileFromText(DOTFILE, fileType, stringWriter.toString())
                         baseDirectory.add(file)
+                        LOG.info("$DOTFILE created in ${baseDirectory.virtualFile.path}")
                     }
                 }
+            } else {
+                LOG.error("Cannot create $DOTFILE")
             }
         }
 
         private fun removeDotFile(project: Project) {
             ApplicationManager.getApplication().runWriteAction {
-                getBasePathDirectory(project)?.findFile(DOTFILE)?.delete()
+                val baseDirectory = getBasePathDirectory(project)
+                baseDirectory?.findFile(DOTFILE)?.let {
+                    it.delete()
+                    LOG.info("$DOTFILE removed from ${baseDirectory.virtualFile.path}")
+                    return@runWriteAction
+                }
+                LOG.warn("Cannot remove $DOTFILE")
             }
         }
 
@@ -164,10 +175,11 @@ class CopilotPluginUtil {
             return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
                 val basePath = project.basePath
                 if (basePath != null) {
-                    val virtualFile = VfsUtil.findFileByIoFile(File(basePath), false)
-                    if (virtualFile != null) {
-                        return@runReadAction PsiManager.getInstance(project).findDirectory(virtualFile)
+                    val ideaDir = File(basePath, IDEA_DIR)
+                    VfsUtil.findFileByIoFile(ideaDir, false)?.let {
+                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
                     }
+                    LOG.warn("$ideaDir is not available")
                 }
                 return@runReadAction null
             }
