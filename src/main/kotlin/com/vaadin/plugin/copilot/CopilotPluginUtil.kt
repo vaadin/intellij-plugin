@@ -133,8 +133,8 @@ class CopilotPluginUtil {
         }
 
         private fun savePortInDotFile(project: Project, port: Int) {
-            val baseDirectory = getBasePathDirectory(project)
-            if (baseDirectory != null) {
+            val dotFileDirectory = getDotFileDirectory(project)
+            if (dotFileDirectory != null) {
                 val props = Properties()
                 props.setProperty("port", port.toString())
                 props.setProperty("ide", "intellij")
@@ -147,11 +147,11 @@ class CopilotPluginUtil {
                 val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
                     ApplicationManager.getApplication().runWriteAction {
-                        baseDirectory.findFile(DOTFILE)?.delete()
+                        dotFileDirectory.findFile(DOTFILE)?.delete()
                         val file = PsiFileFactory.getInstance(project)
                             .createFileFromText(DOTFILE, fileType, stringWriter.toString())
-                        baseDirectory.add(file)
-                        LOG.info("$DOTFILE created in ${baseDirectory.virtualFile.path}")
+                        dotFileDirectory.add(file)
+                        LOG.info("$DOTFILE created in ${dotFileDirectory.virtualFile.path}")
                     }
                 }
             } else {
@@ -161,17 +161,17 @@ class CopilotPluginUtil {
 
         private fun removeDotFile(project: Project) {
             ApplicationManager.getApplication().runWriteAction {
-                val baseDirectory = getBasePathDirectory(project)
-                baseDirectory?.findFile(DOTFILE)?.let {
+                val dotFileDirectory = getDotFileDirectory(project)
+                dotFileDirectory?.findFile(DOTFILE)?.let {
                     it.delete()
-                    LOG.info("$DOTFILE removed from ${baseDirectory.virtualFile.path}")
+                    LOG.info("$DOTFILE removed from ${dotFileDirectory.virtualFile.path}")
                     return@runWriteAction
                 }
                 LOG.warn("Cannot remove $DOTFILE")
             }
         }
 
-        private fun getBasePathDirectory(project: Project): PsiDirectory? {
+        private fun getDotFileDirectory(project: Project): PsiDirectory? {
             return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
                 val basePath = project.basePath
                 if (basePath != null) {
