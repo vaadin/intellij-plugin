@@ -121,6 +121,7 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
                 readBuffer.clear()
                 read = channel.read(readBuffer)
                 if (read == -1) {
+                    channel.close()
                     key.cancel()
                     break
                 }
