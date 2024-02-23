@@ -1,7 +1,10 @@
 package com.vaadin.plugin.copilot.service
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 import io.ktor.util.network.*
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -12,6 +15,8 @@ import java.util.*
 
 // Server implementation based on https://github.com/teocci/NioSocketCodeSample/tree/master
 class CopilotServerServiceImpl(private val project: Project): CopilotServerService {
+
+    private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
     private val timeout: Long = 500
 
@@ -47,7 +52,7 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
             serverChannel!!.register(selector, SelectionKey.OP_ACCEPT)
             serverRunning = true
         } catch (e: IOException) {
-            e.printStackTrace()
+            LOG.error(e)
         }
     }
 
@@ -79,7 +84,7 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
                 }
             }
         } catch (e: IOException) {
-            e.printStackTrace()
+            LOG.error(e)
         } finally {
             closeConnection()
         }
@@ -92,7 +97,7 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
                 serverChannel!!.socket().close()
                 serverChannel!!.close()
             } catch (e: IOException) {
-                e.printStackTrace()
+                LOG.error(e)
             }
         }
     }
@@ -109,28 +114,26 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
     private fun read(key: SelectionKey): ByteArray? {
         val channel = key.channel() as SocketChannel
         val readBuffer = ByteBuffer.allocate(4096)
-        readBuffer.clear()
-
-        val read: Int
+        val baos = ByteArrayOutputStream()
+        var read: Int
         try {
-            read = channel.read(readBuffer)
+            while(true) {
+                readBuffer.clear()
+                read = channel.read(readBuffer)
+                if (read == -1) {
+                    key.cancel()
+                    break
+                }
+                baos.write(readBuffer.array(), 0, read)
+            }
         } catch (e: IOException) {
-            e.printStackTrace()
+            LOG.error(e)
             key.cancel()
             channel.close()
             return null
         }
 
-        if (read == -1) {
-            channel.close()
-            key.cancel()
-            return null
-        }
-        // IMPORTANT - don't forget the flip() the buffer. It is like a reset without clearing it.
-        readBuffer.flip()
-        val data = ByteArray(4096)
-        readBuffer[data, 0, read]
-        return data
+        return baos.toByteArray()
     }
 
 }
