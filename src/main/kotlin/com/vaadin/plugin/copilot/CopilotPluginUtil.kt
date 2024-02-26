@@ -84,13 +84,13 @@ class CopilotPluginUtil {
         fun startServer(project: Project) {
             val server = project.service<CopilotServerService>()
             if (server.isRunning()) {
-                LOG.info("Cannot start Copilot plugin as it is already started")
+                LOG.info("Cannot start Vaadin Copilot integration as it is already started")
                 return
             }
             server.init()
             savePortInDotFile(project, server.getPort()!!)
             ApplicationManager.getApplication().executeOnPooledThread {
-                notify("Copilot plugin started", NotificationType.INFORMATION)
+                notify("Vaadin Copilot integration started", NotificationType.INFORMATION)
                 server.start { data ->
                     handleClientData(project, data)
                 }
@@ -100,12 +100,12 @@ class CopilotPluginUtil {
         fun stopServer(project: Project) {
             val server = project.service<CopilotServerService>()
             if (!server.isRunning()) {
-                LOG.info("Cannot stop Copilot plugin as it is not running")
+                LOG.info("Cannot stop Vaadin Copilot integration as it is not running")
                 return
             }
             removeDotFile(project)
             server.stop()
-            notify("Copilot plugin stopped", NotificationType.INFORMATION)
+            notify("Vaadin Copilot integration stopped", NotificationType.INFORMATION)
         }
 
         private fun handleClientData(project: Project, data: ByteArray) {
@@ -142,7 +142,7 @@ class CopilotPluginUtil {
                 props.setProperty("supportedActions", HANDLERS.values().map { a -> a.command }.joinToString(","))
 
                 val stringWriter = StringWriter()
-                props.store(stringWriter, "Copilot Plugin Runtime Properties")
+                props.store(stringWriter, "Vaadin Copilot Integration Runtime Properties")
 
                 val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
