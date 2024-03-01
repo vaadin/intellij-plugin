@@ -52,7 +52,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                         LOG.info("File $ioFile contents saved")
                     }
                 },
-                undoLabel ?: "Copilot Write File",
+                undoLabel ?: "Vaadin Copilot Write File",
                 DocCommandGroupId.noneGroupId(it),
                 UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
             )

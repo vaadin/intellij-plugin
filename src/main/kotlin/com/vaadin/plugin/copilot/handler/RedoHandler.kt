@@ -6,7 +6,7 @@ import com.intellij.openapi.vfs.findDocument
 
 class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(project, data) {
 
-    private val copilotActionPrefix = "_Redo Copilot"
+    private val copilotActionPrefix = "_Redo Vaadin Copilot"
 
     override fun run() {
         for (vfsFile in vfsFiles) {

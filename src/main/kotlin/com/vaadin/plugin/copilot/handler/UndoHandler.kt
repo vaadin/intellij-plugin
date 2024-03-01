@@ -9,7 +9,7 @@ import java.io.File
 
 open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
 
-    private val copilotActionPrefix = "_Undo Copilot"
+    private val copilotActionPrefix = "_Undo Vaadin Copilot"
 
     protected val vfsFiles: ArrayList<VirtualFile> = ArrayList()
 

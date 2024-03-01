@@ -26,9 +26,9 @@ class ToggleServerAction : AnAction() {
         }
 
         if (CopilotPluginUtil.isServerRunning(project)) {
-            e.presentation.text = "Stop Copilot Plugin"
+            e.presentation.text = "Stop Vaadin Copilot Integration"
         } else {
-            e.presentation.text = "Start Copilot Plugin"
+            e.presentation.text = "Start Vaadin Copilot Integration"
         }
     }
 
