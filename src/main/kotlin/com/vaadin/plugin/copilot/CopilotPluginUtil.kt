@@ -179,7 +179,10 @@ class CopilotPluginUtil {
                     VfsUtil.findFileByIoFile(ideaDir, false)?.let {
                         return@runReadAction PsiManager.getInstance(project).findDirectory(it)
                     }
-                    LOG.warn("$ideaDir is not available")
+                    VfsUtil.createDirectoryIfMissing(ideaDir.path)?.let {
+                        LOG.info("$ideaDir created")
+                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
+                    }
                 }
                 return@runReadAction null
             }
