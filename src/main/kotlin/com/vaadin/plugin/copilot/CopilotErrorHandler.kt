@@ -11,7 +11,7 @@ import java.awt.Component
 
 class CopilotErrorHandler: ErrorReportSubmitter() {
 
-    private val url = "https://github.com/vaadin/copilot-internal/issues/new"
+    private val url = "https://github.com/vaadin/intellij-plugin/issues/new"
 
     override fun getReportActionText(): String {
         return "Report on GitHub"
