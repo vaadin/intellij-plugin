@@ -27,12 +27,16 @@ class CopilotErrorHandler: ErrorReportSubmitter() {
         val firstLine = throwableText.split("\\n".toRegex(), 2)[0].trim()
         val appName = ApplicationInfo.getInstance().fullApplicationName
 
-        val body = "Plugin version: **${pluginDescriptor.version}**\n" +
-                "IDE version: **$appName**\n\n" +
-                "Additional info:\n" +
-                "> ${additionalInfo?.replace("\\n+".toRegex(), "\n")}" +
-                "\n\n" +
-                "Stacktrace:\n" +
+        var body = "Plugin version: **${pluginDescriptor.version}**\n" +
+                "IDE version: **$appName**\n\n"
+
+        if (additionalInfo != null) {
+            body += "Additional info:\n" +
+                    "> ${additionalInfo.replace("\\n+".toRegex(), "\n")}" +
+                    "\n\n"
+        }
+
+        body += "Stacktrace:\n" +
                 "```\n" +
                 throwableText +
                 "\n```"
