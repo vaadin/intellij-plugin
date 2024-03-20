@@ -25,11 +25,9 @@ class CopilotErrorHandler: ErrorReportSubmitter() {
     ): Boolean {
         val throwableText = events.iterator().next().throwableText
         val firstLine = throwableText.split("\\n".toRegex(), 2)[0].trim()
-
         val appName = ApplicationInfo.getInstance().fullApplicationName
-        val pluginVer = CopilotPluginUtil.getPluginVersion()
 
-        val body = "Plugin version: **$pluginVer**\n" +
+        val body = "Plugin version: **${pluginDescriptor.version}**\n" +
                 "IDE version: **$appName**\n\n" +
                 "Additional info:\n" +
                 "> ${additionalInfo?.replace("\\n+".toRegex(), "\n")}" +

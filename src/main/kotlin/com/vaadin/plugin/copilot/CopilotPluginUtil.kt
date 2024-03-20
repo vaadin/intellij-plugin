@@ -185,10 +185,6 @@ class CopilotPluginUtil {
             }
         }
 
-        fun getPluginVersion(): String? {
-            return pluginVersion
-        }
-
     }
 
 
