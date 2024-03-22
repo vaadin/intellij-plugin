@@ -20,11 +20,12 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
-import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.RedoHandler
+import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotServerService
+import java.io.BufferedWriter
 import java.io.File
 import java.io.StringWriter
 import java.util.*
@@ -41,6 +42,8 @@ class CopilotPluginUtil {
         private const val VAADIN_LIB_PREFIX = "com.vaadin"
 
         private const val IDEA_DIR = ".idea"
+
+        private const val NORMALIZED_LINE_SEPARATOR = "\n"
 
         private var isVaadinProject = false
 
@@ -142,7 +145,12 @@ class CopilotPluginUtil {
                 props.setProperty("supportedActions", HANDLERS.values().map { a -> a.command }.joinToString(","))
 
                 val stringWriter = StringWriter()
-                props.store(stringWriter, "Vaadin Copilot Integration Runtime Properties")
+                val bufferedWriter = object : BufferedWriter(stringWriter) {
+                    override fun newLine() {
+                        write(NORMALIZED_LINE_SEPARATOR)
+                    }
+                }
+                props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
 
                 val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
