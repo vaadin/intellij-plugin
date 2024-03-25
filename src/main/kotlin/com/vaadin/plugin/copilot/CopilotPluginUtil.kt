@@ -4,11 +4,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
-import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
@@ -48,8 +48,6 @@ class CopilotPluginUtil {
         private const val NORMALIZED_LINE_SEPARATOR = "\n"
 
         private const val NOTIFICATION_GROUP = "Vaadin Copilot"
-
-        private const val NOTIFICATION_GROUP_IDEA_DIR = "Vaadin Copilot .idea directory missing"
 
         private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
@@ -201,32 +199,14 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun createIdeaDirectoryIfMissing(project: Project): Boolean {
-            return ApplicationManager.getApplication().runWriteAction<Boolean> {
+        fun createIdeaDirectoryIfMissing(project: Project) {
+            WriteCommandAction.runWriteCommandAction(project) {
                 val ideaDir = getIdeaDir(project).path
                 VfsUtil.createDirectoryIfMissing(ideaDir)?.let {
                     LOG.info("$ideaDir created")
-                    return@runWriteAction true
                 }
             }
         }
-
-        fun notifyForDotDirCreation(project: Project) {
-            Notifications.Bus.notify(Notification(
-                NOTIFICATION_GROUP_IDEA_DIR,
-                "Vaadin Copilot Plugin requires .idea directory to store shared files with Vaadin Copilot.",
-                NotificationType.WARNING)
-                .setTitle(".idea directory missing")
-                .setIcon(COPILOT_ICON)
-                .addAction(NotificationAction.create("Create directory and start plugin") { event ->
-                    if (createIdeaDirectoryIfMissing(project)) {
-                        startServer(project)
-                    } else {
-                        notify("Vaadin Plugin could not create .idea directory", NotificationType.ERROR)
-                    }
-                }), project)
-        }
-
     }
 
 }
