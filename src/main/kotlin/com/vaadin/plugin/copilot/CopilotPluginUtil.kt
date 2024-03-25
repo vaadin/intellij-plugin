@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
@@ -16,6 +17,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.libraries.Library
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
@@ -44,6 +46,12 @@ class CopilotPluginUtil {
         private const val IDEA_DIR = ".idea"
 
         private const val NORMALIZED_LINE_SEPARATOR = "\n"
+
+        private const val NOTIFICATION_GROUP = "Vaadin Copilot"
+
+        private const val NOTIFICATION_GROUP_IDEA_DIR = "Vaadin Copilot .idea directory missing"
+
+        private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
         private var isVaadinProject = false
 
@@ -77,7 +85,8 @@ class CopilotPluginUtil {
         }
 
         fun notify(content: String, type: NotificationType, project: Project?) {
-            Notifications.Bus.notify(Notification("Copilot", content, type), project)
+            Notifications.Bus.notify(Notification(NOTIFICATION_GROUP, content, type)
+                .setIcon(COPILOT_ICON), project)
         }
 
         fun isServerRunning(project: Project): Boolean {
@@ -179,24 +188,45 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun getDotFileDirectory(project: Project): PsiDirectory? {
+        private fun getIdeaDir(project: Project): File {
+            return File(project.basePath, IDEA_DIR)
+        }
+
+        fun getDotFileDirectory(project: Project): PsiDirectory? {
             return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
-                val basePath = project.basePath
-                if (basePath != null) {
-                    val ideaDir = File(basePath, IDEA_DIR)
-                    VfsUtil.findFileByIoFile(ideaDir, false)?.let {
-                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
-                    }
-                    VfsUtil.createDirectoryIfMissing(ideaDir.path)?.let {
-                        LOG.info("$ideaDir created")
-                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
-                    }
+                VfsUtil.findFileByIoFile(getIdeaDir(project), false)?.let {
+                    return@runReadAction PsiManager.getInstance(project).findDirectory(it)
                 }
                 return@runReadAction null
             }
         }
 
-    }
+        private fun createIdeaDirectoryIfMissing(project: Project): Boolean {
+            return ApplicationManager.getApplication().runWriteAction<Boolean> {
+                val ideaDir = getIdeaDir(project).path
+                VfsUtil.createDirectoryIfMissing(ideaDir)?.let {
+                    LOG.info("$ideaDir created")
+                    return@runWriteAction true
+                }
+            }
+        }
 
+        fun notifyForDotDirCreation(project: Project) {
+            Notifications.Bus.notify(Notification(
+                NOTIFICATION_GROUP_IDEA_DIR,
+                "Vaadin Copilot Plugin requires .idea directory to store shared files with Vaadin Copilot.",
+                NotificationType.WARNING)
+                .setTitle(".idea directory missing")
+                .setIcon(COPILOT_ICON)
+                .addAction(NotificationAction.create("Create directory and start plugin") { event ->
+                    if (createIdeaDirectoryIfMissing(project)) {
+                        startServer(project)
+                    } else {
+                        notify("Vaadin Plugin could not create .idea directory", NotificationType.ERROR)
+                    }
+                }), project)
+        }
+
+    }
 
 }

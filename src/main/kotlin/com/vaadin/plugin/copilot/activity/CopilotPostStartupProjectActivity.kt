@@ -8,7 +8,10 @@ class CopilotPostStartupProjectActivity: ProjectActivity {
 
     override suspend fun execute(project: Project) {
         val isVaadinProject = CopilotPluginUtil.isVaadinProject(project)
-        if (isVaadinProject) {
+        val dotFileDirectory = CopilotPluginUtil.getDotFileDirectory(project)
+        if (dotFileDirectory == null) {
+            CopilotPluginUtil.notifyForDotDirCreation(project)
+        } else if (isVaadinProject) {
             CopilotPluginUtil.startServer(project)
         }
     }
