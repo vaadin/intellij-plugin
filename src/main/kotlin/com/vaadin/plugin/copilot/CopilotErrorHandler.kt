@@ -28,7 +28,8 @@ class CopilotErrorHandler: ErrorReportSubmitter() {
         val appName = ApplicationInfo.getInstance().fullApplicationName
 
         var body = "Plugin version: **${pluginDescriptor.version}**\n" +
-                "IDE version: **$appName**\n\n"
+                "IDE version: **$appName**\n" +
+                "OS: **${System.getProperty("os.name")}**\n\n"
 
         if (additionalInfo != null) {
             body += "Additional info:\n" +
