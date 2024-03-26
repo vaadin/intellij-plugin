@@ -8,6 +8,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
@@ -16,6 +17,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.libraries.Library
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
@@ -44,6 +46,10 @@ class CopilotPluginUtil {
         private const val IDEA_DIR = ".idea"
 
         private const val NORMALIZED_LINE_SEPARATOR = "\n"
+
+        private const val NOTIFICATION_GROUP = "Vaadin Copilot"
+
+        private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
         private var isVaadinProject = false
 
@@ -77,7 +83,8 @@ class CopilotPluginUtil {
         }
 
         fun notify(content: String, type: NotificationType, project: Project?) {
-            Notifications.Bus.notify(Notification("Copilot", content, type), project)
+            Notifications.Bus.notify(Notification(NOTIFICATION_GROUP, content, type)
+                .setIcon(COPILOT_ICON), project)
         }
 
         fun isServerRunning(project: Project): Boolean {
@@ -179,24 +186,27 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun getDotFileDirectory(project: Project): PsiDirectory? {
+        private fun getIdeaDir(project: Project): File {
+            return File(project.basePath, IDEA_DIR)
+        }
+
+        fun getDotFileDirectory(project: Project): PsiDirectory? {
             return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
-                val basePath = project.basePath
-                if (basePath != null) {
-                    val ideaDir = File(basePath, IDEA_DIR)
-                    VfsUtil.findFileByIoFile(ideaDir, false)?.let {
-                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
-                    }
-                    VfsUtil.createDirectoryIfMissing(ideaDir.path)?.let {
-                        LOG.info("$ideaDir created")
-                        return@runReadAction PsiManager.getInstance(project).findDirectory(it)
-                    }
+                VfsUtil.findFileByIoFile(getIdeaDir(project), false)?.let {
+                    return@runReadAction PsiManager.getInstance(project).findDirectory(it)
                 }
                 return@runReadAction null
             }
         }
 
+        fun createIdeaDirectoryIfMissing(project: Project) {
+            WriteCommandAction.runWriteCommandAction(project) {
+                val ideaDir = getIdeaDir(project).path
+                VfsUtil.createDirectoryIfMissing(ideaDir)?.let {
+                    LOG.info("$ideaDir created")
+                }
+            }
+        }
     }
-
 
 }
