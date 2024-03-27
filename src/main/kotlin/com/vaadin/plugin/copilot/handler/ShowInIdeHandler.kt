@@ -1,8 +1,8 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
-import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
@@ -22,7 +22,7 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 val openFileDescriptor = OpenFileDescriptor(project, file)
                 FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let {editor ->
                     editor.selectionModel.removeSelection()
-                    editor.caretModel.currentCaret.moveToVisualPosition(VisualPosition(line, column))
+                    editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
                     editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
                 }
                 ProjectUtil.focusProjectWindow(project, true)
