@@ -25,6 +25,12 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
+    <change-notes>
+        <![CDATA[
+        <p>Check <a href="https://github.com/vaadin/intellij-plugin/releases">release notes at GitHub</a> for more information.</p>
+        ]]>
+    </change-notes>
+
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
@@ -32,15 +38,16 @@
         <projectService serviceImplementation="com.vaadin.plugin.copilot.service.CopilotServerServiceImpl"
                         serviceInterface="com.vaadin.plugin.copilot.service.CopilotServerService"/>
         <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
-        <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler" />
+        <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
+        <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
+                                id="CopilotStatusBarWidgetFactory" order="last"/>
     </extensions>
 
     <actions>
-        <action id="com.vaadin.plugin.copilot.action.ToggleServerAction"
-                class="com.vaadin.plugin.copilot.action.ToggleServerAction"
-                icon="/icons/copilot.svg">
-            <add-to-group group-id="ProjectViewPopupMenuRunGroup" anchor="last"/>
-        </action>
+        <group id="CopilotStatusBarActions" icon="/icons/vaadin.svg">
+            <action id="com.vaadin.plugin.copilot.action.ToggleServerAction"
+                    class="com.vaadin.plugin.copilot.action.ToggleServerAction"/>
+        </group>
     </actions>
 
     <projectListeners>
