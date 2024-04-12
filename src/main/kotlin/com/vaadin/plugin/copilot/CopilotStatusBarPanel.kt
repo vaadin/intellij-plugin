@@ -33,10 +33,6 @@ class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(projec
     }
 
     override fun getWidgetState(file: VirtualFile?): WidgetState {
-        if (!CopilotPluginUtil.isVaadinProject(project)) {
-            return WidgetState.HIDDEN
-        }
-
         val state = WidgetState("Vaadin", null, true)
         state.icon = IconManager.getInstance().getIcon("/icons/vaadin.svg", javaClass)
         return state
