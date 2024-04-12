@@ -50,8 +50,6 @@ class CopilotPluginUtil {
 
         private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
-        private var isVaadinProject: Boolean? = null
-
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
             UNDO("undo"),
@@ -66,30 +64,26 @@ class CopilotPluginUtil {
                 return false
             }
 
-            if (isVaadinProject != null) {
-                return isVaadinProject!!
-            }
-
             val containsVaadinDeps = fun(file: String): Boolean {
                 return Files.readString(Path(project.basePath!!, file)).contains(VAADIN_LIB_PREFIX)
             }
 
             // Maven projects
             if (File(project.basePath, "pom.xml").exists()) {
-                isVaadinProject = containsVaadinDeps("pom.xml")
+                return containsVaadinDeps("pom.xml")
             }
 
             // Gradle projects
             if (File(project.basePath, "build.gradle").exists()) {
-                isVaadinProject = containsVaadinDeps("build.gradle")
+                return containsVaadinDeps("build.gradle")
             }
 
             // Gradle Kotlin projects
             if (File(project.basePath, "build.gradle.kts").exists()) {
-                isVaadinProject = containsVaadinDeps("build.gradle.kts")
+                return containsVaadinDeps("build.gradle.kts")
             }
 
-            return isVaadinProject ?: false
+            return false
         }
 
         fun notify(content: String, type: NotificationType) {
