@@ -34,11 +34,11 @@
         <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
-                                id="CopilotStatusBarWidgetFactory"/>
+                                id="CopilotStatusBarWidgetFactory" order="last"/>
     </extensions>
 
     <actions>
-        <group id="CopilotStatusBarActions">
+        <group id="CopilotStatusBarActions" icon="/icons/vaadin.svg">
             <action id="com.vaadin.plugin.copilot.action.ToggleServerAction"
                     class="com.vaadin.plugin.copilot.action.ToggleServerAction"/>
         </group>
