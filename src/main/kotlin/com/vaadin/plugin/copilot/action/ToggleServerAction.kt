@@ -1,5 +1,6 @@
 package com.vaadin.plugin.copilot.action
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.vaadin.plugin.copilot.CopilotPluginUtil
@@ -30,6 +31,10 @@ class ToggleServerAction : AnAction() {
         } else {
             e.presentation.text = "Start Vaadin Copilot Integration"
         }
+    }
+
+    override fun getActionUpdateThread(): ActionUpdateThread {
+        return ActionUpdateThread.EDT
     }
 
 }
