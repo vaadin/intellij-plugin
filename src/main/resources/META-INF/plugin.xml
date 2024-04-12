@@ -25,6 +25,12 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
+    <change-notes>
+        <![CDATA[
+        <p>Check <a href="https://github.com/vaadin/intellij-plugin/releases">release notes at GitHub</a> for more information.</p>
+        ]]>
+    </change-notes>
+
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
