@@ -13,10 +13,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.libraries.Library
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
@@ -30,7 +27,9 @@ import com.vaadin.plugin.copilot.service.CopilotServerService
 import java.io.BufferedWriter
 import java.io.File
 import java.io.StringWriter
+import java.nio.file.Files
 import java.util.*
+import kotlin.io.path.Path
 
 
 class CopilotPluginUtil {
@@ -51,8 +50,6 @@ class CopilotPluginUtil {
 
         private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
-        private var isVaadinProject = false
-
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
             UNDO("undo"),
@@ -63,19 +60,30 @@ class CopilotPluginUtil {
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
 
         fun isVaadinProject(project: Project): Boolean {
-            // after first opening project, when libs are not analyzed yet this will return false
-            if (!isVaadinProject) {
-                for (module in ModuleManager.getInstance(project).modules) {
-                    ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                        if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
-                            isVaadinProject = true
-                            return@forEachLibrary true
-                        }
-                        true
-                    }
-                }
+            if (project.basePath == null) {
+                return false
             }
-            return isVaadinProject
+
+            val containsVaadinDeps = fun(file: String): Boolean {
+                return Files.readString(Path(project.basePath!!, file)).contains(VAADIN_LIB_PREFIX)
+            }
+
+            // Maven projects
+            if (File(project.basePath, "pom.xml").exists()) {
+                return containsVaadinDeps("pom.xml")
+            }
+
+            // Gradle projects
+            if (File(project.basePath, "build.gradle").exists()) {
+                return containsVaadinDeps("build.gradle")
+            }
+
+            // Gradle Kotlin projects
+            if (File(project.basePath, "build.gradle.kts").exists()) {
+                return containsVaadinDeps("build.gradle.kts")
+            }
+
+            return false
         }
 
         fun notify(content: String, type: NotificationType) {
@@ -83,8 +91,10 @@ class CopilotPluginUtil {
         }
 
         fun notify(content: String, type: NotificationType, project: Project?) {
-            Notifications.Bus.notify(Notification(NOTIFICATION_GROUP, content, type)
-                .setIcon(COPILOT_ICON), project)
+            Notifications.Bus.notify(
+                Notification(NOTIFICATION_GROUP, content, type)
+                    .setIcon(COPILOT_ICON), project
+            )
         }
 
         fun isServerRunning(project: Project): Boolean {
