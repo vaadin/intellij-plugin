@@ -1,7 +1,6 @@
 package com.vaadin.plugin.copilot.service
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import io.ktor.util.network.*
 import java.io.ByteArrayOutputStream
@@ -14,7 +13,7 @@ import java.nio.channels.SocketChannel
 import java.util.*
 
 // Server implementation based on https://github.com/teocci/NioSocketCodeSample/tree/master
-class CopilotServerServiceImpl(private val project: Project): CopilotServerService {
+class CopilotServerServiceImpl : CopilotServerService {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
@@ -117,7 +116,7 @@ class CopilotServerServiceImpl(private val project: Project): CopilotServerServi
         val baos = ByteArrayOutputStream()
         var read: Int
         try {
-            while(true) {
+            while (true) {
                 readBuffer.clear()
                 read = channel.read(readBuffer)
                 if (read == -1) {

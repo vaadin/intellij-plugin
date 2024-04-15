@@ -15,7 +15,11 @@ abstract class AbstractHandler(val project: Project) : Runnable {
 
     val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
-    class FileEditorWrapper(private val fileEditor: FileEditor, private val project: Project, private val closable: Boolean): AutoCloseable {
+    class FileEditorWrapper(
+        private val fileEditor: FileEditor,
+        private val project: Project,
+        private val closable: Boolean
+    ) : AutoCloseable {
 
         fun getFileEditor(): FileEditor {
             return fileEditor
@@ -32,7 +36,7 @@ abstract class AbstractHandler(val project: Project) : Runnable {
     fun isFileInsideProject(project: Project, file: File): Boolean {
         if (file.exists()) {
             val path = file.toPath()
-            return path.toRealPath().startsWith(project.basePath)
+            return path.toRealPath().startsWith(project.basePath!!)
         } else {
             // New file
             return isFileInsideProject(project, file.parentFile)

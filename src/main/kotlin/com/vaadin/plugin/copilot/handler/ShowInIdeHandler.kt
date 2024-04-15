@@ -18,9 +18,9 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
 
     override fun run() {
         if (isFileInsideProject(project, ioFile)) {
-            val result = VfsUtil.findFileByIoFile(ioFile, true)?.let {file ->
+            val result = VfsUtil.findFileByIoFile(ioFile, true)?.let { file ->
                 val openFileDescriptor = OpenFileDescriptor(project, file)
-                FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let {editor ->
+                FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let { editor ->
                     editor.selectionModel.removeSelection()
                     editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
                     editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
@@ -29,7 +29,7 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 LOG.info("File $ioFile opened at $line:$column")
                 true
             }
-            if (result != true){
+            if (result != true) {
                 LOG.warn("Cannot open $ioFile at $line:$column, file does not exist or is not readable")
             }
         } else {

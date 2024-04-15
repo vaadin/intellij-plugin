@@ -9,7 +9,7 @@ import com.intellij.util.Consumer
 import java.awt.Component
 
 
-class CopilotErrorHandler: ErrorReportSubmitter() {
+class CopilotErrorHandler : ErrorReportSubmitter() {
 
     private val url = "https://github.com/vaadin/intellij-plugin/issues/new"
 
@@ -46,7 +46,6 @@ class CopilotErrorHandler: ErrorReportSubmitter() {
         BrowserUtil.browse("$url?title=$title&body=$body")
         return true
     }
-
 
 
 }
