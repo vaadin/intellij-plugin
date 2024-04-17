@@ -1,5 +1,6 @@
 package com.vaadin.plugin.module
 
+import com.intellij.ide.wizard.withVisualPadding
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.bind
 import com.intellij.ui.dsl.builder.panel
@@ -7,10 +8,9 @@ import com.jetbrains.rd.util.first
 import com.vaadin.plugin.starter.StarterModel
 import com.vaadin.plugin.starter.StarterSupport
 import javax.swing.JEditorPane
-import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class VaadinPanel : JPanel() {
+class VaadinPanel {
 
     private val model = StarterModel(
         StarterSupport.frameworks.keys.first(),
@@ -34,48 +34,87 @@ class VaadinPanel : JPanel() {
 
     init {
         dialogPanel = panel {
+            row {
+                text("<h2 style=\"margin: 0\">Vaadin Hello World Project</h2>")
+            }
+            row {
+                text("Quick start local application development with a \"Hello World\"<br>starter project based on your favorite tech stack.")
+            }
+            row {
+                text("<h3 style=\"margin-bottom: 0\">Framework</h3>")
+            }
             buttonsGroup {
-                row("Framework") {
-                    for (el in StarterSupport.frameworks) {
+                row {
+                    for (el in StarterSupport.frameworks.entries.filter { !it.key.contains("hilla") }) {
+                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                        all["frameworks"]!![r.component] = el.key
+                    }
+                }
+                row {
+                    for (el in StarterSupport.frameworks.entries.filter { it.key.contains("hilla") }) {
                         val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                         all["frameworks"]!![r.component] = el.key
                     }
                 }
             }.bind(model::framework)
+            row {
+                text("<h3 style=\"margin-bottom: 0\">Language</h3>")
+            }
             buttonsGroup {
-                row("Language") {
+                row {
                     for (el in StarterSupport.languages) {
                         val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                         all["languages"]!![r.component] = el.key
                     }
                 }
-                row {
-                    kotlinInfo = text("Kotlin support uses a community add-on.").component
-                }
             }.bind(model::language)
+            row {
+                kotlinInfo = text("Kotlin support uses a community add-on.").component
+            }
             buttonsGroup {
-                row("Build Tool") {
+                row {
+                    text("<h3 style=\"margin-bottom: 0\">Build tool</h3>")
+                }
+                row {
                     for (el in StarterSupport.buildTools) {
                         val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                         all["buildTools"]!![r.component] = el.key
                     }
                 }
             }.bind(model::buildTool)
+            row {
+                text("<h3 style=\"margin-bottom: 0\">Architecture</h3>")
+            }
             buttonsGroup {
-                row("Architecture") {
-                    for (el in StarterSupport.architectures) {
+                row {
+                    for (el in StarterSupport.architectures.entries.filterIndexed { i, t -> i <= 3 }) {
                         val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                         all["architectures"]!![r.component] = el.key
                     }
                 }
                 row {
-                    notAllArchitecturesSupportedMessage = text("").component
+                    for (el in StarterSupport.architectures.entries.filterIndexed { i, t -> i > 3 }) {
+                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                        all["architectures"]!![r.component] = el.key
+                    }
                 }
             }.bind(model::architecture)
-        }
-        add(dialogPanel)
-        refreshArchitecturesSupportedMessage()
-        refreshKotlinMessage()
+            row {
+                notAllArchitecturesSupportedMessage = text("").component
+            }
+            separator()
+            row {
+                text("You can generate more complex Vaadin start applications on <a href=\"https://start.vaadin.com/\">start.vaadin.com</a>")
+            }
+            row {
+                text("Read more at <a href=\"https://vaadin.com/docs\">vaadin.com/docs</a>")
+            }
+        }.withVisualPadding(true)
+        refreshSupport()
+    }
+
+    fun getComponent(): DialogPanel {
+        return dialogPanel!!
     }
 
     fun getModel(): StarterModel {

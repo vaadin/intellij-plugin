@@ -8,7 +8,7 @@ class VaadinCustomOptionsStep(private val builder: VaadinModuleBuilder) : Module
     private val panel = VaadinPanel()
 
     override fun getComponent(): JComponent {
-        return panel
+        return panel.getComponent()
     }
 
     override fun updateDataModel() {
