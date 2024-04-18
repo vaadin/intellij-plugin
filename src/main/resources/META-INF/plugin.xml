@@ -39,6 +39,7 @@
         <projectService serviceImplementation="com.vaadin.plugin.copilot.service.CopilotServerServiceImpl"
                         serviceInterface="com.vaadin.plugin.copilot.service.CopilotServerService"/>
         <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
+        <postStartupActivity implementation="com.vaadin.plugin.module.VaadinPostStartupProjectClose" />
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
                                 id="CopilotStatusBarWidgetFactory" order="last"/>

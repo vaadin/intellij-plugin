@@ -10,11 +10,11 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.name
 
-class ProjectUtil {
+class VaadinProjectUtil {
 
     companion object {
 
-        private val LOG: Logger = Logger.getInstance(ProjectUtil::class.java)
+        private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
         fun downloadAndExtract(project: Project, url: String) {
             val filename = Path.of(url).name
