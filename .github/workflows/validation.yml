@@ -34,4 +34,4 @@ jobs:
       - uses: mshick/add-pr-comment@v2
         with:
           refresh-message-position: true
-          message: "Test using build snapshot: ${{ steps.artifact.outputs.artifact-url }}"
+          message: "Artifact build on last commit: [intellij-plugin-SNAPSHOT.zip](${{ steps.artifact.outputs.artifact-url }})"
