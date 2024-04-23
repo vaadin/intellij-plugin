@@ -5,11 +5,8 @@ class StarterSupport {
     companion object {
 
         val frameworks = linkedMapOf(
-            "24" to "Vaadin Flow 24",
-            "23" to "Vaadin Flow 23",
-            "14" to "Vaadin Flow 14",
-            "hilla-react" to "Hilla + React",
-            "hilla-lit" to "Hilla + Lit"
+            "24" to "Flow / Java",
+            "hilla-react" to "Hilla / React"
         )
 
         val languages = linkedMapOf(
@@ -21,9 +18,7 @@ class StarterSupport {
             "springboot" to "Spring Boot",
             "quarkus" to "Quarkus",
             "jakartaee" to "Jakarta EE",
-            "servlet" to "Servlet",
-            "osgi" to "OSGI",
-            "karaf" to "Karaf"
+            "servlet" to "Servlet"
         )
 
         val buildTools = linkedMapOf(
@@ -33,9 +28,7 @@ class StarterSupport {
 
         val downloadLinks = mapOf(
             "hilla-react" to "https://github.com/vaadin/skeleton-starter-hilla-react/archive/master.zip",
-            "hilla-lit" to "https://github.com/vaadin/skeleton-starter-hilla-lit/archive/master.zip",
             "hilla-react-gradle" to "https://github.com/vaadin/skeleton-starter-hilla-react-gradle/archive/master.zip",
-            "hilla-lit-gradle" to "https://github.com/vaadin/skeleton-starter-hilla-lit-gradle/archive/master.zip",
             "kotlin" to "https://github.com/vaadin/skeleton-starter-kotlin-spring/archive/master.zip",
             "gradle-servlet" to "https://github.com/vaadin/base-starter-gradle/archive/v<version>.zip",
             "gradle-springboot" to "https://github.com/vaadin/base-starter-spring-gradle/archive/v<version>.zip",
@@ -43,8 +36,6 @@ class StarterSupport {
             "quarkus" to "https://github.com/vaadin/base-starter-flow-quarkus/archive/v<version>.zip",
             "jakartaee" to "https://github.com/vaadin/skeleton-starter-flow-cdi/archive/v<version>.zip",
             "servlet" to "https://github.com/vaadin/skeleton-starter-flow/archive/v<version>.zip",
-            "osgi" to "https://github.com/vaadin/base-starter-flow-osgi/archive/v<version>.zip",
-            "karaf" to "https://github.com/vaadin/vaadin-flow-karaf-example/archive/v<version>.zip"
         )
 
         private val supportMatrix = arrayOf(
@@ -56,33 +47,12 @@ class StarterSupport {
                 17
             ),
             StarterSupportMatrixElement(
-                "23",
-                setOf("17"),
-                architectures.keys,
-                buildTools.keys,
-                11
-            ),
-            StarterSupportMatrixElement(
-                "14",
-                setOf("17"),
-                setOf("springboot", "jakartaee", "servlet", "osgi"),
-                buildTools.keys,
-                8
-            ),
-            StarterSupportMatrixElement(
                 "hilla-react",
                 setOf("17"),
                 setOf("springboot"),
                 buildTools.keys,
                 17
             ),
-            StarterSupportMatrixElement(
-                "hilla-lit",
-                setOf("17"),
-                setOf("springboot"),
-                buildTools.keys,
-                17
-            )
         )
 
 

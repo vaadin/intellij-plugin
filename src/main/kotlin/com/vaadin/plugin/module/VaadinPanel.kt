@@ -4,7 +4,7 @@ import com.intellij.ide.wizard.withVisualPadding
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.CollapsibleRow
 import com.intellij.ui.dsl.builder.panel
-import com.vaadin.plugin.starter.HasDownloadLink
+import com.vaadin.plugin.starter.DownloadableModel
 
 class VaadinPanel {
 
@@ -40,7 +40,7 @@ class VaadinPanel {
             }
 
             demoStarterGroup = collapsibleGroup("Demo Starters") {
-                row {}.cell(skeletonStarterPanel.root!!)
+                row {}.cell(skeletonStarterPanel.root)
             }
             separator()
             row {
@@ -60,7 +60,7 @@ class VaadinPanel {
         return dialogPanel!!
     }
 
-    fun getModel(): HasDownloadLink {
+    fun getModel(): DownloadableModel {
         return if (quickStarterGroup!!.expanded) quickStarterPanel.model else skeletonStarterPanel.model
     }
 

@@ -7,7 +7,7 @@ class StarterModel(
     var language: String,       // 17 / kotlin
     var buildTool: String,      // maven / gradle
     var architecture: String    // springboot / servlet / ...
-) : HasDownloadLink {
+) : DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
         var key: String
@@ -29,6 +29,10 @@ class StarterModel(
 
         val link = StarterSupport.downloadLinks[key] ?: "#"
         return link.replace("<version>", framework)
+    }
+
+    override fun getProjectType(): String {
+        return buildTool
     }
 
 }

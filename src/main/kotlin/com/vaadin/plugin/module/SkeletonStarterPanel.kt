@@ -29,16 +29,10 @@ class SkeletonStarterPanel {
         StarterSupport.architectures.keys.first()
     )
 
-    val root: DialogPanel? = panel {
+    val root: DialogPanel = panel {
         buttonsGroup {
             row("Framework") {
-                for (el in StarterSupport.frameworks.entries.filter { !it.key.contains("hilla") }) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["frameworks"]!![r.component] = el.key
-                }
-            }.topGap(TopGap.SMALL)
-            row("") {
-                for (el in StarterSupport.frameworks.entries.filter { it.key.contains("hilla") }) {
+                for (el in StarterSupport.frameworks.entries) {
                     val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                     all["frameworks"]!![r.component] = el.key
                 }
@@ -65,13 +59,7 @@ class SkeletonStarterPanel {
         }.bind(model::buildTool)
         buttonsGroup {
             row("Architecture") {
-                for (el in StarterSupport.architectures.entries.filterIndexed { i, _ -> i <= 3 }) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["architectures"]!![r.component] = el.key
-                }
-            }.topGap(TopGap.SMALL)
-            row("") {
-                for (el in StarterSupport.architectures.entries.filterIndexed { i, _ -> i > 3 }) {
+                for (el in StarterSupport.architectures.entries) {
                     val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
                     all["architectures"]!![r.component] = el.key
                 }

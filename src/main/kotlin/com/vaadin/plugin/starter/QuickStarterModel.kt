@@ -9,7 +9,7 @@ class QuickStarterModel(
     var exampleViews: Boolean,
     var authentication: Boolean,
     var version: String
-) : BaseState(), HasDownloadLink {
+) : BaseState(), DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
         var preset = ""
@@ -31,5 +31,9 @@ class QuickStarterModel(
         }
 
         return "https://start.vaadin.com/dl?preset=${preset}&projectName=${project.name}"
+    }
+
+    override fun getProjectType(): String {
+        return "maven"
     }
 }

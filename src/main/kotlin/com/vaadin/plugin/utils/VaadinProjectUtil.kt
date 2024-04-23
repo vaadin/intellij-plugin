@@ -1,9 +1,13 @@
 package com.vaadin.plugin.utils
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
 import java.io.File
@@ -18,7 +22,9 @@ class VaadinProjectUtil {
 
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
-        fun downloadAndExtract(project: Project, url: String) {
+        private const val NOTIFICATION_GROUP = "Vaadin"
+
+        fun downloadAndExtract(project: Project, url: String, callback: () -> Unit) {
             val filename = "project.zip"
             LOG.info("Downloading $filename")
             val basePath: String = project.basePath!!
@@ -29,7 +35,7 @@ class VaadinProjectUtil {
                 DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Starter Project")
 
             WriteCommandAction.runWriteCommandAction(project, "Create Vaadin Project", "Vaadin", {
-                downloader.downloadWithBackgroundProgress(basePath, project).thenApply {
+                downloader.downloadWithBackgroundProgress(basePath, project).thenAccept {
                     LOG.info("Extracting $downloadedFile")
                     ZipUtil.extract(downloadedFile.toPath(), Path.of(basePath), null)
                     // move contents from single zip directory
@@ -40,6 +46,7 @@ class VaadinProjectUtil {
                     }
                     FileUtil.delete(downloadedFile)
                     LOG.info("$downloadedFile deleted")
+                    VirtualFileManager.getInstance().asyncRefresh(callback)
                 }
             })
         }
@@ -60,6 +67,12 @@ class VaadinProjectUtil {
                 }
                 return null
             }
+        }
+
+        fun notify(content: String, type: NotificationType, project: Project?) {
+            Notifications.Bus.notify(
+                Notification(NOTIFICATION_GROUP, content, type), project
+            )
         }
 
     }
