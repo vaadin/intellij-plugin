@@ -6,11 +6,11 @@ on:
       - main
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
-  validate:
+  buildPlugin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,4 +23,30 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
-        run: ./gradlew --no-configuration-cache build test
+        run: ./gradlew --no-configuration-cache buildPlugin
+      - uses: actions/upload-artifact@v4.3.3
+        id: artifact
+        with:
+          name: distributions
+          path: build/distributions
+      - uses: mshick/add-pr-comment@v2
+        with:
+          refresh-message-position: true
+          message: |
+            Artifact build on last commit: [distributions.zip](${{ steps.artifact.outputs.artifact-url }}). 
+            For MacOS users: there is a zip inside this zip and Finder unzips them both at once. Use `unzip distributions.zip` from Terminal or [check solution for Archive Manager](https://apple.stackexchange.com/questions/443607/is-there-a-way-to-prevent-macoss-archive-utility-from-unarchiving-inner-zip-fil).
+
+  runPluginVerifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Build with Gradle
+        run: ./gradlew --no-configuration-cache runPluginVerifier
