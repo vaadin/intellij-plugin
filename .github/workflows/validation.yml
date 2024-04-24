@@ -33,9 +33,8 @@ jobs:
         with:
           refresh-message-position: true
           message: |
-            "Artifact build on last commit: [distributions.zip](${{ steps.artifact.outputs.artifact-url }}). "
-            "For MacOS users: there is a zip inside this zip and Finder unzips them both at once. " 
-            "Use `unzip distributions.zip` from Terminal or [check solution for Archive Manager](https://apple.stackexchange.com/questions/443607/is-there-a-way-to-prevent-macoss-archive-utility-from-unarchiving-inner-zip-fil)."
+            Artifact build on last commit: [distributions.zip](${{ steps.artifact.outputs.artifact-url }}). 
+            For MacOS users: there is a zip inside this zip and Finder unzips them both at once. Use `unzip distributions.zip` from Terminal or [check solution for Archive Manager](https://apple.stackexchange.com/questions/443607/is-there-a-way-to-prevent-macoss-archive-utility-from-unarchiving-inner-zip-fil).
 
   runPluginVerifier:
     runs-on: ubuntu-latest
