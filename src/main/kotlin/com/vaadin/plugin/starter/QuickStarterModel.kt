@@ -4,23 +4,18 @@ import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
 
 class QuickStarterModel(
-    var framework: String,
-    var frontend: String,
-    var exampleViews: Boolean,
+    var views: String,
     var authentication: Boolean,
     var version: String
 ) : BaseState(), DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
-        var preset = ""
-        if (framework === "Flow") {
-            preset = if (exampleViews) "default" else "empty"
-        } else if (framework === "Hilla") {
-            if (frontend == "Lit") {
-                preset = if (exampleViews) "hilla" else "hilla-empty"
-            } else if (frontend === "React") {
-                preset = if (exampleViews) "react" else "react-empty"
-            }
+        var preset = if (views.contains("Flow")) {
+            "default"
+        } else if (views.contains("Hilla")) {
+            "react"
+        } else {
+            "empty"
         }
 
         if (authentication) {
