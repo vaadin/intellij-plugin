@@ -4,7 +4,9 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
@@ -21,9 +23,11 @@ class VaadinProjectUtil {
 
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
+        val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
+
         private const val NOTIFICATION_GROUP = "Vaadin"
 
-        fun downloadAndExtract(project: Project, url: String, callback: () -> Unit) {
+        fun downloadAndExtract(project: Project, url: String) {
             val filename = "project.zip"
             LOG.info("Downloading $filename")
             val basePath: String = project.basePath!!
@@ -33,7 +37,7 @@ class VaadinProjectUtil {
             val downloader =
                 DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Starter Project")
 
-            downloader.downloadWithBackgroundProgress(basePath, project).thenAccept {
+            downloader.downloadWithBackgroundProgress(basePath, project).thenApply {
                 LOG.info("Extracting $downloadedFile")
                 ZipUtil.extract(downloadedFile.toPath(), Path.of(basePath), null)
                 // move contents from single zip directory
@@ -44,7 +48,8 @@ class VaadinProjectUtil {
                 }
                 FileUtil.delete(downloadedFile)
                 LOG.info("$downloadedFile deleted")
-                VirtualFileManager.getInstance().asyncRefresh(callback)
+                VirtualFileManager.getInstance().syncRefresh()
+                (project.getUserData(PROJECT_DOWNLOADED_PROP_KEY) as GraphProperty<Boolean>).set(true)
             }
         }
 

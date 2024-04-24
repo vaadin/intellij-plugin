@@ -3,20 +3,20 @@ package com.vaadin.plugin.module
 import com.intellij.ide.util.projectWizard.ModuleBuilder
 import com.intellij.ide.util.projectWizard.ModuleWizardStep
 import com.intellij.ide.util.projectWizard.WizardContext
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.module.ModifiableModuleModel
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleType
+import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.ProjectType
-import com.intellij.openapi.roots.ModifiableRootModel
-import com.intellij.openapi.startup.StartupManager
-import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.starter.DownloadableModel
 import com.vaadin.plugin.utils.VaadinProjectUtil
-import java.io.File
 
 class VaadinModuleBuilder : ModuleBuilder() {
+
+    private val propertyGraph = PropertyGraph()
+
+    private val projectDownloadedProperty = propertyGraph.property(false)
 
     private var model: DownloadableModel? = null
 
@@ -36,18 +36,11 @@ class VaadinModuleBuilder : ModuleBuilder() {
         this.model = model
     }
 
-    override fun setupRootModel(modifiableRootModel: ModifiableRootModel) {
-        val project = modifiableRootModel.project
-        StartupManager.getInstance(project).runAfterOpened {
-            VaadinProjectUtil.downloadAndExtract(project, this.model!!.getDownloadLink(project)) {
-                VaadinProjectUtil.notify("Vaadin project created", NotificationType.INFORMATION, project)
-                VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)?.let {
-                    val descriptor = OpenFileDescriptor(project, it)
-                    descriptor.setUsePreviewTab(true)
-                    FileEditorManager.getInstance(project).openEditor(descriptor, true)
-                }
-            }
-        }
+    override fun createModule(moduleModel: ModifiableModuleModel): Module {
+        val project = moduleModel.project
+        project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
+        VaadinProjectUtil.downloadAndExtract(project, this.model!!.getDownloadLink(project))
+        return super.createModule(moduleModel)
     }
 
     override fun getProjectType(): ProjectType? {
