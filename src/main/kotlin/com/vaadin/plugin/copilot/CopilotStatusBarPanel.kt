@@ -6,10 +6,10 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListPopup
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
-import com.intellij.ui.IconManager
 
 class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(project, false) {
 
@@ -34,7 +34,7 @@ class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(projec
 
     override fun getWidgetState(file: VirtualFile?): WidgetState {
         val state = WidgetState("Vaadin", null, true)
-        state.icon = IconManager.getInstance().getIcon("/icons/vaadin.svg", javaClass)
+        state.icon = IconLoader.getIcon("/icons/vaadin.svg", javaClass.classLoader)
         return state
     }
 }

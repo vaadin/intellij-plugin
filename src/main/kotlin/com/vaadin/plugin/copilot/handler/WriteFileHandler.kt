@@ -61,7 +61,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
 
     private fun create() {
         getOrCreateParentDir()?.let {
-            PsiManager.getInstance(project).findDirectory(it)?.let {it2 ->
+            PsiManager.getInstance(project).findDirectory(it)?.let { it2 ->
                 ApplicationManager.getApplication().runWriteAction {
                     val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
                     val newFile = PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)

@@ -29,7 +29,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
 
     override fun run() {
         for (vfsFile in vfsFiles) {
-            getEditorWrapper(vfsFile).use {wrapper ->
+            getEditorWrapper(vfsFile).use { wrapper ->
                 val undoManager = UndoManagerImpl.getInstance(project)
                 val editor = wrapper.getFileEditor()
                 if (undoManager.isUndoAvailable(editor)) {

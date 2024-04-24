@@ -50,8 +50,4 @@
         </group>
     </actions>
 
-    <projectListeners>
-        <listener class="com.vaadin.plugin.copilot.listener.CopilotProjectLifecycleListener"
-                  topic="com.intellij.openapi.project.ProjectCloseListener"/>
-    </projectListeners>
 </idea-plugin>
