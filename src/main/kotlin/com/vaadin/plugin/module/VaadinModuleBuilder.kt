@@ -5,8 +5,8 @@ import com.intellij.ide.util.projectWizard.ModuleWizardStep
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.module.ModuleType
 import com.intellij.openapi.project.ProjectType
 import com.intellij.openapi.roots.ModifiableRootModel
@@ -44,7 +44,7 @@ class VaadinModuleBuilder : ModuleBuilder() {
                 VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)?.let {
                     val descriptor = OpenFileDescriptor(project, it)
                     descriptor.setUsePreviewTab(true)
-                    FileEditorManagerEx.getInstanceEx(project).openEditor(descriptor, true)
+                    FileEditorManager.getInstance(project).openEditor(descriptor, true)
                 }
             }
         }

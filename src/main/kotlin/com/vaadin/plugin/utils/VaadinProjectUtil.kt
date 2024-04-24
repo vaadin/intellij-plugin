@@ -3,7 +3,6 @@ package com.vaadin.plugin.utils
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
@@ -34,21 +33,19 @@ class VaadinProjectUtil {
             val downloader =
                 DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Starter Project")
 
-            WriteCommandAction.runWriteCommandAction(project, "Create Vaadin Project", "Vaadin", {
-                downloader.downloadWithBackgroundProgress(basePath, project).thenAccept {
-                    LOG.info("Extracting $downloadedFile")
-                    ZipUtil.extract(downloadedFile.toPath(), Path.of(basePath), null)
-                    // move contents from single zip directory
-                    getZipRootFolder(downloadedFile)?.let {
-                        LOG.info("Zip contains single directory $it, moving to $basePath")
-                        FileUtil.copyDirContent(File(basePath, it), File(basePath))
-                        FileUtil.delete(File(basePath, it))
-                    }
-                    FileUtil.delete(downloadedFile)
-                    LOG.info("$downloadedFile deleted")
-                    VirtualFileManager.getInstance().asyncRefresh(callback)
+            downloader.downloadWithBackgroundProgress(basePath, project).thenAccept {
+                LOG.info("Extracting $downloadedFile")
+                ZipUtil.extract(downloadedFile.toPath(), Path.of(basePath), null)
+                // move contents from single zip directory
+                getZipRootFolder(downloadedFile)?.let {
+                    LOG.info("Zip contains single directory $it, moving to $basePath")
+                    FileUtil.copyDirContent(File(basePath, it), File(basePath))
+                    FileUtil.delete(File(basePath, it))
                 }
-            })
+                FileUtil.delete(downloadedFile)
+                LOG.info("$downloadedFile deleted")
+                VirtualFileManager.getInstance().asyncRefresh(callback)
+            }
         }
 
         @Throws(IOException::class)
