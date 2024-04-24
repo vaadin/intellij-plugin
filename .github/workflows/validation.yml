@@ -6,7 +6,7 @@ on:
       - main
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -23,15 +23,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
-        run: ./gradlew --no-configuration-cache build test
-      - name: Build plugin
-        run: ./gradlew --no-configuration-cache buildPlugin
+        run: ./gradlew --no-configuration-cache build test buildPlugin
       - uses: actions/upload-artifact@v4.3.3
         id: artifact
         with:
-          name: intellij-plugin-SNAPSHOT
-          path: build/distributions/*.zip
+          name: distributions
+          path: build/distributions
       - uses: mshick/add-pr-comment@v2
         with:
           refresh-message-position: true
-          message: "Artifact build on last commit: [intellij-plugin-SNAPSHOT.zip](${{ steps.artifact.outputs.artifact-url }})"
+          message: "Artifact build on last commit: [distributions.zip](${{ steps.artifact.outputs.artifact-url }})"
