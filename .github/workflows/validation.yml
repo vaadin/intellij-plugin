@@ -28,7 +28,7 @@ jobs:
         id: artifact
         with:
           name: distributions
-          path: build/distributions
+          path: build
       - uses: mshick/add-pr-comment@v2
         with:
           refresh-message-position: true
