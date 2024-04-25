@@ -46,5 +46,4 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
             FileEditorManager.getInstance(project).openEditor(descriptor, true)
         }
     }
-
 }
