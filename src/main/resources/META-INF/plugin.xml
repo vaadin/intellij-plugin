@@ -44,7 +44,6 @@
                                 id="CopilotStatusBarWidgetFactory" order="last"/>
 
         <!-- Vaadin Project Wizard -->
-        <notificationGroup id="Vaadin" displayType="BALLOON"/>
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
     </extensions>
 
