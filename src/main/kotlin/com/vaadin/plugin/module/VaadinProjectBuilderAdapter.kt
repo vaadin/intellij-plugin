@@ -35,7 +35,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
 
     override fun isAvailable(): Boolean {
         val lastPerformedActionId = (ActionManagerImpl.getInstance() as ActionManagerImpl).lastPreformedActionId
-        lastPerformedActionId ?: return true
+        lastPerformedActionId ?: return false
         return lastPerformedActionId.contains("NewProject", true)
     }
 
