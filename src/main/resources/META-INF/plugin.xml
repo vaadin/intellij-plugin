@@ -45,8 +45,7 @@
 
         <!-- Vaadin Project Wizard -->
         <notificationGroup id="Vaadin" displayType="BALLOON"/>
-        <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinModuleBuilder"/>
-        <postStartupActivity implementation="com.vaadin.plugin.module.PostModuleCreatedActivity"/>
+        <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
     </extensions>
 
     <actions>

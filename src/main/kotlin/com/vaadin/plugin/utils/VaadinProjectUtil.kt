@@ -11,6 +11,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
+import com.vaadin.plugin.starter.DownloadableModel
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
@@ -24,6 +25,8 @@ class VaadinProjectUtil {
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
+
+        val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
 
         private const val NOTIFICATION_GROUP = "Vaadin"
 
