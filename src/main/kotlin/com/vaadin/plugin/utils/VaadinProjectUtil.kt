@@ -1,8 +1,5 @@
 package com.vaadin.plugin.utils
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
@@ -28,8 +25,6 @@ class VaadinProjectUtil {
 
         val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
 
-        private const val NOTIFICATION_GROUP = "Vaadin"
-
         fun downloadAndExtract(project: Project, url: String) {
             val filename = "project.zip"
             LOG.info("Downloading $filename")
@@ -38,7 +33,7 @@ class VaadinProjectUtil {
             LOG.info("File saved to $downloadedFile")
             val description = DownloadableFileService.getInstance().createFileDescription(url, filename)
             val downloader =
-                DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Starter Project")
+                DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Project")
 
             downloader.downloadWithBackgroundProgress(basePath, project).thenApply {
                 LOG.info("Extracting $downloadedFile")
@@ -72,12 +67,6 @@ class VaadinProjectUtil {
                 }
                 return null
             }
-        }
-
-        fun notify(content: String, type: NotificationType, project: Project?) {
-            Notifications.Bus.notify(
-                Notification(NOTIFICATION_GROUP, content, type), project
-            )
         }
 
     }

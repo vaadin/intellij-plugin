@@ -7,7 +7,8 @@ import com.intellij.openapi.util.UserDataHolder
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.ui.dsl.builder.Panel
 
-class VaadinProjectWizardStep(override val context: WizardContext, override val propertyGraph: PropertyGraph) : NewProjectWizardStep {
+class VaadinProjectWizardStep(override val context: WizardContext, override val propertyGraph: PropertyGraph) :
+    NewProjectWizardStep {
 
     override val data: UserDataHolder
         get() = UserDataHolderBase()

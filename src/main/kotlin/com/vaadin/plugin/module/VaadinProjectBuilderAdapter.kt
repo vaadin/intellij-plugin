@@ -3,15 +3,15 @@ package com.vaadin.plugin.module
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
 import com.intellij.ide.wizard.NewProjectWizardStep
-import com.intellij.notification.NotificationType
+import com.intellij.openapi.actionSystem.impl.ActionManagerImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.utils.VaadinProjectUtil
 import java.io.File
+
 
 class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
     GeneratorNewProjectWizardBuilderAdapter(vaadinWizard) {
@@ -33,12 +33,13 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
         }
     }
 
-    override fun canCreateModule(): Boolean {
-        return false
+    override fun isAvailable(): Boolean {
+        val lastPerformedActionId = (ActionManagerImpl.getInstance() as ActionManagerImpl).lastPreformedActionId
+        lastPerformedActionId ?: return true
+        return lastPerformedActionId.contains("NewProject", true)
     }
 
     private fun afterProjectCreated(project: Project) {
-        VaadinProjectUtil.notify("Vaadin project created", NotificationType.INFORMATION, project)
         VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)?.let {
             val descriptor = OpenFileDescriptor(project, it)
             descriptor.setUsePreviewTab(true)
