@@ -78,8 +78,8 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         }
 
         quickStarterGroup!!.expanded = true
-        quickStarterGroup!!.addExpandedListener { if (it) skeletonStarterGroup!!.expanded = false }
-        skeletonStarterGroup!!.addExpandedListener { if (it) quickStarterGroup!!.expanded = false }
+        quickStarterGroup!!.addExpandedListener { if (it) skeletonStarterGroup!!.expanded = false; updateModel() }
+        skeletonStarterGroup!!.addExpandedListener { if (it) quickStarterGroup!!.expanded = false; updateModel() }
 
         updateModel()
     }
