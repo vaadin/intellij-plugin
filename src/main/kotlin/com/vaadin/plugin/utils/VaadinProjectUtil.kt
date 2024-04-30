@@ -1,8 +1,5 @@
 package com.vaadin.plugin.utils
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
@@ -11,6 +8,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
+import com.vaadin.plugin.starter.DownloadableModel
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
@@ -25,7 +23,7 @@ class VaadinProjectUtil {
 
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 
-        private const val NOTIFICATION_GROUP = "Vaadin"
+        val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
 
         fun downloadAndExtract(project: Project, url: String) {
             val filename = "project.zip"
@@ -35,7 +33,7 @@ class VaadinProjectUtil {
             LOG.info("File saved to $downloadedFile")
             val description = DownloadableFileService.getInstance().createFileDescription(url, filename)
             val downloader =
-                DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Starter Project")
+                DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Project")
 
             downloader.downloadWithBackgroundProgress(basePath, project).thenApply {
                 LOG.info("Extracting $downloadedFile")
@@ -69,12 +67,6 @@ class VaadinProjectUtil {
                 }
                 return null
             }
-        }
-
-        fun notify(content: String, type: NotificationType, project: Project?) {
-            Notifications.Bus.notify(
-                Notification(NOTIFICATION_GROUP, content, type), project
-            )
         }
 
     }
