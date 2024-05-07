@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
+import com.intellij.task.ProjectTaskManager
 import java.io.File
 
 class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
@@ -50,6 +51,10 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                         it.setText(content)
                         commitAndFlush(it)
                         LOG.info("File $ioFile contents saved")
+
+                        ProjectTaskManager.getInstance(project).compile(vfsFile).then {
+                            LOG.info("File $ioFile compiled")
+                        }
                     }
                 },
                 undoLabel ?: "Vaadin Copilot Write File",
