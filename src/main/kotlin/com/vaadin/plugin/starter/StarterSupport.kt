@@ -5,12 +5,12 @@ class StarterSupport {
     companion object {
 
         val frameworks = linkedMapOf(
-            "24" to "Flow / Java",
+            "flow" to "Flow / Java",
             "hilla-react" to "Hilla / React"
         )
 
         val languages = linkedMapOf(
-            "17" to "Java",
+            "java" to "Java",
             "kotlin" to "Kotlin"
         )
 
@@ -26,44 +26,25 @@ class StarterSupport {
             "gradle" to "Gradle"
         )
 
-        val downloadLinks = mapOf(
-            "hilla-react" to "https://github.com/vaadin/skeleton-starter-hilla-react/archive/master.zip",
-            "hilla-react-gradle" to "https://github.com/vaadin/skeleton-starter-hilla-react-gradle/archive/master.zip",
-            "kotlin" to "https://github.com/vaadin/skeleton-starter-kotlin-spring/archive/master.zip",
-            "gradle-servlet" to "https://github.com/vaadin/base-starter-gradle/archive/v<version>.zip",
-            "gradle-springboot" to "https://github.com/vaadin/base-starter-spring-gradle/archive/v<version>.zip",
-            "springboot" to "https://github.com/vaadin/skeleton-starter-flow-spring/archive/v<version>.zip",
-            "quarkus" to "https://github.com/vaadin/base-starter-flow-quarkus/archive/v<version>.zip",
-            "jakartaee" to "https://github.com/vaadin/skeleton-starter-flow-cdi/archive/v<version>.zip",
-            "servlet" to "https://github.com/vaadin/skeleton-starter-flow/archive/v<version>.zip",
-        )
-
         private val supportMatrix = arrayOf(
             StarterSupportMatrixElement(
-                "24",
+                "flow",
                 languages.keys,
                 setOf("springboot", "quarkus", "jakartaee", "servlet"),
-                buildTools.keys,
-                17
+                buildTools.keys
             ),
             StarterSupportMatrixElement(
                 "hilla-react",
-                setOf("17"),
+                setOf("java"),
                 setOf("springboot"),
-                buildTools.keys,
-                17
+                buildTools.keys
             ),
         )
 
 
         fun isSupportedFramework(model: StarterModel, framework: String): Boolean {
             val foundSupport = getSupport(framework) ?: return false
-            return try {
-                (Integer.parseInt(model.language) >= foundSupport.javaMinVersion
-                        && foundSupport.architectures.contains(model.architecture))
-            } catch (e: NumberFormatException) {
-                true // kotlin
-            }
+            return foundSupport.architectures.contains(model.architecture)
         }
 
         fun isSupportedLanguage(model: StarterModel, language: String): Boolean {
