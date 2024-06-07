@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.text.Strings
 import com.intellij.openapi.vfs.ReadonlyStatusHandler
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -50,7 +51,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 project,
                 {
                     WriteCommandAction.runWriteCommandAction(project) {
-                        it.setText(content)
+                        it.setText(Strings.convertLineSeparators(content))
                         commitAndFlush(it)
                         LOG.info("File $ioFile contents saved")
 
