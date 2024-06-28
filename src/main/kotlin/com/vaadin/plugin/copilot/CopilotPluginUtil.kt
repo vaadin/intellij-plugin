@@ -133,7 +133,7 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun createCommandHandler(
+        fun createCommandHandler(
             command: String,
             project: Project,
             data: Map<String, Any>
@@ -156,6 +156,7 @@ class CopilotPluginUtil {
             if (dotFileDirectory != null) {
                 val props = Properties()
                 props.setProperty("port", port.toString())
+                props.setProperty("endpoint", RestUtil.getEndpoint())
                 props.setProperty("ide", "intellij")
                 props.setProperty("version", pluginVersion)
                 props.setProperty("supportedActions", HANDLERS.values().map { a -> a.command }.joinToString(","))
