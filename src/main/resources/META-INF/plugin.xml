@@ -42,6 +42,7 @@
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
                                 id="CopilotStatusBarWidgetFactory" order="last"/>
+        <httpRequestHandler implementation="com.vaadin.plugin.copilot.service.CopilotRestService"/>
 
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
