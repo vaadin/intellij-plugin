@@ -9,10 +9,7 @@ import com.vaadin.plugin.copilot.CommandRequest
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.RestUtil
 import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.http.FullHttpRequest
-import io.netty.handler.codec.http.HttpMethod
-import io.netty.handler.codec.http.HttpResponseStatus
-import io.netty.handler.codec.http.QueryStringDecoder
+import io.netty.handler.codec.http.*
 import org.jetbrains.ide.RestService
 import java.nio.charset.Charset
 import java.nio.file.Path
@@ -30,8 +27,9 @@ class CopilotRestService : RestService() {
         request: FullHttpRequest,
         context: ChannelHandlerContext
     ): String? {
+        val charset = HttpUtil.getCharset(request, Charset.defaultCharset())
         val copilotRequest: CommandRequest = jacksonObjectMapper()
-            .readValue(request.content().toString(Charset.defaultCharset()))
+            .readValue(request.content().toString(charset))
 
         if (copilotRequest.projectBasePath == null) {
             sendStatus(HttpResponseStatus.BAD_REQUEST, false, context.channel())
