@@ -9,10 +9,7 @@ import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.text.Strings
-import com.intellij.openapi.vfs.ReadonlyStatusHandler
-import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.findDocument
+import com.intellij.openapi.vfs.*
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.intellij.task.ProjectTaskManager
@@ -75,6 +72,7 @@ class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandl
     private fun compile(vfsFile: VirtualFile) {
         ProjectTaskManager.getInstance(project).compile(vfsFile).then {
             LOG.info("File $ioFile compiled")
+            VirtualFileManager.getInstance().syncRefresh()
         }
     }
 
