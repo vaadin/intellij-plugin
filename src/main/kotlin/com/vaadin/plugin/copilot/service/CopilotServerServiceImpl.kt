@@ -13,6 +13,7 @@ import java.nio.channels.SocketChannel
 import java.util.*
 
 // Server implementation based on https://github.com/teocci/NioSocketCodeSample/tree/master
+@Deprecated("Will be removed in Copilot 24.5")
 class CopilotServerServiceImpl : CopilotServerService {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
