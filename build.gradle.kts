@@ -19,6 +19,11 @@ intellijPlatform {
             "1.0-SNAPSHOT"
         }
     }
+    pluginVerification {
+        ides {
+            recommended()
+        }
+    }
 }
 
 java {
