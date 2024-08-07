@@ -3,6 +3,7 @@ package com.vaadin.plugin.module
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
 import com.intellij.ide.wizard.NewProjectWizardStep
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
@@ -34,7 +35,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
     }
 
     override fun isAvailable(): Boolean {
-        val lastPerformedActionId = (ActionManagerImpl.getInstance() as ActionManagerImpl).lastPreformedActionId
+        val lastPerformedActionId = (ActionManager.getInstance() as ActionManagerImpl).lastPreformedActionId
         lastPerformedActionId ?: return false
         return lastPerformedActionId.contains("NewProject", true)
     }

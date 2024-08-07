@@ -50,8 +50,7 @@
 
     <actions>
         <group id="CopilotStatusBarActions" icon="/icons/vaadin.svg">
-            <action id="com.vaadin.plugin.copilot.action.ToggleServerAction"
-                    class="com.vaadin.plugin.copilot.action.ToggleServerAction"/>
+            <action class="com.vaadin.plugin.copilot.action.ToggleServerAction"/>
         </group>
     </actions>
 

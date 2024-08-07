@@ -9,7 +9,7 @@ class QuickStarterPanel {
 
     val root = panel {
         row("Example views") {
-            segmentedButton(setOf("Flow (Java)", "Hilla (React)", "None")) { it }.whenItemSelected {
+            segmentedButton(setOf("Flow (Java)", "Hilla (React)", "None")) { this.text = it }.whenItemSelected {
                 model.views = it
             }.selectedItem = model.views
         }
@@ -19,7 +19,7 @@ class QuickStarterPanel {
             }.component.isSelected = model.authentication
         }
         row("Version") {
-            segmentedButton(setOf("Stable", "Prerelease")) { it }.whenItemSelected {
+            segmentedButton(setOf("Stable", "Prerelease")) { this.text = it }.whenItemSelected {
                 model.version = it
             }.selectedItem = model.version
         }
