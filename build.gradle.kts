@@ -1,5 +1,3 @@
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.21"
@@ -26,9 +24,7 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, compatibilitySince)
             recommended()
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, compatibilityUntil)
         }
     }
 }
