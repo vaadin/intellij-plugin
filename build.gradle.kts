@@ -1,57 +1,72 @@
 plugins {
-  id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij") version "1.17.3"
+    id("java")
+    id("org.jetbrains.kotlin.jvm") version "1.9.21"
+    id("org.jetbrains.intellij.platform") version "2.0.0"
 }
 
 group = "com.vaadin"
-version = if (hasProperty("projVersion")) {
-  property("projVersion") as String
-} else {
-  "1.0-SNAPSHOT"
-}
 val publishChannel = if (hasProperty("publishChannel")) {
-  property("publishChannel") as String
+    property("publishChannel") as String
 } else {
-  "Stable"
+    "Stable"
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        version = if (hasProperty("projVersion")) {
+            property("projVersion") as String
+        } else {
+            "1.0-SNAPSHOT"
+        }
+    }
+    pluginVerification {
+        ides {
+            recommended()
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 repositories {
-  mavenCentral()
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-  version.set("2023.1.5")
-  type.set("IC") // Target IDE Platform
+dependencies {
+    intellijPlatform {
+        create("IC", "2023.3")
+        bundledPlugin("com.intellij.java")
 
-  plugins.set(listOf(/* Plugin Dependencies */))
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
+    }
 }
 
 tasks {
-  // Set the JVM compatibility versions
-  withType<JavaCompile> {
-    sourceCompatibility = "17"
-    targetCompatibility = "17"
-  }
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-  }
+    patchPluginXml {
+        sinceBuild.set("233")
+        untilBuild.set("242.*")
+    }
 
-  patchPluginXml {
-    sinceBuild.set("231")
-    untilBuild.set("241.*")
-  }
+    signPlugin {
+        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
+        privateKey.set(System.getenv("PRIVATE_KEY"))
+        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+    }
 
-  signPlugin {
-    certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-    privateKey.set(System.getenv("PRIVATE_KEY"))
-    password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-  }
-
-  publishPlugin {
-    channels.set(listOf(publishChannel))
-    token.set(System.getenv("PUBLISH_TOKEN"))
-  }
+    publishPlugin {
+        channels.set(listOf(publishChannel))
+        token.set(System.getenv("PUBLISH_TOKEN"))
+    }
 }
