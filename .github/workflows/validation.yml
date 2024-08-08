@@ -22,7 +22,7 @@ jobs:
           cache: gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Build with Gradle
+      - name: Build plugin
         run: ./gradlew --no-configuration-cache buildPlugin
       - uses: actions/upload-artifact@v4.3.3
         id: artifact
@@ -48,5 +48,5 @@ jobs:
           cache: gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Build with Gradle
+      - name: Verify plugin
         run: ./gradlew --no-configuration-cache verifyPlugin

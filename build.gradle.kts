@@ -55,7 +55,7 @@ dependencies {
 
 tasks {
     patchPluginXml {
-        sinceBuild.set("223")
+        sinceBuild.set("233")
         untilBuild.set("242.*")
     }
 
