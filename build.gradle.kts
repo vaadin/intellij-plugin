@@ -26,11 +26,9 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
-                sinceBuild = compatibilitySince
-                untilBuild = compatibilityUntil
-            }
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, compatibilitySince)
+            recommended()
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, compatibilityUntil)
         }
     }
 }
