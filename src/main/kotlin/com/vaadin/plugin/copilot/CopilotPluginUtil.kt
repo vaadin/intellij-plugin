@@ -45,6 +45,7 @@ class CopilotPluginUtil {
 
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
+            MOVE("move"),
             WRITE_BINARY("writeBinary"),
             UNDO("undo"),
             REDO("redo"),
@@ -95,6 +96,7 @@ class CopilotPluginUtil {
         ): Runnable? {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
+                HANDLERS.MOVE.command -> return MoveFileHandler(project, data)
                 HANDLERS.WRITE_BINARY.command -> return WriteBinaryFileHandler(project, data)
                 HANDLERS.UNDO.command -> return UndoHandler(project, data)
                 HANDLERS.REDO.command -> return RedoHandler(project, data)

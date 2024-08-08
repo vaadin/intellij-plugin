@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.ReadonlyStatusHandler
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.intellij.task.ProjectTaskManager
@@ -71,17 +72,14 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
         }
     }
 
-    open fun doWrite(vfsFile: VirtualFile, doc: Document, content: String) {
-        doc.setText(Strings.convertLineSeparators(content))
-    }
-
     private fun create() {
         getOrCreateParentDir()?.let {
             PsiManager.getInstance(project).findDirectory(it)?.let { it2 ->
                 ApplicationManager.getApplication().runWriteAction {
-                    val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
-                    val newFile = PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)
-                    it2.add(newFile)
+                    val psiFile = doCreate(ioFile, content)
+                    if (psiFile.containingDirectory == null) {
+                        it2.add(psiFile)
+                    }
                 }
                 VfsUtil.findFileByIoFile(ioFile, true)
                 LOG.info("File $ioFile contents saved")
@@ -97,5 +95,13 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
         return VfsUtil.findFileByIoFile(ioFile.parentFile, true)
     }
 
+    open fun doCreate(ioFile: File, content: String): PsiFile {
+        val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
+        return PsiFileFactory.getInstance(project).createFileFromText(ioFile.path, fileType, content)
+    }
+
+    open fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
+        doc?.let { it.setText(Strings.convertLineSeparators(content)) }
+    }
 
 }
