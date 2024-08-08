@@ -4,9 +4,6 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.0.0"
 }
 
-val compatibilitySince = "233"
-val compatibilityUntil = "242.*"
-
 group = "com.vaadin"
 val publishChannel = if (hasProperty("publishChannel")) {
     property("publishChannel") as String
@@ -58,8 +55,8 @@ dependencies {
 
 tasks {
     patchPluginXml {
-        sinceBuild.set(compatibilitySince)
-        untilBuild.set(compatibilityUntil)
+        sinceBuild.set("233")
+        untilBuild.set("242.*")
     }
 
     signPlugin {
