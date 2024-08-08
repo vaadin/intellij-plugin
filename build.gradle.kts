@@ -1,8 +1,13 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.21"
     id("org.jetbrains.intellij.platform") version "2.0.0"
 }
+
+val compatibilitySince = "233"
+val compatibilityUntil = "242.*"
 
 group = "com.vaadin"
 val publishChannel = if (hasProperty("publishChannel")) {
@@ -21,7 +26,11 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                sinceBuild = compatibilitySince
+                untilBuild = compatibilityUntil
+            }
         }
     }
 }
@@ -55,8 +64,8 @@ dependencies {
 
 tasks {
     patchPluginXml {
-        sinceBuild.set("223")
-        untilBuild.set("242.*")
+        sinceBuild.set(compatibilitySince)
+        untilBuild.set(compatibilityUntil)
     }
 
     signPlugin {
