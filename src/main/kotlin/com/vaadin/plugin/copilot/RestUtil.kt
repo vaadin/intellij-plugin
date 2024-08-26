@@ -1,12 +1,15 @@
 package com.vaadin.plugin.copilot
 
 import org.jetbrains.ide.BuiltInServerManager
+import java.util.*
 
 class RestUtil {
 
     companion object {
 
-        fun getServiceName(): String = "copilot"
+        private val serviceName = "copilot-" + UUID.randomUUID()
+
+        fun getServiceName(): String = serviceName
 
         fun getEndpoint(): String {
             val port = BuiltInServerManager.getInstance().port
