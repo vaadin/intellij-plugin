@@ -1,7 +1,7 @@
 package com.vaadin.plugin.copilot
 
 import org.jetbrains.ide.BuiltInServerManager
-import java.util.*
+import java.util.UUID
 
 class RestUtil {
 
