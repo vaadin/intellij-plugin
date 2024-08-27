@@ -8,14 +8,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import java.io.File
 import java.nio.file.Files
-import java.util.*
+import java.util.Base64
 
 class WriteBinaryFileHandler(project: Project, data: Map<String, Any>) : WriteFileHandler(project, data) {
 
     override fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
-        vfsFile?.let {
-            it.setBinaryContent(Base64.getDecoder().decode(content))
-        }
+        vfsFile?.setBinaryContent(Base64.getDecoder().decode(content))
     }
 
     override fun doCreate(ioFile: File, content: String): PsiFile {
