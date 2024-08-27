@@ -10,7 +10,7 @@ import java.io.File
 import java.nio.file.Files
 import java.util.Base64
 
-class WriteBinaryFileHandler(project: Project, data: Map<String, Any>) : WriteFileHandler(project, data) {
+class WriteBase64FileHandler(project: Project, data: Map<String, Any>) : WriteFileHandler(project, data) {
 
     override fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
         vfsFile?.setBinaryContent(Base64.getDecoder().decode(content))
