@@ -19,14 +19,12 @@ class CopilotPostStartupProjectActivity : ProjectActivity {
             if (dotFileDirectory == null) {
                 CopilotPluginUtil.createIdeaDirectoryIfMissing(project)
             }
-            CopilotPluginUtil.startServer(project)
+            CopilotPluginUtil.saveDotFile(project)
         }
 
         ProjectManager.getInstance().addProjectManagerListener(project, object : ProjectManagerListener {
             override fun projectClosing(project: Project) {
-                if (CopilotPluginUtil.isServerRunning(project)) {
-                    CopilotPluginUtil.stopServer(project)
-                }
+                CopilotPluginUtil.removeDotFile(project)
             }
         })
     }

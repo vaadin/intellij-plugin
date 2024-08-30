@@ -1,7 +1,5 @@
 package com.vaadin.plugin.copilot
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -9,7 +7,6 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -20,7 +17,6 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.vaadin.plugin.copilot.handler.*
-import com.vaadin.plugin.copilot.service.CopilotServerService
 import java.io.BufferedWriter
 import java.io.File
 import java.io.StringWriter
@@ -49,6 +45,7 @@ class CopilotPluginUtil {
 
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
+            WRITE_BASE64("writeBase64"),
             UNDO("undo"),
             REDO("redo"),
             REFRESH("refresh"),
@@ -84,53 +81,11 @@ class CopilotPluginUtil {
             return false
         }
 
-        fun notify(content: String, type: NotificationType) {
-            notify(content, type, null)
-        }
-
         fun notify(content: String, type: NotificationType, project: Project?) {
             Notifications.Bus.notify(
                 Notification(NOTIFICATION_GROUP, content, type)
                     .setIcon(COPILOT_ICON), project
             )
-        }
-
-        fun isServerRunning(project: Project): Boolean {
-            return project.service<CopilotServerService>().isRunning()
-        }
-
-        fun startServer(project: Project) {
-            val server = project.service<CopilotServerService>()
-            if (server.isRunning()) {
-                LOG.info("Cannot start Vaadin Copilot integration as it is already started")
-                return
-            }
-            server.init()
-            savePortInDotFile(project, server.getPort()!!)
-            ApplicationManager.getApplication().executeOnPooledThread {
-                notify("Vaadin Copilot integration started", NotificationType.INFORMATION)
-                server.start { data ->
-                    handleClientData(project, data)
-                }
-            }
-        }
-
-        fun stopServer(project: Project) {
-            val server = project.service<CopilotServerService>()
-            if (!server.isRunning()) {
-                LOG.info("Cannot stop Vaadin Copilot integration as it is not running")
-                return
-            }
-            removeDotFile(project)
-            server.stop()
-            notify("Vaadin Copilot integration stopped", NotificationType.INFORMATION)
-        }
-
-        private fun handleClientData(project: Project, data: ByteArray) {
-            val command: CommandRequest = jacksonObjectMapper().readValue(data)
-            runInEdt {
-                createCommandHandler(command.command, project, command.data)?.run()
-            }
         }
 
         fun createCommandHandler(
@@ -140,6 +95,7 @@ class CopilotPluginUtil {
         ): Runnable? {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
+                HANDLERS.WRITE_BASE64.command -> return WriteBase64FileHandler(project, data)
                 HANDLERS.UNDO.command -> return UndoHandler(project, data)
                 HANDLERS.REDO.command -> return RedoHandler(project, data)
                 HANDLERS.SHOW_IN_IDE.command -> return ShowInIdeHandler(project, data)
@@ -151,11 +107,10 @@ class CopilotPluginUtil {
             return null
         }
 
-        private fun savePortInDotFile(project: Project, port: Int) {
+        fun saveDotFile(project: Project) {
             val dotFileDirectory = getDotFileDirectory(project)
             if (dotFileDirectory != null) {
                 val props = Properties()
-                props.setProperty("port", port.toString())
                 props.setProperty("endpoint", RestUtil.getEndpoint())
                 props.setProperty("ide", "intellij")
                 props.setProperty("version", pluginVersion)
@@ -184,7 +139,7 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun removeDotFile(project: Project) {
+        fun removeDotFile(project: Project) {
             ApplicationManager.getApplication().runWriteAction {
                 val dotFileDirectory = getDotFileDirectory(project)
                 dotFileDirectory?.findFile(DOTFILE)?.let {
