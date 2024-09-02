@@ -44,6 +44,13 @@
 
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
+
+        <actionOnSaveInfoProvider id="VaadinCompileOnSaveInfoProvider"
+                                  implementation="com.vaadin.plugin.actions.VaadinOnSaveInfoProvider"
+                                  order="last"/>
+        <actionOnSave id="VaadinCompileOnSaveAction"
+                      implementation="com.vaadin.plugin.actions.VaadinCompileOnSaveAction" order="last"/>
+
     </extensions>
 
 </idea-plugin>
