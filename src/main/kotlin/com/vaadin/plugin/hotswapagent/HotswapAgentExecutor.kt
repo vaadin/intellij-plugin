@@ -48,7 +48,7 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     }
 
     override fun getToolWindowIcon(): Icon {
-        return super.getToolWindowIcon()
+        return theIcon;
     }
 
 
