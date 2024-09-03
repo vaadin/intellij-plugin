@@ -22,11 +22,14 @@ class JdkUtil {
             return "JBR" == jdkInfo?.variant?.prefix;
         }
 
-        fun getCompatibleJetbrainsJdk(module: Module): Sdk? {
+        fun getBundledJetbrainsJdk(): Sdk {
             val jbrHomePath = PathManager.getBundledRuntimePath()
-            val jbrSdk = JavaSdk.getInstance().createJdk("Bundled JBR", jbrHomePath, false);
-            val projectJavaVersion = getProjectJavaVersion(module);
+            return JavaSdk.getInstance().createJdk("Bundled JBR", jbrHomePath, false);
+        }
 
+        fun getCompatibleJetbrainsJdk(module: Module): Sdk? {
+            val projectJavaVersion = getProjectJavaVersion(module);
+            val jbrSdk = getBundledJetbrainsJdk();
             val bundledSdkVersion = JavaSdk.getInstance().getVersion(jbrSdk)
                 ?: throw IllegalArgumentException("Unable to detect bundled sdk version");
 
@@ -61,10 +64,14 @@ class JdkUtil {
             return javaModuleData.targetBytecodeVersion?.toInt();
         }
 
-        private fun getProjectSdkVersion(module: Module): Int? {
+        fun getSdkMajorVersion(sdk: Sdk): Int? {
+            val sdkVersion = JavaSdk.getInstance().getVersion(sdk) ?: return null;
+            return sdkVersion.maxLanguageLevel.toJavaVersion().feature;
+        }
+
+        fun getProjectSdkVersion(module: Module): Int? {
             val projectSdk = ProjectRootManager.getInstance(module.project)?.projectSdk ?: return null;
-            val projectSdkVersion = JavaSdk.getInstance().getVersion(projectSdk) ?: return null;
-            return projectSdkVersion.maxLanguageLevel.toJavaVersion().feature;
+            return getSdkMajorVersion(projectSdk);
         }
     }
 
