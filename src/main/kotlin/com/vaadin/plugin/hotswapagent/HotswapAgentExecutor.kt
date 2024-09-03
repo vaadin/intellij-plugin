@@ -13,7 +13,7 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     }
 
 
-    private val theIcon = IconLoader.getIcon("/icons/vaadin.svg", HotswapAgentExecutor::class.java.classLoader);
+    private val theIcon = IconLoader.getIcon("/icons/swap.svg", HotswapAgentExecutor::class.java.classLoader);
 
     override fun getDescription(): String {
         return "Debug using HotswapAgent"
