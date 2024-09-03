@@ -12,12 +12,10 @@ import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.roots.ProjectRootManager
-import org.apache.commons.io.IOUtils
+import com.vaadin.plugin.utils.VaadinHomeUtil
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.jps.model.java.JdkVersionDetector
 import org.jetbrains.plugins.gradle.util.GradleUtil
-import java.io.File
-import java.net.URL
 
 
 class HotswapAgentProgramPatcher : JavaProgramPatcher() {
@@ -44,25 +42,11 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
                     .isAtLeast(projectJavaVersion)
             ) {
                 javaParameters.jdk = jbrSdk;
-                homePath = jbrHomePath;
             } else {
                 throw IllegalArgumentException("The bundled JBR is not compatible with the project JDK");
             }
         }
-        val agentInJdk = File(homePath, "lib/hotswap/hotswap-agent.jar");
-        if (!agentInJdk.exists()) {
-            // Try to copy the agent to the JDK
-            val bundledHotswap: URL = this::class.java.classLoader.getResource("hotswap-agent.jar")
-                ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found");
-            if (!agentInJdk.parentFile.mkdirs()) {
-                throw IllegalStateException("Unable to create directory for hotswap-agent.jar");
-            }
-            try {
-                IOUtils.copyLarge(bundledHotswap.openStream(), agentInJdk.outputStream());
-            } catch (e: Exception) {
-                throw IllegalStateException("Unable to copy hotswap-agent.jar to JDK", e);
-            }
-        }
+        val agentInHome = VaadinHomeUtil.getHotswapAgentJar()
 
         val paramsList = javaParameters.vmParametersList;
         paramsList.add("--add-opens java.base/sun.nio.ch=ALL-UNNAMED");
@@ -71,7 +55,8 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         paramsList.add("--add-opens=java.base/java.io=ALL-UNNAMED");
 
         paramsList.add("-XX:+AllowEnhancedClassRedefinition");
-        paramsList.add("-XX:HotswapAgent=fatjar");
+
+        paramsList.add("-javaagent:$agentInHome");
     }
 
     private fun getMavenJavaVersion(module: Module): Int? {
