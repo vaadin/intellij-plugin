@@ -30,9 +30,9 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
 
         val paramsList = javaParameters.vmParametersList;
         paramsList.add("--add-opens java.base/sun.nio.ch=ALL-UNNAMED");
-        paramsList.add("--add-opens=java.base/java.lang=ALL-UNNAMED");
-        paramsList.add("--add-opens=java.base/java.lang.reflect=ALL-UNNAMED");
-        paramsList.add("--add-opens=java.base/java.io=ALL-UNNAMED");
+        paramsList.add("--add-opens java.base/java.lang=ALL-UNNAMED");
+        paramsList.add("--add-opens java.base/java.lang.reflect=ALL-UNNAMED");
+        paramsList.add("--add-opens java.base/java.io=ALL-UNNAMED");
 
         paramsList.add("-XX:+AllowEnhancedClassRedefinition");
 
