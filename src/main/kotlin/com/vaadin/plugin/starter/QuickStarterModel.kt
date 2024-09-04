@@ -2,6 +2,7 @@ package com.vaadin.plugin.starter
 
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
+import java.net.URLEncoder
 
 class QuickStarterModel(
     var views: String,
@@ -25,7 +26,7 @@ class QuickStarterModel(
             preset += "&preset=partial-prerelease"
         }
 
-        return "https://start.vaadin.com/dl?preset=${preset}&projectName=${project.name}"
+        return "https://start.vaadin.com/dl?preset=${preset}&projectName=${URLEncoder.encode(project.name, "UTF-8")}"
     }
 
     override fun getProjectType(): String {
