@@ -11,12 +11,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.vaadin.plugin.copilot.handler.*
+import com.vaadin.plugin.utils.VaadinIcons
 import java.io.BufferedWriter
 import java.io.File
 import java.io.StringWriter
@@ -40,8 +40,6 @@ class CopilotPluginUtil {
         private const val NORMALIZED_LINE_SEPARATOR = "\n"
 
         private const val NOTIFICATION_GROUP = "Vaadin Copilot"
-
-        private val COPILOT_ICON = IconLoader.getIcon("/icons/copilot.svg", CopilotPluginUtil::class.java)
 
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
@@ -84,7 +82,7 @@ class CopilotPluginUtil {
         fun notify(content: String, type: NotificationType, project: Project?) {
             Notifications.Bus.notify(
                 Notification(NOTIFICATION_GROUP, content, type)
-                    .setIcon(COPILOT_ICON), project
+                    .setIcon(VaadinIcons.VAADIN), project
             )
         }
 
