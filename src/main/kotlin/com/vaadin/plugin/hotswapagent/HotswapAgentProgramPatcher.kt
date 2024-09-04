@@ -39,6 +39,10 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         paramsList.add("java.base/java.lang.reflect=ALL-UNNAMED");
         paramsList.add(addOpens);
         paramsList.add("java.base/java.io=ALL-UNNAMED");
+        paramsList.add(addOpens);
+        paramsList.add("java.base/sun.security.action=ALL-UNNAMED");
+        paramsList.add(addOpens);
+        paramsList.add("java.desktop/java.beans=ALL-UNNAMED");
 
         paramsList.add("-XX:+AllowEnhancedClassRedefinition");
         paramsList.add("-XX:+ClassUnloading");
