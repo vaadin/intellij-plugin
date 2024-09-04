@@ -35,6 +35,7 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         paramsList.add("--add-opens java.base/java.io=ALL-UNNAMED");
 
         paramsList.add("-XX:+AllowEnhancedClassRedefinition");
+        paramsList.add("-XX:+ClassUnloading");
 
         paramsList.add("-javaagent:$agentInHome");
     }
