@@ -46,10 +46,13 @@ dependencies {
     intellijPlatform {
         create("IC", "2023.3")
         bundledPlugin("com.intellij.java")
+        bundledPlugin("org.jetbrains.idea.maven")
+        bundledPlugin("org.jetbrains.plugins.gradle")
 
         pluginVerifier()
         zipSigner()
         instrumentationTools()
+
     }
 }
 
