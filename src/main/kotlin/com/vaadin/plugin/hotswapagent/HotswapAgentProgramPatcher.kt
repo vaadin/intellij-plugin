@@ -29,13 +29,15 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         val agentInHome = VaadinHomeUtil.getHotswapAgentJar()
 
         val paramsList = javaParameters.vmParametersList;
-        paramsList.add("--add-opens");
+
+        val addOpens = "--add-opens"
+        paramsList.add(addOpens);
         paramsList.add("java.base/sun.nio.ch=ALL-UNNAMED");
-        paramsList.add("--add-opens");
+        paramsList.add(addOpens);
         paramsList.add("java.base/java.lang=ALL-UNNAMED");
-        paramsList.add("--add-opens");
+        paramsList.add(addOpens);
         paramsList.add("java.base/java.lang.reflect=ALL-UNNAMED");
-        paramsList.add("--add-opens");
+        paramsList.add(addOpens);
         paramsList.add("java.base/java.io=ALL-UNNAMED");
 
         paramsList.add("-XX:+AllowEnhancedClassRedefinition");
