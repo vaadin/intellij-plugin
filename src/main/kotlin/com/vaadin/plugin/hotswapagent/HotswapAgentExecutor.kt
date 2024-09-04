@@ -1,8 +1,7 @@
 package com.vaadin.plugin.hotswapagent
 
 import com.intellij.execution.executors.DefaultDebugExecutor
-import com.intellij.openapi.util.IconLoader
-import com.intellij.openapi.util.IconLoader.getIcon
+import com.vaadin.plugin.utils.VaadinIcons
 import javax.swing.Icon
 
 
@@ -11,9 +10,6 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     companion object {
         val ID = "Vaadin.HotswapAgentExecutor"
     }
-
-
-    private val theIcon = IconLoader.getIcon("/icons/swap.svg", HotswapAgentExecutor::class.java.classLoader);
 
     override fun getDescription(): String {
         return "Debug using HotswapAgent"
@@ -44,11 +40,11 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     }
 
     override fun getIcon(): Icon {
-        return theIcon;
+        return VaadinIcons.DEBUG_HOTSWAP
     }
 
     override fun getToolWindowIcon(): Icon {
-        return theIcon;
+        return VaadinIcons.DEBUG_HOTSWAP
     }
 
 
