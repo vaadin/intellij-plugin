@@ -2,7 +2,6 @@ package com.vaadin.plugin.copilot.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.ProjectManager
 import com.vaadin.plugin.copilot.CommandRequest
@@ -47,9 +46,7 @@ class CopilotRestService : RestService() {
             return null
         }
 
-        runInEdt {
-            CopilotPluginUtil.createCommandHandler(copilotRequest.command, project, copilotRequest.data)?.run()
-        }
+        CopilotPluginUtil.createCommandHandler(copilotRequest.command, project, copilotRequest.data)?.run()
 
         sendOk(request, context)
         return null

@@ -1,6 +1,7 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -20,12 +21,14 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         if (isFileInsideProject(project, ioFile)) {
             val result = VfsUtil.findFileByIoFile(ioFile, true)?.let { file ->
                 val openFileDescriptor = OpenFileDescriptor(project, file)
-                FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let { editor ->
-                    editor.selectionModel.removeSelection()
-                    editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
-                    editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                runInEdt {
+                    FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let { editor ->
+                        editor.selectionModel.removeSelection()
+                        editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
+                        editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                    }
+                    ProjectUtil.focusProjectWindow(project, true)
                 }
-                ProjectUtil.focusProjectWindow(project, true)
                 LOG.info("File $ioFile opened at $line:$column")
                 true
             }
