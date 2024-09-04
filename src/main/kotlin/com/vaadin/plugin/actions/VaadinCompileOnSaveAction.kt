@@ -1,5 +1,7 @@
 package com.vaadin.plugin.actions
 
+import com.intellij.debugger.DebuggerManagerEx
+import com.intellij.debugger.ui.HotSwapUI
 import com.intellij.ide.actionsOnSave.impl.ActionsOnSaveFileDocumentManagerListener
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.diagnostic.Logger
@@ -10,8 +12,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.task.ProjectTaskManager
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.DEFAULT
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.PROPERTY
 import com.vaadin.plugin.copilot.CopilotPluginUtil
@@ -41,9 +41,10 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
 
         val task = object : Task.Backgroundable(project, "Vaadin: compiling...") {
             override fun run(indicator: ProgressIndicator) {
-                ProjectTaskManager.getInstance(project).compile(vfsFile).then {
+                val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
+                if (session != null) {
+                    HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
                     LOG.info("File $vfsFile compiled")
-                    VirtualFileManager.getInstance().syncRefresh()
                 }
             }
         }

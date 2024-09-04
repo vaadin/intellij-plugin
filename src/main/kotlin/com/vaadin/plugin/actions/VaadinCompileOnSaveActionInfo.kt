@@ -11,7 +11,7 @@ class VaadinCompileOnSaveActionInfo(context: ActionOnSaveContext) :
         const val NAME = "Compile on save"
         const val PROPERTY = "vaadin.compileOnSave"
         const val DEFAULT = true
-        const val DESCRIPTION = "Compiles *.java"
+        const val DESCRIPTION = "Compiles *.java while debugging"
     }
 
     override fun getComment(): ActionOnSaveComment? {
