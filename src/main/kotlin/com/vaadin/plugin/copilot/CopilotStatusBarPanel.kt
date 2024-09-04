@@ -3,10 +3,10 @@ package com.vaadin.plugin.copilot
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.ListPopup
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
+import com.vaadin.plugin.utils.VaadinIcons
 
 class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(project, false) {
 
@@ -24,7 +24,7 @@ class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(projec
 
     override fun getWidgetState(file: VirtualFile?): WidgetState {
         val state = WidgetState("Vaadin plugin is active", null, true)
-        state.icon = IconLoader.getIcon("/icons/vaadin.svg", javaClass.classLoader)
+        state.icon = VaadinIcons.VAADIN
         return state
     }
 }
