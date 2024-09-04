@@ -24,6 +24,7 @@
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <change-notes>
         <![CDATA[
@@ -44,6 +45,9 @@
 
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
+
+        <postStartupActivity implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
+        <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
     </extensions>
 
 </idea-plugin>
