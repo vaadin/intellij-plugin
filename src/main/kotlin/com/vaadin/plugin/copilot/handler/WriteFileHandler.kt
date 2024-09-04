@@ -1,6 +1,7 @@
 package com.vaadin.plugin.copilot.handler
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runInEdt
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.command.WriteCommandAction
@@ -18,7 +19,7 @@ import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
-import com.intellij.task.ProjectTaskManager
+import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 import java.io.File
 
 open class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
@@ -32,10 +33,12 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
             // file exists, write content
             val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
             if (vfsFile?.exists() == true) {
-                if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
-                    writeAndFlush(vfsFile)
-                } else {
-                    LOG.warn("File $ioFile is not writable")
+                runInEdt {
+                    if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
+                        writeAndFlush(vfsFile)
+                    } else {
+                        LOG.warn("File $ioFile is not writable")
+                    }
                 }
             } else {
                 // file does not exist, create new one
@@ -57,12 +60,8 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                         commitAndFlush(it)
                         LOG.info("File $ioFile contents saved")
 
-                        val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
-                        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
-
-                        ProjectTaskManager.getInstance(project).compile(vfsFile).then {
-                            LOG.info("File $ioFile compiled")
-                        }
+                        compile(vfsFile)
+                        openFileInEditor(vfsFile)
                     }
                 },
                 undoLabel ?: "Vaadin Copilot Write File",
@@ -73,18 +72,47 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     }
 
     private fun create() {
-        getOrCreateParentDir()?.let {
-            PsiManager.getInstance(project).findDirectory(it)?.let { it2 ->
-                ApplicationManager.getApplication().runWriteAction {
-                    val psiFile = doCreate(ioFile, content)
-                    if (psiFile.containingDirectory == null) {
-                        it2.add(psiFile)
-                    }
-                }
-                VfsUtil.findFileByIoFile(ioFile, true)
-                LOG.info("File $ioFile contents saved")
+        val psiDir = runReadAction {
+            val parentDir = getOrCreateParentDir()
+            if (parentDir != null) {
+                return@runReadAction PsiManager.getInstance(project).findDirectory(parentDir)
+            }
+            return@runReadAction null
+        }
+
+        if (psiDir != null) {
+            runInEdt {
+                CommandProcessor.getInstance().executeCommand(
+                    project,
+                    {
+                        WriteCommandAction.runWriteCommandAction(project) {
+                            val psiFile = doCreate(ioFile, content)
+                            if (psiFile.containingDirectory == null) {
+                                psiDir.add(psiFile)
+                            }
+
+                            VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
+                                compile(vfsFile)
+                                openFileInEditor(vfsFile)
+                            }
+                        }
+                        LOG.info("File $ioFile contents saved")
+                    },
+                    undoLabel ?: "Vaadin Copilot Write File",
+                    null,
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
+                )
             }
         }
+    }
+
+    private fun openFileInEditor(vfsFile: VirtualFile) {
+        val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
+        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
+    }
+
+    private fun compile(vfsFile: VirtualFile) {
+        VaadinCompileOnSaveAction().compile(project, vfsFile)
     }
 
     private fun getOrCreateParentDir(): VirtualFile? {
@@ -97,11 +125,11 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
 
     open fun doCreate(ioFile: File, content: String): PsiFile {
         val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
-        return PsiFileFactory.getInstance(project).createFileFromText(ioFile.path, fileType, content)
+        return PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)
     }
 
     open fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
-        doc?.let { it.setText(Strings.convertLineSeparators(content)) }
+        doc?.setText(Strings.convertLineSeparators(content))
     }
 
 }

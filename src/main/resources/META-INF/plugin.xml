@@ -48,6 +48,12 @@
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
 
+        <actionOnSaveInfoProvider id="VaadinCompileOnSaveInfoProvider"
+                                  implementation="com.vaadin.plugin.actions.VaadinOnSaveInfoProvider"
+                                  order="last"/>
+        <actionOnSave id="VaadinCompileOnSaveAction"
+                      implementation="com.vaadin.plugin.actions.VaadinCompileOnSaveAction" order="last"/>
+
         <!-- Debug using Hotswap Agent -->
         <programRunner implementation="com.vaadin.plugin.hotswapagent.HotswapAgentRunner"/>
         <java.programPatcher implementation="com.vaadin.plugin.hotswapagent.HotswapAgentProgramPatcher"/>
