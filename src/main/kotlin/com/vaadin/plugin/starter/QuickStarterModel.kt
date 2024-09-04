@@ -26,7 +26,12 @@ class QuickStarterModel(
             preset += "&preset=partial-prerelease"
         }
 
-        return "https://start.vaadin.com/dl?preset=${preset}&projectName=${URLEncoder.encode(project.name, "UTF-8")}"
+        return "https://start.vaadin.com/dl?preset=${preset}&projectName=${
+            URLEncoder.encode(
+                project.name,
+                "UTF-8"
+            ).replace("\\+", "%20")
+        }"
     }
 
     override fun getProjectType(): String {
