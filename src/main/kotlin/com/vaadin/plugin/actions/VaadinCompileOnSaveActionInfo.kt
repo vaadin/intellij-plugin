@@ -8,10 +8,10 @@ class VaadinCompileOnSaveActionInfo(context: ActionOnSaveContext) :
     ActionOnSaveInfoBase(context, NAME, PROPERTY, DEFAULT) {
 
     companion object {
-        const val NAME = "Vaadin - compile on save"
+        const val NAME = "Compile on save"
         const val PROPERTY = "vaadin.compileOnSave"
         const val DEFAULT = true
-        const val DESCRIPTION = "Compiles Java files on save to improve Flow applications development experience"
+        const val DESCRIPTION = "Compiles *.java"
     }
 
     override fun getComment(): ActionOnSaveComment? {
