@@ -32,7 +32,9 @@ object VaadinHomeUtil {
             // Try to copy the agent to the JDK
             val bundledHotswap = this.javaClass.classLoader.getResource("hotswap-agent.jar")
                 ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found");
-            check(hotswapAgentJar.parentFile.mkdirs()) { "Unable to create directory for hotswap-agent.jar" }
+            if (!intellijFolder.exists()) {
+                check(intellijFolder.mkdirs()) { "Unable to create directory for hotswap-agent.jar" }
+            }
             try {
                 IOUtils.copyLarge(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
             } catch (e: IOException) {
