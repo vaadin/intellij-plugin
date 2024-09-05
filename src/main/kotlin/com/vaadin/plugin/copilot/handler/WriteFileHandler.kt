@@ -20,6 +20,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
+import com.vaadin.plugin.utils.IdeUtil
+import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
 open class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
@@ -28,7 +30,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     private val undoLabel: String? = data["undoLabel"] as String?
     private val ioFile: File = File(data["file"] as String)
 
-    override fun run() {
+    override fun run(): HandlerResponse {
         if (isFileInsideProject(project, ioFile)) {
             // file exists, write content
             val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
@@ -45,8 +47,16 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                 LOG.info("File $ioFile does not exist, creating new file")
                 create()
             }
+
+            if (IdeUtil.willBlockingPopupBeShown(project, ioFile.extension == "java")) {
+                IdeUtil.bringToFront(project)
+                return HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
+            }
+
+            return RESPONSE_OK
         } else {
             LOG.warn("File $ioFile is not a part of a project")
+            return RESPONSE_BAD_REQUEST
         }
     }
 

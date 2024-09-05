@@ -9,11 +9,18 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
-abstract class AbstractHandler(val project: Project) : Runnable {
+abstract class AbstractHandler(val project: Project) : Handler {
 
     val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
+
+    val RESPONSE_OK = HandlerResponse(HttpResponseStatus.OK)
+
+    val RESPONSE_BAD_REQUEST = HandlerResponse(HttpResponseStatus.BAD_REQUEST)
+
+    val RESPONSE_ERROR = HandlerResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR)
 
     class FileEditorWrapper(
         private val fileEditor: FileEditor,

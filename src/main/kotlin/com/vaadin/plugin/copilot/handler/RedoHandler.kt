@@ -11,7 +11,7 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
 
     private val copilotActionPrefix = "_Redo Vaadin Copilot"
 
-    override fun run() {
+    override fun run(): HandlerResponse {
         for (vfsFile in vfsFiles) {
             runInEdt {
                 getEditorWrapper(vfsFile).use { wrapper ->
@@ -31,6 +31,7 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
                 }
             }
         }
+        return RESPONSE_OK
     }
 
 }
