@@ -1,5 +1,6 @@
 package com.vaadin.plugin.utils
 
+import com.intellij.openapi.diagnostic.Logger
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import java.io.File
@@ -8,6 +9,7 @@ import java.util.Properties
 import java.util.jar.JarFile
 
 object VaadinHomeUtil {
+    private val LOG: Logger = Logger.getInstance(VaadinHomeUtil::class.java)
     private const val PROPERTY_USER_HOME: String = "user.home"
     private const val VAADIN_FOLDER_NAME: String = ".vaadin"
     private const val HOTSWAP_AGENT_JAR_FILE_NAME = "hotswap-agent.jar"
@@ -31,7 +33,7 @@ object VaadinHomeUtil {
      */
     fun getHotswapAgentJar(): File {
         val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
-        if (!hotswapAgentJar.exists() || this.isBundledVersionNewer()) {
+        if (!hotswapAgentJar.exists()) {
             // Try to copy the agent to the JDK
             val bundledHotswap = this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
                 ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found");
@@ -46,7 +48,18 @@ object VaadinHomeUtil {
         }
         return hotswapAgentJar;
     }
-
+    fun checkBundledAndCurrentVersionAndReplaceIfBundledOneIsNewer(){
+        try{
+            val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
+            val bundledHotswap = this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
+                ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found");
+            if(isBundledVersionNewer()){
+                IOUtils.copyLarge(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
+            }
+        }catch(e: Exception){
+            LOG.error(e.message, e)
+        }
+    }
     private fun isBundledVersionNewer(): Boolean {
         val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
         val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotswapAgentJar);
