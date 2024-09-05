@@ -48,6 +48,7 @@
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
 
+        <!-- Actions on save -->
         <actionOnSaveInfoProvider id="VaadinCompileOnSaveInfoProvider"
                                   implementation="com.vaadin.plugin.actions.VaadinOnSaveInfoProvider"
                                   order="last"/>
@@ -58,7 +59,10 @@
         <programRunner implementation="com.vaadin.plugin.hotswapagent.HotswapAgentRunner"/>
         <java.programPatcher implementation="com.vaadin.plugin.hotswapagent.HotswapAgentProgramPatcher"/>
         <executor implementation="com.vaadin.plugin.hotswapagent.HotswapAgentExecutor"/>
-    </extensions>
 
+        <!-- Configuration check -->
+        <postStartupActivity implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
+        <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
+    </extensions>
 
 </idea-plugin>
