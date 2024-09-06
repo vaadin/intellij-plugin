@@ -61,7 +61,8 @@
         <executor implementation="com.vaadin.plugin.hotswapagent.HotswapAgentExecutor"/>
 
         <!-- Configuration check -->
-        <postStartupActivity implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
+        <backgroundPostStartupActivity
+                implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
         <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
     </extensions>
 

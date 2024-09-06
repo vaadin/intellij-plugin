@@ -78,6 +78,9 @@ class CopilotPluginUtil {
 
             return false
         }
+        fun getPluginVersion(): String?{
+            return pluginVersion;
+        }
 
         fun notify(content: String, type: NotificationType, project: Project?) {
             Notifications.Bus.notify(

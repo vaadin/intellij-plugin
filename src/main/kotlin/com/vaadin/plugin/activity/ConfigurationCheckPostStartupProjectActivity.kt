@@ -15,6 +15,7 @@ import com.intellij.openapi.vcs.VcsBundle
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
+import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 
 class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
@@ -38,6 +39,7 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         checkReloadClassesSetting(project)
         checkVcsAddConfirmationSetting(project)
+        VaadinHomeUtil.updateOrInstallHotSwapJar()
     }
 
     private fun checkReloadClassesSetting(project: Project) {
