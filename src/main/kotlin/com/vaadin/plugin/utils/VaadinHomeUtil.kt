@@ -1,8 +1,8 @@
 package com.vaadin.plugin.utils
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.util.io.FileUtil
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.IOException
 import java.util.Properties
@@ -41,7 +41,7 @@ object VaadinHomeUtil {
                 check(intellijFolder.mkdirs()) { "Unable to create directory for hotswap-agent.jar" }
             }
             try {
-                IOUtils.copyLarge(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
+                FileUtil.copy(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
             } catch (e: IOException) {
                 throw IllegalStateException("Unable to copy hotswap-agent.jar to " + hotswapAgentJar.absolutePath, e)
             }
@@ -54,7 +54,7 @@ object VaadinHomeUtil {
             val bundledHotswap = this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
                 ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found");
             if(isBundledVersionNewer()){
-                IOUtils.copyLarge(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
+                FileUtil.copy(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
             }
         }catch(e: Exception){
             LOG.error(e.message, e)
@@ -75,9 +75,9 @@ object VaadinHomeUtil {
         try{
             tempFile = File.createTempFile("bundled-hotswap-agent", "jar");
             tempFile.deleteOnExit();
-            IOUtils.copyLarge(this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)?.openStream() ?:
-                throw IllegalStateException("Unable to copy hotswap-agent.jar to temporary file ")
-            , tempFile.outputStream())
+            FileUtil.copy(this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)?.openStream() ?:
+            throw IllegalStateException("Unable to copy hotswap-agent.jar to temporary file ")
+                , tempFile.outputStream())
             return getHotswapAgentVersion(tempFile)
         }catch (e: IOException) {
             e.printStackTrace()
