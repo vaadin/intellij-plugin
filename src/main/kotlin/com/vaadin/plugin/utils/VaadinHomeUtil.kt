@@ -25,37 +25,55 @@ object VaadinHomeUtil {
         return File(userHome, VAADIN_FOLDER_NAME)
     }
 
-    /** Gets the hotswap-agent.jar location in ~/.vaadin.
-     *
+    /**
+     * Gets the hotswap-agent.jar location in ~/.vaadin.
      * If the file does not exist, copies the bundled version.
      *
      * @return the hotswap-agent.jar file
      */
-    fun getHotswapAgentJar(): File {
-        val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
-        if (!hotswapAgentJar.exists()) {
-            // Try to copy the agent to the JDK
-            val bundledHotswap = this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
-                ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found")
-            if (!intellijFolder.exists()) {
-                check(intellijFolder.mkdirs()) { "Unable to create directory for hotswap-agent.jar" }
-            }
-            try {
-                FileUtil.copy(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
-            } catch (e: IOException) {
-                throw IllegalStateException("Unable to copy hotswap-agent.jar to " + hotswapAgentJar.absolutePath, e)
-            }
+    fun getHotSwapAgentJar(): File {
+        // might only happen if user removes hotswap-agent.jar manually after plugin is already installed
+        if (!hotSwapAgentJarFile.exists()) {
+            throw IllegalStateException(
+                "hotswap-agent.jar not found in " + intellijFolder.path +
+                        ", please restart IntelliJ to fix the issue"
+            )
         }
-        return hotswapAgentJar
+        return hotSwapAgentJarFile
     }
 
-    fun checkBundledAndCurrentVersionAndReplaceIfBundledOneIsNewer() {
+    /**
+     * Installs or updates hotswap-agent.jar in ~/.vaadin
+     */
+    fun updateOrInstallHotSwapJar() {
         try {
-            val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
             val bundledHotswap = this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
                 ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found")
-            if (isBundledVersionNewer()) {
-                FileUtil.copy(bundledHotswap.openStream(), hotswapAgentJar.outputStream())
+            if (!hotSwapAgentJarFile.exists()) {
+                try {
+                    check(
+                        FileUtil.createParentDirs(hotSwapAgentJarFile)
+                    ) { "Unable to create directory for hotswap-agent.jar" }
+                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
+                    LOG.info("Installed hotswap-agent.jar version: " + getHotswapAgentVersion(hotSwapAgentJarFile))
+                } catch (e: IOException) {
+                    throw IllegalStateException(
+                        "Unable to copy hotswap-agent.jar to " + hotSwapAgentJarFile.absolutePath,
+                        e
+                    )
+                }
+            } else if (isBundledVersionNewer()) {
+                try {
+                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
+                    LOG.info("Updated hotswap-agent.jar to version " + getHotswapAgentVersion(hotSwapAgentJarFile))
+                } catch (e: IOException) {
+                    throw IllegalStateException(
+                        "Unable to update hotswap-agent.jar",
+                        e
+                    )
+                }
+            } else {
+                LOG.info("Using existing hotswap-agent.jar version " + getHotswapAgentVersion(hotSwapAgentJarFile))
             }
         } catch (e: Exception) {
             LOG.error(e.message, e)
@@ -63,8 +81,7 @@ object VaadinHomeUtil {
     }
 
     private fun isBundledVersionNewer(): Boolean {
-        val hotswapAgentJar = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
-        val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotswapAgentJar)
+        val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotSwapAgentJarFile)
         val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
         if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
             return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) == 1
@@ -113,4 +130,7 @@ object VaadinHomeUtil {
 
     private val intellijFolder: File
         get() = File(resolveVaadinHomeDirectory(), "intellij-plugin")
+
+    private val hotSwapAgentJarFile: File
+        get() = File(intellijFolder, HOTSWAP_AGENT_JAR_FILE_NAME)
 }
