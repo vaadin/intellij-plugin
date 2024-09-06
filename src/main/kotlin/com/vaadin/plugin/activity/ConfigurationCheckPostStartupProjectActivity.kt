@@ -3,6 +3,7 @@ package com.vaadin.plugin.activity
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.IdeCoreBundle
+import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
@@ -15,6 +16,7 @@ import com.intellij.openapi.vcs.VcsBundle
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 
@@ -39,7 +41,9 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
         checkReloadClassesSetting(project)
         checkVcsAddConfirmationSetting(project)
-        VaadinHomeUtil.updateOrInstallHotSwapJar()
+        RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
+            VaadinHomeUtil.updateOrInstallHotSwapJar()
+        }
     }
 
     private fun checkReloadClassesSetting(project: Project) {

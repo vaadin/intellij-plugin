@@ -66,4 +66,13 @@
         <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
     </extensions>
 
+    <actions>
+        <action
+                id="HotSwap.installOrUpdate"
+                class="com.vaadin.plugin.actions.InstallOrUpdateHotSwapAction"
+                text="HotSwap: Install or update"
+                description="Installs or updates hotswap-agent.jar">
+        </action>
+    </actions>
+
 </idea-plugin>
