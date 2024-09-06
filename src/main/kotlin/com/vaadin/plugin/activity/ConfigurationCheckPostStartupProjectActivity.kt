@@ -43,7 +43,7 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
         checkVcsAddConfirmationSetting(project)
         RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
             VaadinHomeUtil.checkBundledAndCurrentVersionAndReplaceIfBundledOneIsNewer()
-        };
+        }
 
     }
 
