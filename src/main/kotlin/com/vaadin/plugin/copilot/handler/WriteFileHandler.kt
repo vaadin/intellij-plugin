@@ -31,6 +31,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     private val ioFile: File = File(data["file"] as String)
 
     override fun run(): HandlerResponse {
+        var response = RESPONSE_OK
         if (isFileInsideProject(project, ioFile)) {
             // file exists, write content
             val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
@@ -46,14 +47,14 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                 // file does not exist, create new one
                 LOG.info("File $ioFile does not exist, creating new file")
                 create()
+                if (IdeUtil.willVcsPopupBeShown(project)) {
+                    IdeUtil.bringToFront(project)
+                    response =
+                        HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
+                }
             }
 
-            if (IdeUtil.willBlockingPopupBeShown(project, ioFile.extension == "java")) {
-                IdeUtil.bringToFront(project)
-                return HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
-            }
-
-            return RESPONSE_OK
+            return response
         } else {
             LOG.warn("File $ioFile is not a part of a project")
             return RESPONSE_BAD_REQUEST
