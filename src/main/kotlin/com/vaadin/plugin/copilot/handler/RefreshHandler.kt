@@ -5,8 +5,9 @@ import com.intellij.openapi.vfs.VirtualFileManager
 
 class RefreshHandler(project: Project) : AbstractHandler(project) {
 
-    override fun run() {
-        VirtualFileManager.getInstance().asyncRefresh {  }
+    override fun run(): HandlerResponse {
+        VirtualFileManager.getInstance().asyncRefresh { }
+        return RESPONSE_OK
     }
 
 }

@@ -30,7 +30,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         }
     }
 
-    override fun run() {
+    override fun run(): HandlerResponse {
         for (vfsFile in vfsFiles) {
             runInEdt {
                 getEditorWrapper(vfsFile).use { wrapper ->
@@ -50,6 +50,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 }
             }
         }
+        return RESPONSE_OK
     }
 
 }

@@ -17,6 +17,7 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
+import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
 import java.io.File
 import java.io.StringWriter
@@ -93,7 +94,7 @@ class CopilotPluginUtil {
             command: String,
             project: Project,
             data: Map<String, Any>
-        ): Runnable? {
+        ): Handler {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
                 HANDLERS.WRITE_BASE64.command -> return WriteBase64FileHandler(project, data)
@@ -103,9 +104,13 @@ class CopilotPluginUtil {
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
+                    return object : Handler {
+                        override fun run(): HandlerResponse {
+                            return HandlerResponse(HttpResponseStatus.BAD_REQUEST)
+                        }
+                    }
                 }
             }
-            return null
         }
 
         fun saveDotFile(project: Project) {
