@@ -7,3 +7,6 @@ This plugin integrates directly with IntelliJ’s undo stack, allowing developer
 While initially focused on enhancing undo functionality, the plugin is designed for future expansion with additional features to streamline your Vaadin development workflow.
 
 Available at https://plugins.jetbrains.com/plugin/23758-vaadin
+
+
+Thanks to https://github.com/gejun123456/HotSwapHelper for inspiration and ideas on the Hotswap Agent integration.
