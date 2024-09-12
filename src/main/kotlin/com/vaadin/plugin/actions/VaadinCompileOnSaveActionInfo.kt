@@ -8,7 +8,7 @@ class VaadinCompileOnSaveActionInfo(context: ActionOnSaveContext) :
     ActionOnSaveInfoBase(context, NAME, PROPERTY, DEFAULT) {
 
     companion object {
-        const val NAME = "Compile on save"
+        const val NAME = "Compile Java files"
         const val PROPERTY = "vaadin.compileOnSave"
         const val DEFAULT = true
         const val DESCRIPTION = "Compiles *.java while debugging"
