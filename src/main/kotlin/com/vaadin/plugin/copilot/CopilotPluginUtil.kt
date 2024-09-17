@@ -10,6 +10,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDirectory
@@ -58,23 +59,33 @@ class CopilotPluginUtil {
                 return false
             }
 
-            val containsVaadinDeps = fun(file: String): Boolean {
-                return Files.readString(Path(project.basePath!!, file)).contains(VAADIN_LIB_PREFIX)
+            val containsVaadinDeps = fun(path: String, file: String): Boolean {
+                return Files.readString(Path(path!!, file)).contains(VAADIN_LIB_PREFIX)
             }
 
-            // Maven projects
-            if (File(project.basePath, "pom.xml").exists()) {
-                return containsVaadinDeps("pom.xml")
-            }
+            val modules = ModuleManager.getInstance(project).modules
+            modules.forEach { module ->
+                println("Module name: ${module.name}")
+                // Maven projects
+                if (File(File(module.moduleFilePath).parent, "pom.xml").exists()) {
+                    if (containsVaadinDeps(File(module.moduleFilePath).parent, "pom.xml")) {
+                        return true
+                    }
+                }
 
-            // Gradle projects
-            if (File(project.basePath, "build.gradle").exists()) {
-                return containsVaadinDeps("build.gradle")
-            }
+                // Gradle projects
+                if (File(File(module.moduleFilePath).parent, "build.gradle").exists()) {
+                    if (containsVaadinDeps(File(module.moduleFilePath).parent, "build.gradle")) {
+                        return true
+                    }
+                }
 
-            // Gradle Kotlin projects
-            if (File(project.basePath, "build.gradle.kts").exists()) {
-                return containsVaadinDeps("build.gradle.kts")
+                // Gradle Kotlin projects
+                if (File(File(module.moduleFilePath).parent, "build.gradle.kts").exists()) {
+                    if (containsVaadinDeps(File(module.moduleFilePath).parent, "build.gradle.kts")) {
+                        return true
+                    }
+                }
             }
 
             return false
