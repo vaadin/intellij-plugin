@@ -39,7 +39,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Vaadin Copilot -->
         <notificationGroup id="Vaadin Copilot" displayType="BALLOON"/>
-        <postStartupActivity implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
+        <backgroundPostStartupActivity
+                implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
                                 id="CopilotStatusBarWidgetFactory" order="last"/>

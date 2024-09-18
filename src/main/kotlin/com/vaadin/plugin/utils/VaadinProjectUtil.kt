@@ -1,8 +1,11 @@
 package com.vaadin.plugin.utils
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.libraries.Library
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -67,6 +70,19 @@ class VaadinProjectUtil {
                 }
                 return null
             }
+        }
+
+        fun isVaadinProject(project: Project): Boolean {
+            var hasVaadin = false
+            ModuleManager.getInstance(project).modules.forEach { module ->
+                ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
+                    if (library.name?.contains("com.vaadin:") == true) {
+                        hasVaadin = true
+                    }
+                    true
+                }
+            }
+            return hasVaadin
         }
 
     }
