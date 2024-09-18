@@ -74,6 +74,15 @@
                 text="HotSwap: Install or update"
                 description="Installs or updates hotswap-agent.jar">
         </action>
+        <action
+                id="HotSwap.debug"
+                class="com.vaadin.plugin.actions.DebugUsingHotSwapAgentAction"
+                text="Debug using HotSwapAgent"
+                icon="vaadin/icons/swap.svg">
+            <add-to-group group-id="RunDashboardContentToolbar"
+                          relative-to-action="RunDashboard.Debug"
+                          anchor="after"/>
+        </action>
     </actions>
 
 </idea-plugin>
