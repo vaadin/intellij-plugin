@@ -24,6 +24,8 @@ class VaadinProjectUtil {
 
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
+        private const val VAADIN_LIB_PREFIX = "com.vaadin:"
+
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 
         val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
@@ -76,7 +78,7 @@ class VaadinProjectUtil {
             var hasVaadin = false
             ModuleManager.getInstance(project).modules.forEach { module ->
                 ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                    if (library.name?.contains("com.vaadin:") == true) {
+                    if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
                         hasVaadin = true
                     }
                     true
