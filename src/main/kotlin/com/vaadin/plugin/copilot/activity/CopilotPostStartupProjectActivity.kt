@@ -5,6 +5,7 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.startup.ProjectActivity
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.utils.VaadinProjectUtil
 import org.jetbrains.ide.BuiltInServerManager
 
 class CopilotPostStartupProjectActivity : ProjectActivity {
@@ -13,8 +14,7 @@ class CopilotPostStartupProjectActivity : ProjectActivity {
 
         BuiltInServerManager.getInstance().waitForStart()
 
-        val isVaadinProject = CopilotPluginUtil.isVaadinProject(project)
-        if (isVaadinProject) {
+        if (VaadinProjectUtil.isVaadinProject(project)) {
             val dotFileDirectory = CopilotPluginUtil.getDotFileDirectory(project)
             if (dotFileDirectory == null) {
                 CopilotPluginUtil.createIdeaDirectoryIfMissing(project)
