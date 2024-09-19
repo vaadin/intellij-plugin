@@ -25,7 +25,7 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         val module = runProfile.configurationModule?.module ?: return
 
         if (runProfile.javaClass.simpleName == "SpringBootApplicationRunConfiguration") {
-            turnOffFrameDeactivationPolicy(runProfile);
+            turnOffFrameDeactivationPolicy(runProfile)
         }
         if (!JdkUtil.isJetbrainsRuntime(javaParameters.jdk)) {
             // Use the bundled Jetbrains Runtime
@@ -60,14 +60,14 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
     private fun turnOffFrameDeactivationPolicy(runProfile: JavaRunConfigurationBase) {
         try {
             val getOptions = runProfile.javaClass.getDeclaredMethod("getOptions")
-            getOptions.trySetAccessible();
-            var options = getOptions.invoke(runProfile);
-            var policy = options.javaClass.getDeclaredField("frameDeactivationUpdatePolicy\$delegate")
-            policy.trySetAccessible();
+            getOptions.trySetAccessible()
+            val options = getOptions.invoke(runProfile)
+            val policy = options.javaClass.getDeclaredField("frameDeactivationUpdatePolicy\$delegate")
+            policy.trySetAccessible()
 
-            val prop = policy.get(options);
+            val prop = policy.get(options)
 
-            prop.javaClass.getMethod("parseAndSetValue", String::class.java).invoke(prop, null);
+            prop.javaClass.getMethod("parseAndSetValue", String::class.java).invoke(prop, null)
         } catch (e: Exception) {
             LOG.debug("Failed to turn off frame deactivation policy", e)
         }
