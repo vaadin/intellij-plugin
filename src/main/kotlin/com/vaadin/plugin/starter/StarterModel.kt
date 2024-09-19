@@ -3,10 +3,10 @@ package com.vaadin.plugin.starter
 import com.intellij.openapi.project.Project
 
 class StarterModel(
-    var framework: String,      // flow / hilla-react
-    var language: String,       // java / kotlin
-    var buildTool: String,      // maven / gradle
-    var architecture: String    // springboot / servlet / ...
+    var framework: String, // flow / hilla-react
+    var language: String, // java / kotlin
+    var buildTool: String, // maven / gradle
+    var architecture: String // springboot / servlet / ...
 ) : DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
@@ -16,5 +16,4 @@ class StarterModel(
     override fun getProjectType(): String {
         return buildTool
     }
-
 }

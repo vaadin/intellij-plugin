@@ -12,18 +12,19 @@ object IdeUtil {
 
     fun willVcsPopupBeShown(project: Project): Boolean {
         val confirmation = VcsConfiguration.StandardConfirmation.ADD
-        val value = ProjectLevelVcsManagerImpl.getInstanceImpl(project).getConfirmation(confirmation).value
+        val value =
+            ProjectLevelVcsManagerImpl.getInstanceImpl(project)
+                .getConfirmation(confirmation)
+                .value
         return value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION
     }
 
     fun willHotSwapPopupBeShown(): Boolean {
-        return DebuggerSettings.getInstance().RUN_HOTSWAP_AFTER_COMPILE == DebuggerSettings.RUN_HOTSWAP_ASK
+        return DebuggerSettings.getInstance().RUN_HOTSWAP_AFTER_COMPILE ==
+            DebuggerSettings.RUN_HOTSWAP_ASK
     }
 
     fun bringToFront(project: Project) {
-        runInEdt {
-            ProjectUtil.focusProjectWindow(project, true)
-        }
+        runInEdt { ProjectUtil.focusProjectWindow(project, true) }
     }
-
 }

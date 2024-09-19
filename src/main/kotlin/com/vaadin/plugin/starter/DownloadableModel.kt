@@ -7,5 +7,4 @@ interface DownloadableModel {
     fun getDownloadLink(project: Project): String
 
     fun getProjectType(): String
-
 }

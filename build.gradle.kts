@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.21"
     id("org.jetbrains.intellij.platform") version "2.0.0"
+    id("com.diffplug.spotless") version "7.0.0.BETA2"
 }
 
 group = "com.vaadin"
@@ -53,6 +54,20 @@ dependencies {
         zipSigner()
         instrumentationTools()
 
+    }
+}
+
+configure<com.diffplug.gradle.spotless.SpotlessExtension> { // if you are using build.gradle.kts, instead of 'spotless {' use:
+    // configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+    kotlin {
+        // by default the target is every '.kt' and '.kts` file in the java sourcesets
+        ktfmt("0.51").googleStyle().configure {
+            it.setMaxWidth(80)
+            it.setBlockIndent(4)
+            it.setContinuationIndent(4)
+            it.setRemoveUnusedImports(false)
+            it.setManageTrailingCommas(false)
+        }
     }
 }
 

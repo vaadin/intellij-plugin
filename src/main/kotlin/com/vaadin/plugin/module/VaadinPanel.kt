@@ -17,14 +17,20 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.UIBundle
 import com.intellij.ui.dsl.builder.*
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KEY
-import org.jetbrains.annotations.Nls
 import java.io.File
+import org.jetbrains.annotations.Nls
 
-class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: WizardContext, builder: Panel) {
+class VaadinPanel(
+    propertyGraph: PropertyGraph,
+    private val wizardContext: WizardContext,
+    builder: Panel
+) {
 
     private val entityNameProperty = propertyGraph.lazyProperty(::suggestName)
-    private val locationProperty = propertyGraph.lazyProperty(::suggestLocationByName)
-    private val canonicalPathProperty = locationProperty.joinCanonicalPath(entityNameProperty)
+    private val locationProperty =
+        propertyGraph.lazyProperty(::suggestLocationByName)
+    private val canonicalPathProperty =
+        locationProperty.joinCanonicalPath(entityNameProperty)
 
     private var quickStarterGroup: CollapsibleRow? = null
     private var skeletonStarterGroup: CollapsibleRow? = null
@@ -34,52 +40,60 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
 
     init {
         builder.panel {
-            row("Name:") {
-                textField().bindText(entityNameProperty)
-            }
+            row("Name:") { textField().bindText(entityNameProperty) }
             row("Location:") {
-                val commentLabel = projectLocationField(locationProperty, wizardContext)
-                    .align(AlignX.FILL)
-                    .comment(getLocationComment(), 100).comment!!
+                val commentLabel =
+                    projectLocationField(locationProperty, wizardContext)
+                        .align(AlignX.FILL)
+                        .comment(getLocationComment(), 100)
+                        .comment!!
                 entityNameProperty.afterChange {
                     commentLabel.text = getLocationComment()
                     updateModel()
                 }
                 locationProperty.afterChange {
                     commentLabel.text = getLocationComment()
-                    entityNameProperty.set(suggestName(entityNameProperty.get()))
+                    entityNameProperty.set(
+                        suggestName(entityNameProperty.get()))
                     updateModel()
                 }
             }
 
-            quickStarterGroup = collapsibleGroup("Project Settings") {
-                row {}.cell(quickStarterPanel.root)
-            }
+            quickStarterGroup =
+                collapsibleGroup("Project Settings") {
+                    row {}.cell(quickStarterPanel.root)
+                }
 
-            skeletonStarterGroup = collapsibleGroup("Hello World Projects") {
-                row {}.cell(skeletonStarterPanel.root)
-            }
+            skeletonStarterGroup =
+                collapsibleGroup("Hello World Projects") {
+                    row {}.cell(skeletonStarterPanel.root)
+                }
             row {
                 text(
                     "<a href=\"https://vaadin.com/flow\">Flow framework</a> is the most productive" +
-                            " choice, allowing 100% of the user<br>interface to be coded in server-side Java."
-                )
+                        " choice, allowing 100% of the user<br>interface to be coded in server-side Java.")
             }
             row {
                 text(
                     "<a href=\"https://hilla.dev/\">Hilla framework</a>, on the other hand, enables" +
-                            " implementation of your user<br>interface with React while automatically connecting it to your" +
-                            " Java backend."
-                )
+                        " implementation of your user<br>interface with React while automatically connecting it to your" +
+                        " Java backend.")
             }
             row {
-                text("For more configuration options, visit <a href=\"https://start.vaadin.com\">start.vaadin.com</a>")
+                text(
+                    "For more configuration options, visit <a href=\"https://start.vaadin.com\">start.vaadin.com</a>")
             }
         }
 
         quickStarterGroup!!.expanded = true
-        quickStarterGroup!!.addExpandedListener { if (it) skeletonStarterGroup!!.expanded = false; updateModel() }
-        skeletonStarterGroup!!.addExpandedListener { if (it) quickStarterGroup!!.expanded = false; updateModel() }
+        quickStarterGroup!!.addExpandedListener {
+            if (it) skeletonStarterGroup!!.expanded = false
+            updateModel()
+        }
+        skeletonStarterGroup!!.addExpandedListener {
+            if (it) quickStarterGroup!!.expanded = false
+            updateModel()
+        }
 
         updateModel()
     }
@@ -98,19 +112,22 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun getLocationComment(): @Nls String {
-        val shortPath = StringUtil.shortenPathWithEllipsis(getPresentablePath(canonicalPathProperty.get()), 60)
+        val shortPath =
+            StringUtil.shortenPathWithEllipsis(
+                getPresentablePath(canonicalPathProperty.get()), 60)
         return UIBundle.message(
             "label.project.wizard.new.project.path.description",
             wizardContext.isCreatingNewProjectInt,
-            shortPath
-        )
+            shortPath)
     }
 
     private fun updateModel() {
         wizardContext.setProjectFileDirectory(canonicalPathProperty.get())
         wizardContext.projectName = entityNameProperty.get()
         wizardContext.defaultModuleName = entityNameProperty.get()
-        val projectModel = if (quickStarterGroup!!.expanded) quickStarterPanel.model else skeletonStarterPanel.model
+        val projectModel =
+            if (quickStarterGroup!!.expanded) quickStarterPanel.model
+            else skeletonStarterPanel.model
         wizardContext.getUserData(PROJECT_MODEL_PROP_KEY)?.set(projectModel)
     }
 
@@ -118,14 +135,19 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         locationProperty: GraphProperty<String>,
         wizardContext: WizardContext
     ): Cell<TextFieldWithBrowseButton> {
-        val fileChooserDescriptor = FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
-            .withFileFilter { it.isDirectory }
-            .withPathToTextConvertor(::getPresentablePath)
-            .withTextToPathConvertor(::getCanonicalPath)
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
-        val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor)
+        val fileChooserDescriptor =
+            FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
+                .withFileFilter { it.isDirectory }
+                .withPathToTextConvertor(::getPresentablePath)
+                .withTextToPathConvertor(::getCanonicalPath)
+        val title =
+            IdeBundle.message(
+                "title.select.project.file.directory",
+                wizardContext.presentationName)
+        val property =
+            locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
+        return textFieldWithBrowseButton(
+                title, wizardContext.project, fileChooserDescriptor)
             .bindText(property)
     }
-
 }

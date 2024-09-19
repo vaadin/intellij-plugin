@@ -11,13 +11,14 @@ class QuickStarterModel(
 ) : BaseState(), DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
-        var preset = if (views.contains("Flow")) {
-            "default"
-        } else if (views.contains("Hilla")) {
-            "react"
-        } else {
-            "empty"
-        }
+        var preset =
+            if (views.contains("Flow")) {
+                "default"
+            } else if (views.contains("Hilla")) {
+                "react"
+            } else {
+                "empty"
+            }
 
         if (authentication) {
             preset += "&preset=partial-auth"

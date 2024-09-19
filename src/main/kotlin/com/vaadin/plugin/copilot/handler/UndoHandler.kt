@@ -10,7 +10,8 @@ import com.intellij.openapi.vfs.findDocument
 import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 import java.io.File
 
-open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
+open class UndoHandler(project: Project, data: Map<String, Any>) :
+    AbstractHandler(project) {
 
     private val copilotActionPrefix = "_Undo Vaadin Copilot"
 
@@ -21,9 +22,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         for (path in paths) {
             val file = File(path)
             if (isFileInsideProject(project, file)) {
-                VfsUtil.findFileByIoFile(file, true)?.let {
-                    vfsFiles.add(it)
-                }
+                VfsUtil.findFileByIoFile(file, true)?.let { vfsFiles.add(it) }
             } else {
                 LOG.warn("File $file is not a part of a project")
             }
@@ -38,12 +37,16 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                     val editor = wrapper.getFileEditor()
                     runWriteAction {
                         if (undoManager.isUndoAvailable(editor)) {
-                            val undo = undoManager.getUndoActionNameAndDescription(editor).first
+                            val undo =
+                                undoManager
+                                    .getUndoActionNameAndDescription(editor)
+                                    .first
                             if (undo.startsWith(copilotActionPrefix)) {
                                 undoManager.undo(editor)
                                 commitAndFlush(vfsFile.findDocument())
                                 LOG.info("$undo performed on ${vfsFile.path}")
-                                VaadinCompileOnSaveAction().compile(project, vfsFile)
+                                VaadinCompileOnSaveAction()
+                                    .compile(project, vfsFile)
                             }
                         }
                     }
@@ -52,5 +55,4 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         }
         return RESPONSE_OK
     }
-
 }

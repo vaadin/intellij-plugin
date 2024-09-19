@@ -23,7 +23,8 @@ class VaadinProjectWizard : GeneratorNewProjectWizard {
     private val propertyGraph: PropertyGraph
         get() = PropertyGraph("Vaadin project")
 
-    private val projectModelProperty = propertyGraph.property<DownloadableModel?>(null)
+    private val projectModelProperty =
+        propertyGraph.property<DownloadableModel?>(null)
 
     val projectModel: DownloadableModel? by projectModelProperty
 
@@ -31,5 +32,4 @@ class VaadinProjectWizard : GeneratorNewProjectWizard {
         context.putUserData(PROJECT_MODEL_PROP_KEY, projectModelProperty)
         return VaadinProjectWizardStep(context, propertyGraph)
     }
-
 }

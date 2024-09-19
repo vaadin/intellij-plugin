@@ -16,15 +16,20 @@ import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.DEFAULT
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.PROPERTY
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 
-class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
+class VaadinCompileOnSaveAction :
+    ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
     override fun isEnabledForProject(project: Project): Boolean {
-        return PropertiesComponent.getInstance(project).getBoolean(PROPERTY, DEFAULT)
+        return PropertiesComponent.getInstance(project)
+            .getBoolean(PROPERTY, DEFAULT)
     }
 
-    override fun processDocuments(project: Project, documents: Array<Document?>) {
+    override fun processDocuments(
+        project: Project,
+        documents: Array<Document?>
+    ) {
         if (documents.size != 1) {
             return
         }
@@ -39,15 +44,20 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
             return
         }
 
-        val task = object : Task.Backgroundable(project, "Vaadin: compiling...") {
-            override fun run(indicator: ProgressIndicator) {
-                val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
-                if (session != null) {
-                    HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
-                    LOG.info("File $vfsFile compiled")
+        val task =
+            object : Task.Backgroundable(project, "Vaadin: compiling...") {
+                override fun run(indicator: ProgressIndicator) {
+                    val session =
+                        DebuggerManagerEx.getInstanceEx(project)
+                            .context
+                            .debuggerSession
+                    if (session != null) {
+                        HotSwapUI.getInstance(project)
+                            .compileAndReload(session, vfsFile)
+                        LOG.info("File $vfsFile compiled")
+                    }
                 }
             }
-        }
         ProgressManager.getInstance().run(task)
     }
 }

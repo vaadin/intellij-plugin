@@ -13,9 +13,9 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.utils.VaadinProjectUtil
 import java.io.File
 
-
-class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
-    GeneratorNewProjectWizardBuilderAdapter(vaadinWizard) {
+class VaadinProjectBuilderAdapter(
+    private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()
+) : GeneratorNewProjectWizardBuilderAdapter(vaadinWizard) {
 
     private val propertyGraph = PropertyGraph()
 
@@ -27,24 +27,33 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
 
     override fun createProject(name: String?, path: String?): Project? {
         return super.createProject(name, path)?.let { project ->
-            project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
-            projectDownloadedProperty.afterChange { afterProjectCreated(project) }
-            VaadinProjectUtil.downloadAndExtract(project, vaadinWizard.projectModel!!.getDownloadLink(project))
+            project.putUserData(
+                VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY,
+                projectDownloadedProperty)
+            projectDownloadedProperty.afterChange {
+                afterProjectCreated(project)
+            }
+            VaadinProjectUtil.downloadAndExtract(
+                project, vaadinWizard.projectModel!!.getDownloadLink(project))
             project
         }
     }
 
     override fun isAvailable(): Boolean {
-        val lastPerformedActionId = (ActionManager.getInstance() as ActionManagerImpl).lastPreformedActionId
+        val lastPerformedActionId =
+            (ActionManager.getInstance() as ActionManagerImpl)
+                .lastPreformedActionId
         lastPerformedActionId ?: return false
         return lastPerformedActionId.contains("NewProject", true)
     }
 
     private fun afterProjectCreated(project: Project) {
-        VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)?.let {
-            val descriptor = OpenFileDescriptor(project, it)
-            descriptor.setUsePreviewTab(true)
-            FileEditorManager.getInstance(project).openEditor(descriptor, true)
-        }
+        VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)
+            ?.let {
+                val descriptor = OpenFileDescriptor(project, it)
+                descriptor.setUsePreviewTab(true)
+                FileEditorManager.getInstance(project)
+                    .openEditor(descriptor, true)
+            }
     }
 }

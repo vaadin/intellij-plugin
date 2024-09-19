@@ -4,7 +4,6 @@ import com.intellij.execution.executors.DefaultDebugExecutor
 import com.vaadin.plugin.utils.VaadinIcons
 import javax.swing.Icon
 
-
 class HotswapAgentExecutor : DefaultDebugExecutor() {
 
     companion object {
@@ -16,27 +15,27 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     }
 
     override fun getId(): String {
-        return Companion.ID;
+        return ID
     }
 
     override fun getToolWindowId(): String {
-        return id;
+        return id
     }
 
     override fun getActionName(): String {
-        return description;
+        return description
     }
 
     override fun getStartActionText(): String {
-        return description;
+        return description
     }
 
     override fun getStartActionText(configurationName: String): String {
-        return description;
+        return description
     }
 
     override fun getContextActionId(): String {
-        return "$id-action";
+        return "$id-action"
     }
 
     override fun getIcon(): Icon {
@@ -46,7 +45,6 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     override fun getToolWindowIcon(): Icon {
         return VaadinIcons.DEBUG_HOTSWAP
     }
-
 
     override fun getDisabledIcon(): Icon {
         return super.getDisabledIcon()

@@ -1,7 +1,7 @@
 package com.vaadin.plugin.copilot
 
-import org.jetbrains.ide.BuiltInServerManager
 import java.util.UUID
+import org.jetbrains.ide.BuiltInServerManager
 
 class RestUtil {
 
@@ -15,7 +15,5 @@ class RestUtil {
             val port = BuiltInServerManager.getInstance().port
             return "http://127.0.0.1:$port/api/" + getServiceName()
         }
-
     }
-
 }

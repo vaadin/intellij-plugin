@@ -12,10 +12,10 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
-import org.jetbrains.ide.RestService
-import org.jetbrains.io.response
 import java.nio.charset.Charset
 import java.nio.file.Path
+import org.jetbrains.ide.RestService
+import org.jetbrains.io.response
 
 class CopilotRestService : RestService() {
 
@@ -31,18 +31,20 @@ class CopilotRestService : RestService() {
         context: ChannelHandlerContext
     ): String? {
         val charset = HttpUtil.getCharset(request, Charset.defaultCharset())
-        val copilotRequest: CommandRequest = jacksonObjectMapper()
-            .readValue(request.content().toString(charset))
+        val copilotRequest: CommandRequest =
+            jacksonObjectMapper().readValue(request.content().toString(charset))
 
         if (copilotRequest.projectBasePath == null) {
             sendStatus(HttpResponseStatus.BAD_REQUEST, false, context.channel())
             return null
         }
 
-        val projectBasePath = Path.of(copilotRequest.projectBasePath).toRealPath()
-        val project = ProjectManager.getInstance().openProjects.find {
-            Path.of(it.basePath!!).toRealPath().equals(projectBasePath)
-        }
+        val projectBasePath =
+            Path.of(copilotRequest.projectBasePath).toRealPath()
+        val project =
+            ProjectManager.getInstance().openProjects.find {
+                Path.of(it.basePath!!).toRealPath().equals(projectBasePath)
+            }
 
         if (project == null) {
             LOG.error("Project location does not match any open project")
@@ -51,12 +53,18 @@ class CopilotRestService : RestService() {
         }
 
         val handlerResponse =
-            CopilotPluginUtil.createCommandHandler(copilotRequest.command, project, copilotRequest.data).run()
+            CopilotPluginUtil.createCommandHandler(
+                    copilotRequest.command, project, copilotRequest.data)
+                .run()
         if (handlerResponse.data == null) {
-            sendStatus(handlerResponse.status, HttpUtil.isKeepAlive(request), context.channel())
+            sendStatus(
+                handlerResponse.status,
+                HttpUtil.isKeepAlive(request),
+                context.channel())
         } else {
             val json = Gson().toJson(handlerResponse.data)
-            val buff: ByteBuf = Unpooled.copiedBuffer(json, Charset.forName("UTF-8"))
+            val buff: ByteBuf =
+                Unpooled.copiedBuffer(json, Charset.forName("UTF-8"))
             sendResponse(request, context, response("application/json", buff))
         }
         return null
@@ -65,5 +73,4 @@ class CopilotRestService : RestService() {
     override fun isMethodSupported(method: HttpMethod): Boolean {
         return method === HttpMethod.POST
     }
-
 }

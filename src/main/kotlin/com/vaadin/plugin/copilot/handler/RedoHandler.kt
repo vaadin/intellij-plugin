@@ -7,7 +7,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.findDocument
 import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 
-class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(project, data) {
+class RedoHandler(project: Project, data: Map<String, Any>) :
+    UndoHandler(project, data) {
 
     private val copilotActionPrefix = "_Redo Vaadin Copilot"
 
@@ -19,12 +20,16 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
                     val undoManager = UndoManagerImpl.getInstance(project)
                     runWriteAction {
                         if (undoManager.isRedoAvailable(editor)) {
-                            val redo = undoManager.getRedoActionNameAndDescription(editor).first
+                            val redo =
+                                undoManager
+                                    .getRedoActionNameAndDescription(editor)
+                                    .first
                             if (redo.startsWith(copilotActionPrefix)) {
                                 undoManager.redo(editor)
                                 commitAndFlush(vfsFile.findDocument())
                                 LOG.info("$redo performed on ${vfsFile.path}")
-                                VaadinCompileOnSaveAction().compile(project, vfsFile)
+                                VaadinCompileOnSaveAction()
+                                    .compile(project, vfsFile)
                             }
                         }
                     }
@@ -33,5 +38,4 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
         }
         return RESPONSE_OK
     }
-
 }
