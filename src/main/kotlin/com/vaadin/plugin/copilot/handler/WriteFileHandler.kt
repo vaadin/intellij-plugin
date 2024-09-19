@@ -24,8 +24,7 @@ import com.vaadin.plugin.utils.IdeUtil
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
-open class WriteFileHandler(project: Project, data: Map<String, Any>) :
-    AbstractHandler(project) {
+open class WriteFileHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
 
     private val content: String = data["content"] as String
     private val undoLabel: String? = data["undoLabel"] as String?
@@ -38,8 +37,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
             val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
             if (vfsFile?.exists() == true) {
                 runInEdt {
-                    if (ReadonlyStatusHandler.ensureFilesWritable(
-                        project, vfsFile)) {
+                    if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
                         writeAndFlush(vfsFile)
                     } else {
                         LOG.warn("File $ioFile is not writable")
@@ -51,10 +49,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
                 create()
                 if (IdeUtil.willVcsPopupBeShown(project)) {
                     IdeUtil.bringToFront(project)
-                    response =
-                        HandlerResponse(
-                            HttpResponseStatus.OK,
-                            mapOf("blockingPopup" to "true"))
+                    response = HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
                 }
             }
 
@@ -82,7 +77,8 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
                     },
                     undoLabel ?: "Vaadin Copilot Write File",
                     DocCommandGroupId.noneGroupId(it),
-                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
+                )
         }
     }
 
@@ -90,8 +86,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
         val psiDir = runReadAction {
             val parentDir = getOrCreateParentDir()
             if (parentDir != null) {
-                return@runReadAction PsiManager.getInstance(project)
-                    .findDirectory(parentDir)
+                return@runReadAction PsiManager.getInstance(project).findDirectory(parentDir)
             }
             return@runReadAction null
         }
@@ -108,8 +103,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
                                     psiDir.add(psiFile)
                                 }
 
-                                VfsUtil.findFileByIoFile(ioFile, true)?.let {
-                                    vfsFile ->
+                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
                                     compile(vfsFile)
                                     openFileInEditor(vfsFile)
                                 }
@@ -118,15 +112,15 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
                         },
                         undoLabel ?: "Vaadin Copilot Write File",
                         null,
-                        UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
+                        UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
+                    )
             }
         }
     }
 
     private fun openFileInEditor(vfsFile: VirtualFile) {
         val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
-        FileEditorManager.getInstance(project)
-            .openTextEditor(openFileDescriptor, false)
+        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }
 
     private fun compile(vfsFile: VirtualFile) {
@@ -142,10 +136,8 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) :
     }
 
     open fun doCreate(ioFile: File, content: String): PsiFile {
-        val fileType =
-            FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
-        return PsiFileFactory.getInstance(project)
-            .createFileFromText(ioFile.name, fileType, content)
+        val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
+        return PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)
     }
 
     open fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {

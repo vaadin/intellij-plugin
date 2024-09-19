@@ -10,8 +10,7 @@ import com.intellij.openapi.vfs.findDocument
 import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 import java.io.File
 
-open class UndoHandler(project: Project, data: Map<String, Any>) :
-    AbstractHandler(project) {
+open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
 
     private val copilotActionPrefix = "_Undo Vaadin Copilot"
 
@@ -37,16 +36,12 @@ open class UndoHandler(project: Project, data: Map<String, Any>) :
                     val editor = wrapper.getFileEditor()
                     runWriteAction {
                         if (undoManager.isUndoAvailable(editor)) {
-                            val undo =
-                                undoManager
-                                    .getUndoActionNameAndDescription(editor)
-                                    .first
+                            val undo = undoManager.getUndoActionNameAndDescription(editor).first
                             if (undo.startsWith(copilotActionPrefix)) {
                                 undoManager.undo(editor)
                                 commitAndFlush(vfsFile.findDocument())
                                 LOG.info("$undo performed on ${vfsFile.path}")
-                                VaadinCompileOnSaveAction()
-                                    .compile(project, vfsFile)
+                                VaadinCompileOnSaveAction().compile(project, vfsFile)
                             }
                         }
                     }

@@ -10,7 +10,6 @@ class DebugUsingHotSwapAgentAction : ExecutorAction() {
     override fun update(p0: AnActionEvent, p1: Boolean) {}
 
     override fun getExecutor(): Executor {
-        return ExecutorRegistry.getInstance()
-            .getExecutorById(HotswapAgentExecutor.ID)!!
+        return ExecutorRegistry.getInstance().getExecutorById(HotswapAgentExecutor.ID)!!
     }
 }

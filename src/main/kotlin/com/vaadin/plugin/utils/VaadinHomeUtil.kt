@@ -16,8 +16,7 @@ object VaadinHomeUtil {
     /**
      * Get Vaadin home directory.
      *
-     * @return File instance for Vaadin home folder. Does not check if the
-     *   folder exists.
+     * @return File instance for Vaadin home folder. Does not check if the folder exists.
      */
     private fun resolveVaadinHomeDirectory(): File {
         val userHome = System.getProperty(PROPERTY_USER_HOME)
@@ -47,44 +46,35 @@ object VaadinHomeUtil {
     fun updateOrInstallHotSwapJar(): String? {
         try {
             val bundledHotswap =
-                this.javaClass.classLoader.getResource(
-                    HOTSWAP_AGENT_JAR_FILE_NAME)
-                    ?: throw IllegalStateException(
-                        "The plugin package is broken: no hotswap-agent.jar found")
+                this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
+                    ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found")
             if (!hotSwapAgentJarFile.exists()) {
                 try {
                     check(FileUtil.createParentDirs(hotSwapAgentJarFile)) {
                         "Unable to create directory for hotswap-agent.jar"
                     }
-                    FileUtil.copy(
-                        bundledHotswap.openStream(),
-                        hotSwapAgentJarFile.outputStream())
+                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
                     val version = getHotswapAgentVersion(hotSwapAgentJarFile)
                     LOG.info("Installed hotswap-agent.jar version: $version")
                     return version
                 } catch (e: IOException) {
                     throw IllegalStateException(
-                        "Unable to copy hotswap-agent.jar to " +
-                            hotSwapAgentJarFile.absolutePath,
-                        e)
+                        "Unable to copy hotswap-agent.jar to " + hotSwapAgentJarFile.absolutePath,
+                        e,
+                    )
                 }
             } else if (isBundledVersionNewer()) {
                 try {
-                    FileUtil.copy(
-                        bundledHotswap.openStream(),
-                        hotSwapAgentJarFile.outputStream())
+                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
                     val version = getHotswapAgentVersion(hotSwapAgentJarFile)
                     LOG.info("Updated hotswap-agent.jar to version $version")
                     return version
                 } catch (e: IOException) {
-                    throw IllegalStateException(
-                        "Unable to update hotswap-agent.jar", e)
+                    throw IllegalStateException("Unable to update hotswap-agent.jar", e)
                 }
             } else {
                 val version = getHotswapAgentVersion(hotSwapAgentJarFile)
-                LOG.info(
-                    "Using existing hotswap-agent.jar version " +
-                        getHotswapAgentVersion(hotSwapAgentJarFile))
+                LOG.info("Using existing hotswap-agent.jar version " + getHotswapAgentVersion(hotSwapAgentJarFile))
                 return version
             }
         } catch (e: Exception) {
@@ -94,13 +84,10 @@ object VaadinHomeUtil {
     }
 
     private fun isBundledVersionNewer(): Boolean {
-        val hotswapAgentVersionInVaadinFolder =
-            getHotswapAgentVersion(hotSwapAgentJarFile)
+        val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotSwapAgentJarFile)
         val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
-        if (bundledHotswapAgentVersion != null &&
-            hotswapAgentVersionInVaadinFolder != null) {
-            return bundledHotswapAgentVersion.compareTo(
-                hotswapAgentVersionInVaadinFolder) == 1
+        if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
+            return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) == 1
         }
         return false
     }
@@ -110,12 +97,10 @@ object VaadinHomeUtil {
         try {
             tempFile = File.createTempFile("bundled-hotswap-agent", ".jar")
             FileUtil.copy(
-                this.javaClass.classLoader
-                    .getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
-                    ?.openStream()
-                    ?: throw IllegalStateException(
-                        "Unable to copy hotswap-agent.jar to temporary file "),
-                tempFile.outputStream())
+                this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)?.openStream()
+                    ?: throw IllegalStateException("Unable to copy hotswap-agent.jar to temporary file "),
+                tempFile.outputStream(),
+            )
             return getHotswapAgentVersion(tempFile)
         } catch (e: IOException) {
             LOG.error(e.message, e)

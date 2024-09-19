@@ -20,25 +20,17 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
     override fun execute(environment: ExecutionEnvironment) {
         val runProfile =
             environment.runProfile as? JavaRunConfigurationBase
-                ?: throw IllegalStateException(
-                    "$runnerId can only run Java configurations")
+                ?: throw IllegalStateException("$runnerId can only run Java configurations")
         val javaCommandLine =
-            environment.state as? JavaCommandLine
-                ?: throw IllegalStateException(
-                    "$runnerId needs a JavaCommandLine")
-        val module =
-            runProfile.configurationModule?.module
-                ?: throw IllegalStateException("$runnerId needs a module")
+            environment.state as? JavaCommandLine ?: throw IllegalStateException("$runnerId needs a JavaCommandLine")
+        val module = runProfile.configurationModule?.module ?: throw IllegalStateException("$runnerId needs a module")
 
         val javaParameters = javaCommandLine.javaParameters
-        val jdkOk =
-            JdkUtil.isJetbrainsRuntime(javaParameters.jdk) ||
-                JdkUtil.getCompatibleJetbrainsJdk(module) != null
+        val jdkOk = JdkUtil.isJetbrainsRuntime(javaParameters.jdk) || JdkUtil.getCompatibleJetbrainsJdk(module) != null
         if (jdkOk) {
             super.execute(environment)
         } else {
-            val bundledJetbrainsJdk =
-                JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
+            val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
             val projectSdkMajor = JdkUtil.getProjectSdkVersion(module)
 
             ApplicationManager.getApplication().invokeLater {

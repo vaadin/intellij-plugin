@@ -6,7 +6,7 @@ class StarterModel(
     var framework: String, // flow / hilla-react
     var language: String, // java / kotlin
     var buildTool: String, // maven / gradle
-    var architecture: String // springboot / servlet / ...
+    var architecture: String, // springboot / servlet / ...
 ) : DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {

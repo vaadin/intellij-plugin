@@ -20,17 +20,11 @@ import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KE
 import java.io.File
 import org.jetbrains.annotations.Nls
 
-class VaadinPanel(
-    propertyGraph: PropertyGraph,
-    private val wizardContext: WizardContext,
-    builder: Panel
-) {
+class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: WizardContext, builder: Panel) {
 
     private val entityNameProperty = propertyGraph.lazyProperty(::suggestName)
-    private val locationProperty =
-        propertyGraph.lazyProperty(::suggestLocationByName)
-    private val canonicalPathProperty =
-        locationProperty.joinCanonicalPath(entityNameProperty)
+    private val locationProperty = propertyGraph.lazyProperty(::suggestLocationByName)
+    private val canonicalPathProperty = locationProperty.joinCanonicalPath(entityNameProperty)
 
     private var quickStarterGroup: CollapsibleRow? = null
     private var skeletonStarterGroup: CollapsibleRow? = null
@@ -53,21 +47,14 @@ class VaadinPanel(
                 }
                 locationProperty.afterChange {
                     commentLabel.text = getLocationComment()
-                    entityNameProperty.set(
-                        suggestName(entityNameProperty.get()))
+                    entityNameProperty.set(suggestName(entityNameProperty.get()))
                     updateModel()
                 }
             }
 
-            quickStarterGroup =
-                collapsibleGroup("Project Settings") {
-                    row {}.cell(quickStarterPanel.root)
-                }
+            quickStarterGroup = collapsibleGroup("Project Settings") { row {}.cell(quickStarterPanel.root) }
 
-            skeletonStarterGroup =
-                collapsibleGroup("Hello World Projects") {
-                    row {}.cell(skeletonStarterPanel.root)
-                }
+            skeletonStarterGroup = collapsibleGroup("Hello World Projects") { row {}.cell(skeletonStarterPanel.root) }
             row {
                 text(
                     "<a href=\"https://vaadin.com/flow\">Flow framework</a> is the most productive" +
@@ -80,8 +67,7 @@ class VaadinPanel(
                         " Java backend.")
             }
             row {
-                text(
-                    "For more configuration options, visit <a href=\"https://start.vaadin.com\">start.vaadin.com</a>")
+                text("For more configuration options, visit <a href=\"https://start.vaadin.com\">start.vaadin.com</a>")
             }
         }
 
@@ -112,42 +98,33 @@ class VaadinPanel(
     }
 
     private fun getLocationComment(): @Nls String {
-        val shortPath =
-            StringUtil.shortenPathWithEllipsis(
-                getPresentablePath(canonicalPathProperty.get()), 60)
+        val shortPath = StringUtil.shortenPathWithEllipsis(getPresentablePath(canonicalPathProperty.get()), 60)
         return UIBundle.message(
             "label.project.wizard.new.project.path.description",
             wizardContext.isCreatingNewProjectInt,
-            shortPath)
+            shortPath,
+        )
     }
 
     private fun updateModel() {
         wizardContext.setProjectFileDirectory(canonicalPathProperty.get())
         wizardContext.projectName = entityNameProperty.get()
         wizardContext.defaultModuleName = entityNameProperty.get()
-        val projectModel =
-            if (quickStarterGroup!!.expanded) quickStarterPanel.model
-            else skeletonStarterPanel.model
+        val projectModel = if (quickStarterGroup!!.expanded) quickStarterPanel.model else skeletonStarterPanel.model
         wizardContext.getUserData(PROJECT_MODEL_PROP_KEY)?.set(projectModel)
     }
 
     private fun Row.projectLocationField(
         locationProperty: GraphProperty<String>,
-        wizardContext: WizardContext
+        wizardContext: WizardContext,
     ): Cell<TextFieldWithBrowseButton> {
         val fileChooserDescriptor =
             FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
                 .withFileFilter { it.isDirectory }
                 .withPathToTextConvertor(::getPresentablePath)
                 .withTextToPathConvertor(::getCanonicalPath)
-        val title =
-            IdeBundle.message(
-                "title.select.project.file.directory",
-                wizardContext.presentationName)
-        val property =
-            locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(
-                title, wizardContext.project, fileChooserDescriptor)
-            .bindText(property)
+        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
+        val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
+        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor).bindText(property)
     }
 }

@@ -23,8 +23,7 @@ class VaadinProjectWizard : GeneratorNewProjectWizard {
     private val propertyGraph: PropertyGraph
         get() = PropertyGraph("Vaadin project")
 
-    private val projectModelProperty =
-        propertyGraph.property<DownloadableModel?>(null)
+    private val projectModelProperty = propertyGraph.property<DownloadableModel?>(null)
 
     val projectModel: DownloadableModel? by projectModelProperty
 

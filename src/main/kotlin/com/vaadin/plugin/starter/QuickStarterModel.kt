@@ -4,11 +4,8 @@ import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 
-class QuickStarterModel(
-    var views: String,
-    var authentication: Boolean,
-    var version: String
-) : BaseState(), DownloadableModel {
+class QuickStarterModel(var views: String, var authentication: Boolean, var version: String) :
+    BaseState(), DownloadableModel {
 
     override fun getDownloadLink(project: Project): String {
         var preset =
@@ -30,7 +27,7 @@ class QuickStarterModel(
         return "https://start.vaadin.com/dl?preset=${preset}&projectName=${
             URLEncoder.encode(
                 project.name,
-                "UTF-8"
+                "UTF-8",
             ).replace("\\+", "%20")
         }"
     }

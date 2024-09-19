@@ -8,8 +8,7 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.impl.status.EditorBasedStatusBarPopup
 import com.vaadin.plugin.utils.VaadinIcons
 
-class CopilotStatusBarPanel(project: Project) :
-    EditorBasedStatusBarPopup(project, false) {
+class CopilotStatusBarPanel(project: Project) : EditorBasedStatusBarPopup(project, false) {
 
     override fun ID(): String {
         return "CopilotStatusBarPanel"

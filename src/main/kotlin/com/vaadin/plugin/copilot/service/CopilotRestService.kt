@@ -28,19 +28,17 @@ class CopilotRestService : RestService() {
     override fun execute(
         urlDecoder: QueryStringDecoder,
         request: FullHttpRequest,
-        context: ChannelHandlerContext
+        context: ChannelHandlerContext,
     ): String? {
         val charset = HttpUtil.getCharset(request, Charset.defaultCharset())
-        val copilotRequest: CommandRequest =
-            jacksonObjectMapper().readValue(request.content().toString(charset))
+        val copilotRequest: CommandRequest = jacksonObjectMapper().readValue(request.content().toString(charset))
 
         if (copilotRequest.projectBasePath == null) {
             sendStatus(HttpResponseStatus.BAD_REQUEST, false, context.channel())
             return null
         }
 
-        val projectBasePath =
-            Path.of(copilotRequest.projectBasePath).toRealPath()
+        val projectBasePath = Path.of(copilotRequest.projectBasePath).toRealPath()
         val project =
             ProjectManager.getInstance().openProjects.find {
                 Path.of(it.basePath!!).toRealPath().equals(projectBasePath)
@@ -53,18 +51,12 @@ class CopilotRestService : RestService() {
         }
 
         val handlerResponse =
-            CopilotPluginUtil.createCommandHandler(
-                    copilotRequest.command, project, copilotRequest.data)
-                .run()
+            CopilotPluginUtil.createCommandHandler(copilotRequest.command, project, copilotRequest.data).run()
         if (handlerResponse.data == null) {
-            sendStatus(
-                handlerResponse.status,
-                HttpUtil.isKeepAlive(request),
-                context.channel())
+            sendStatus(handlerResponse.status, HttpUtil.isKeepAlive(request), context.channel())
         } else {
             val json = Gson().toJson(handlerResponse.data)
-            val buff: ByteBuf =
-                Unpooled.copiedBuffer(json, Charset.forName("UTF-8"))
+            val buff: ByteBuf = Unpooled.copiedBuffer(json, Charset.forName("UTF-8"))
             sendResponse(request, context, response("application/json", buff))
         }
         return null

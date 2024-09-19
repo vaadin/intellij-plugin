@@ -20,7 +20,7 @@ class CopilotErrorHandler : ErrorReportSubmitter() {
         events: Array<out IdeaLoggingEvent>,
         additionalInfo: String?,
         parentComponent: Component,
-        consumer: Consumer<in SubmittedReportInfo>
+        consumer: Consumer<in SubmittedReportInfo>,
     ): Boolean {
         val throwableText = events.iterator().next().throwableText
         val firstLine = throwableText.split("\\n".toRegex(), 2)[0].trim()
@@ -32,10 +32,7 @@ class CopilotErrorHandler : ErrorReportSubmitter() {
                 "OS: **${System.getProperty("os.name")}**\n\n"
 
         if (additionalInfo != null) {
-            body +=
-                "Additional info:\n" +
-                    "> ${additionalInfo.replace("\\n+".toRegex(), "\n")}" +
-                    "\n\n"
+            body += "Additional info:\n" + "> ${additionalInfo.replace("\\n+".toRegex(), "\n")}" + "\n\n"
         }
 
         body += "Stacktrace:\n" + "```\n" + throwableText + "\n```"

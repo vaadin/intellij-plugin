@@ -8,18 +8,10 @@ class VaadinIcons {
 
         private const val RESOURCE_PATH = "/vaadin/icons"
 
-        val VAADIN_BLUE =
-            IconLoader.getIcon(
-                "$RESOURCE_PATH/module.svg",
-                VaadinIcons::class.java.classLoader)
+        val VAADIN_BLUE = IconLoader.getIcon("$RESOURCE_PATH/module.svg", VaadinIcons::class.java.classLoader)
 
-        val VAADIN =
-            IconLoader.getIcon(
-                "$RESOURCE_PATH/vaadin.svg",
-                VaadinIcons::class.java.classLoader)
+        val VAADIN = IconLoader.getIcon("$RESOURCE_PATH/vaadin.svg", VaadinIcons::class.java.classLoader)
 
-        val DEBUG_HOTSWAP =
-            IconLoader.getIcon(
-                "$RESOURCE_PATH/swap.svg", VaadinIcons::class.java.classLoader)
+        val DEBUG_HOTSWAP = IconLoader.getIcon("$RESOURCE_PATH/swap.svg", VaadinIcons::class.java.classLoader)
     }
 }

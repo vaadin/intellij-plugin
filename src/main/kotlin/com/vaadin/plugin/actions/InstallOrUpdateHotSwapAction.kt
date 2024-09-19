@@ -11,15 +11,13 @@ class InstallOrUpdateHotSwapAction : AnAction() {
     override fun actionPerformed(p0: AnActionEvent) {
         val version = VaadinHomeUtil.updateOrInstallHotSwapJar()
         if (version != null) {
-            CopilotPluginUtil.notify(
-                "hotswap-agent.jar:$version installed",
-                NotificationType.INFORMATION,
-                p0.project)
+            CopilotPluginUtil.notify("hotswap-agent.jar:$version installed", NotificationType.INFORMATION, p0.project)
         } else {
             CopilotPluginUtil.notify(
                 "Installation of hotswap-agent.jar failed, see logs for details",
                 NotificationType.ERROR,
-                p0.project)
+                p0.project,
+            )
         }
     }
 }

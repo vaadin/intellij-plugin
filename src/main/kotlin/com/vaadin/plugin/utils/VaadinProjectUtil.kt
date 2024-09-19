@@ -22,16 +22,13 @@ class VaadinProjectUtil {
 
     companion object {
 
-        private val LOG: Logger =
-            Logger.getInstance(VaadinProjectUtil::class.java)
+        private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
         private const val VAADIN_LIB_PREFIX = "com.vaadin:"
 
-        val PROJECT_DOWNLOADED_PROP_KEY =
-            Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
+        val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 
-        val PROJECT_MODEL_PROP_KEY =
-            Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
+        val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
 
         fun downloadAndExtract(project: Project, url: String) {
             val filename = "project.zip"
@@ -39,34 +36,24 @@ class VaadinProjectUtil {
             val basePath: String = project.basePath!!
             val downloadedFile = File(basePath, filename)
             LOG.info("File saved to $downloadedFile")
-            val description =
-                DownloadableFileService.getInstance()
-                    .createFileDescription(url, filename)
+            val description = DownloadableFileService.getInstance().createFileDescription(url, filename)
             val downloader =
-                DownloadableFileService.getInstance()
-                    .createDownloader(listOf(description), "Vaadin Project")
+                DownloadableFileService.getInstance().createDownloader(listOf(description), "Vaadin Project")
 
-            downloader
-                .downloadWithBackgroundProgress(basePath, project)
-                .thenApply {
-                    LOG.info("Extracting $downloadedFile")
-                    ZipUtil.extract(
-                        downloadedFile.toPath(), Path.of(basePath), null)
-                    // move contents from single zip directory
-                    getZipRootFolder(downloadedFile)?.let {
-                        LOG.info(
-                            "Zip contains single directory $it, moving to $basePath")
-                        FileUtil.copyDirContent(
-                            File(basePath, it), File(basePath))
-                        FileUtil.delete(File(basePath, it))
-                    }
-                    FileUtil.delete(downloadedFile)
-                    LOG.info("$downloadedFile deleted")
-                    VirtualFileManager.getInstance().syncRefresh()
-                    (project.getUserData(PROJECT_DOWNLOADED_PROP_KEY)
-                            as GraphProperty<Boolean>)
-                        .set(true)
+            downloader.downloadWithBackgroundProgress(basePath, project).thenApply {
+                LOG.info("Extracting $downloadedFile")
+                ZipUtil.extract(downloadedFile.toPath(), Path.of(basePath), null)
+                // move contents from single zip directory
+                getZipRootFolder(downloadedFile)?.let {
+                    LOG.info("Zip contains single directory $it, moving to $basePath")
+                    FileUtil.copyDirContent(File(basePath, it), File(basePath))
+                    FileUtil.delete(File(basePath, it))
                 }
+                FileUtil.delete(downloadedFile)
+                LOG.info("$downloadedFile deleted")
+                VirtualFileManager.getInstance().syncRefresh()
+                (project.getUserData(PROJECT_DOWNLOADED_PROP_KEY) as GraphProperty<Boolean>).set(true)
+            }
         }
 
         @Throws(IOException::class)
@@ -91,14 +78,12 @@ class VaadinProjectUtil {
         fun isVaadinProject(project: Project): Boolean {
             var hasVaadin = false
             ModuleManager.getInstance(project).modules.forEach { module ->
-                ModuleRootManager.getInstance(module)
-                    .orderEntries()
-                    .forEachLibrary { library: Library ->
-                        if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
-                            hasVaadin = true
-                        }
-                        true
+                ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
+                    if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
+                        hasVaadin = true
                     }
+                    true
+                }
             }
             return hasVaadin
         }

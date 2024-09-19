@@ -57,15 +57,14 @@ dependencies {
     }
 }
 
-configure<com.diffplug.gradle.spotless.SpotlessExtension> { // if you are using build.gradle.kts, instead of 'spotless {' use:
-    // configure<com.diffplug.gradle.spotless.SpotlessExtension> {
+configure<com.diffplug.gradle.spotless.SpotlessExtension> {
     kotlin {
         // by default the target is every '.kt' and '.kts` file in the java sourcesets
         ktfmt("0.51").googleStyle().configure {
-            it.setMaxWidth(80)
+            it.setMaxWidth(120)
             it.setBlockIndent(4)
             it.setContinuationIndent(4)
-            it.setRemoveUnusedImports(false)
+            it.setRemoveUnusedImports(true)
             it.setManageTrailingCommas(false)
         }
     }

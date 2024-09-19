@@ -15,8 +15,7 @@ class CopilotPostStartupProjectActivity : ProjectActivity {
         BuiltInServerManager.getInstance().waitForStart()
 
         if (VaadinProjectUtil.isVaadinProject(project)) {
-            val dotFileDirectory =
-                CopilotPluginUtil.getDotFileDirectory(project)
+            val dotFileDirectory = CopilotPluginUtil.getDotFileDirectory(project)
             if (dotFileDirectory == null) {
                 CopilotPluginUtil.createIdeaDirectoryIfMissing(project)
             }
@@ -30,6 +29,7 @@ class CopilotPostStartupProjectActivity : ProjectActivity {
                     override fun projectClosing(project: Project) {
                         CopilotPluginUtil.removeDotFile(project)
                     }
-                })
+                },
+            )
     }
 }

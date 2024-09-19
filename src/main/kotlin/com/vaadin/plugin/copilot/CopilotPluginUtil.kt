@@ -27,8 +27,7 @@ class CopilotPluginUtil {
 
     companion object {
 
-        private val LOG: Logger =
-            Logger.getInstance(CopilotPluginUtil::class.java)
+        private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
         private const val DOTFILE = ".copilot-plugin"
 
@@ -44,13 +43,10 @@ class CopilotPluginUtil {
             UNDO("undo"),
             REDO("redo"),
             REFRESH("refresh"),
-            SHOW_IN_IDE("showInIde")
+            SHOW_IN_IDE("showInIde"),
         }
 
-        private val pluginVersion =
-            PluginManagerCore.getPlugin(
-                    PluginId.getId("com.vaadin.intellij-plugin"))
-                ?.version
+        private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
 
         fun getPluginVersion(): String? {
             return pluginVersion
@@ -58,31 +54,24 @@ class CopilotPluginUtil {
 
         fun notify(content: String, type: NotificationType, project: Project?) {
             Notifications.Bus.notify(
-                Notification(NOTIFICATION_GROUP, content, type)
-                    .setIcon(VaadinIcons.VAADIN),
-                project)
+                Notification(NOTIFICATION_GROUP, content, type).setIcon(VaadinIcons.VAADIN),
+                project,
+            )
         }
 
-        fun createCommandHandler(
-            command: String,
-            project: Project,
-            data: Map<String, Any>
-        ): Handler {
+        fun createCommandHandler(command: String, project: Project, data: Map<String, Any>): Handler {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
-                HANDLERS.WRITE_BASE64.command ->
-                    return WriteBase64FileHandler(project, data)
+                HANDLERS.WRITE_BASE64.command -> return WriteBase64FileHandler(project, data)
                 HANDLERS.UNDO.command -> return UndoHandler(project, data)
                 HANDLERS.REDO.command -> return RedoHandler(project, data)
-                HANDLERS.SHOW_IN_IDE.command ->
-                    return ShowInIdeHandler(project, data)
+                HANDLERS.SHOW_IN_IDE.command -> return ShowInIdeHandler(project, data)
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
                         override fun run(): HandlerResponse {
-                            return HandlerResponse(
-                                HttpResponseStatus.BAD_REQUEST)
+                            return HandlerResponse(HttpResponseStatus.BAD_REQUEST)
                         }
                     }
                 }
@@ -96,9 +85,7 @@ class CopilotPluginUtil {
                 props.setProperty("endpoint", RestUtil.getEndpoint())
                 props.setProperty("ide", "intellij")
                 props.setProperty("version", pluginVersion)
-                props.setProperty(
-                    "supportedActions",
-                    HANDLERS.entries.joinToString(",") { a -> a.command })
+                props.setProperty("supportedActions", HANDLERS.entries.joinToString(",") { a -> a.command })
 
                 val stringWriter = StringWriter()
                 val bufferedWriter =
@@ -107,22 +94,17 @@ class CopilotPluginUtil {
                             write(NORMALIZED_LINE_SEPARATOR)
                         }
                     }
-                props.store(
-                    bufferedWriter,
-                    "Vaadin Copilot Integration Runtime Properties")
+                props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
 
-                val fileType =
-                    FileTypeManager.getInstance().getStdFileType("properties")
+                val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
                     ApplicationManager.getApplication().runWriteAction {
                         dotFileDirectory.findFile(DOTFILE)?.delete()
                         val file =
                             PsiFileFactory.getInstance(project)
-                                .createFileFromText(
-                                    DOTFILE, fileType, stringWriter.toString())
+                                .createFileFromText(DOTFILE, fileType, stringWriter.toString())
                         dotFileDirectory.add(file)
-                        LOG.info(
-                            "$DOTFILE created in ${dotFileDirectory.virtualFile.path}")
+                        LOG.info("$DOTFILE created in ${dotFileDirectory.virtualFile.path}")
                     }
                 }
             } else {
@@ -135,8 +117,7 @@ class CopilotPluginUtil {
                 val dotFileDirectory = getDotFileDirectory(project)
                 dotFileDirectory?.findFile(DOTFILE)?.let {
                     it.delete()
-                    LOG.info(
-                        "$DOTFILE removed from ${dotFileDirectory.virtualFile.path}")
+                    LOG.info("$DOTFILE removed from ${dotFileDirectory.virtualFile.path}")
                     return@runWriteAction
                 }
                 LOG.warn("Cannot remove $DOTFILE")
@@ -148,11 +129,9 @@ class CopilotPluginUtil {
         }
 
         fun getDotFileDirectory(project: Project): PsiDirectory? {
-            return ApplicationManager.getApplication().runReadAction<
-                PsiDirectory?> {
+            return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
                 VfsUtil.findFileByIoFile(getIdeaDir(project), false)?.let {
-                    return@runReadAction PsiManager.getInstance(project)
-                        .findDirectory(it)
+                    return@runReadAction PsiManager.getInstance(project).findDirectory(it)
                 }
                 return@runReadAction null
             }
@@ -161,9 +140,7 @@ class CopilotPluginUtil {
         fun createIdeaDirectoryIfMissing(project: Project) {
             WriteCommandAction.runWriteCommandAction(project) {
                 val ideaDir = getIdeaDir(project).path
-                VfsUtil.createDirectoryIfMissing(ideaDir)?.let {
-                    LOG.info("$ideaDir created")
-                }
+                VfsUtil.createDirectoryIfMissing(ideaDir)?.let { LOG.info("$ideaDir created") }
             }
         }
     }

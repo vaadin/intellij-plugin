@@ -20,13 +20,12 @@ abstract class AbstractHandler(val project: Project) : Handler {
 
     val RESPONSE_BAD_REQUEST = HandlerResponse(HttpResponseStatus.BAD_REQUEST)
 
-    val RESPONSE_ERROR =
-        HandlerResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+    val RESPONSE_ERROR = HandlerResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR)
 
     class FileEditorWrapper(
         private val fileEditor: FileEditor,
         private val project: Project,
-        private val closable: Boolean
+        private val closable: Boolean,
     ) : AutoCloseable {
 
         fun getFileEditor(): FileEditor {
@@ -35,8 +34,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
 
         override fun close() {
             if (closable) {
-                FileEditorManager.getInstance(project)
-                    .closeFile(fileEditor.file)
+                FileEditorManager.getInstance(project).closeFile(fileEditor.file)
             }
         }
     }
@@ -55,8 +53,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
         val manager = FileEditorManager.getInstance(project)
         val editors = manager.getEditors(vfsFile)
         if (editors.isEmpty()) {
-            return FileEditorWrapper(
-                manager.openFile(vfsFile, false).first(), project, true)
+            return FileEditorWrapper(manager.openFile(vfsFile, false).first(), project, true)
         }
         return FileEditorWrapper(editors.first(), project, false)
     }

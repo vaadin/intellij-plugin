@@ -8,11 +8,7 @@ import com.intellij.execution.runners.JavaProgramPatcher
 import com.vaadin.plugin.utils.VaadinHomeUtil
 
 class HotswapAgentProgramPatcher : JavaProgramPatcher() {
-    override fun patchJavaParameters(
-        executor: Executor?,
-        runProfile: RunProfile?,
-        javaParameters: JavaParameters?
-    ) {
+    override fun patchJavaParameters(executor: Executor?, runProfile: RunProfile?, javaParameters: JavaParameters?) {
         if (executor !is HotswapAgentExecutor) {
             return
         }
@@ -28,8 +24,7 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
             // Use the bundled Jetbrains Runtime
             javaParameters.jdk =
                 JdkUtil.getCompatibleJetbrainsJdk(module)
-                    ?: throw IllegalArgumentException(
-                        "The bundled JBR is not compatible with the project JDK")
+                    ?: throw IllegalArgumentException("The bundled JBR is not compatible with the project JDK")
         }
         val agentInHome = VaadinHomeUtil.getHotSwapAgentJar()
 
