@@ -13,7 +13,5 @@ class VaadinIcons {
         val VAADIN = IconLoader.getIcon("$RESOURCE_PATH/vaadin.svg", VaadinIcons::class.java.classLoader)
 
         val DEBUG_HOTSWAP = IconLoader.getIcon("$RESOURCE_PATH/swap.svg", VaadinIcons::class.java.classLoader)
-
     }
-
 }

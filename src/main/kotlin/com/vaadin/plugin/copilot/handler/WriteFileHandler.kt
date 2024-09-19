@@ -49,8 +49,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                 create()
                 if (IdeUtil.willVcsPopupBeShown(project)) {
                     IdeUtil.bringToFront(project)
-                    response =
-                        HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
+                    response = HandlerResponse(HttpResponseStatus.OK, mapOf("blockingPopup" to "true"))
                 }
             }
 
@@ -63,22 +62,23 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
 
     private fun writeAndFlush(vfsFile: VirtualFile) {
         vfsFile.findDocument()?.let {
-            CommandProcessor.getInstance().executeCommand(
-                project,
-                {
-                    WriteCommandAction.runWriteCommandAction(project) {
-                        doWrite(vfsFile, it, content)
-                        commitAndFlush(it)
-                        LOG.info("File $ioFile contents saved")
+            CommandProcessor.getInstance()
+                .executeCommand(
+                    project,
+                    {
+                        WriteCommandAction.runWriteCommandAction(project) {
+                            doWrite(vfsFile, it, content)
+                            commitAndFlush(it)
+                            LOG.info("File $ioFile contents saved")
 
-                        compile(vfsFile)
-                        openFileInEditor(vfsFile)
-                    }
-                },
-                undoLabel ?: "Vaadin Copilot Write File",
-                DocCommandGroupId.noneGroupId(it),
-                UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
-            )
+                            compile(vfsFile)
+                            openFileInEditor(vfsFile)
+                        }
+                    },
+                    undoLabel ?: "Vaadin Copilot Write File",
+                    DocCommandGroupId.noneGroupId(it),
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
+                )
         }
     }
 
@@ -93,26 +93,27 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
 
         if (psiDir != null) {
             runInEdt {
-                CommandProcessor.getInstance().executeCommand(
-                    project,
-                    {
-                        WriteCommandAction.runWriteCommandAction(project) {
-                            val psiFile = doCreate(ioFile, content)
-                            if (psiFile.containingDirectory == null) {
-                                psiDir.add(psiFile)
-                            }
+                CommandProcessor.getInstance()
+                    .executeCommand(
+                        project,
+                        {
+                            WriteCommandAction.runWriteCommandAction(project) {
+                                val psiFile = doCreate(ioFile, content)
+                                if (psiFile.containingDirectory == null) {
+                                    psiDir.add(psiFile)
+                                }
 
-                            VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
-                                compile(vfsFile)
-                                openFileInEditor(vfsFile)
+                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
+                                    compile(vfsFile)
+                                    openFileInEditor(vfsFile)
+                                }
                             }
-                        }
-                        LOG.info("File $ioFile contents saved")
-                    },
-                    undoLabel ?: "Vaadin Copilot Write File",
-                    null,
-                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
-                )
+                            LOG.info("File $ioFile contents saved")
+                        },
+                        undoLabel ?: "Vaadin Copilot Write File",
+                        null,
+                        UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
+                    )
             }
         }
     }
@@ -142,5 +143,4 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     open fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
         doc?.setText(Strings.convertLineSeparators(content))
     }
-
 }

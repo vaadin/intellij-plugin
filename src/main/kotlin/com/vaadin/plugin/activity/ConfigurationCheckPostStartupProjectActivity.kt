@@ -52,9 +52,9 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
             notify(
                 project,
                 "Your $HOTSWAP_CONFIGURABLE class reload setting requires confirmation each time file is going to be reloaded. " +
-                        "It will cause popups appear while working with Vaadin Copilot. " +
-                        "To improve experience please set \"$MESSAGE_RELOAD_CLASSES\" to \"$MESSAGE_RELOAD_ALWAYS\"",
-                HOTSWAP_CONFIGURABLE
+                    "It will cause popups appear while working with Vaadin Copilot. " +
+                    "To improve experience please set \"$MESSAGE_RELOAD_CLASSES\" to \"$MESSAGE_RELOAD_ALWAYS\"",
+                HOTSWAP_CONFIGURABLE,
             )
         }
 
@@ -62,8 +62,8 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
             notify(
                 project,
                 "Your $HOTSWAP_CONFIGURABLE class reload is turned off. It will cause changes are not reflected in your application. " +
-                        "To improve experience please set \"$MESSAGE_RELOAD_CLASSES\" to \"$MESSAGE_RELOAD_ALWAYS\"",
-                HOTSWAP_CONFIGURABLE
+                    "To improve experience please set \"$MESSAGE_RELOAD_CLASSES\" to \"$MESSAGE_RELOAD_ALWAYS\"",
+                HOTSWAP_CONFIGURABLE,
             )
         }
     }
@@ -75,28 +75,22 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
             notify(
                 project,
                 "Your $MESSAGE_VCS settings requires confirmation after creating each new file. " +
-                        "It will cause popups appear while working with Vaadin Copilot. " +
-                        "To improve experience please set \"$MESSAGE_WHEN_FILES_CREATED\" to \"$MESSAGE_ADD_SILENTLY\" or \"$MESSAGE_DO_NOT_ADD\"",
-                VCS_CONFIRMATION_CONFIGURABLE
+                    "It will cause popups appear while working with Vaadin Copilot. " +
+                    "To improve experience please set \"$MESSAGE_WHEN_FILES_CREATED\" to \"$MESSAGE_ADD_SILENTLY\" or \"$MESSAGE_DO_NOT_ADD\"",
+                VCS_CONFIRMATION_CONFIGURABLE,
             )
         }
     }
 
     private fun notify(project: Project, content: String, configurable: String) {
-        val notification = Notification(
-            NOTIFICATION_GROUP,
-            content,
-            NotificationType.INFORMATION
-        ).setIcon(VaadinIcons.VAADIN)
+        val notification =
+            Notification(NOTIFICATION_GROUP, content, NotificationType.INFORMATION).setIcon(VaadinIcons.VAADIN)
         notification.addAction(createGoToConfigurationAction(project, configurable))
         notification.addAction(createDontAskAgainAction())
         Notifications.Bus.notify(notification)
     }
 
-    private fun createGoToConfigurationAction(
-        project: Project,
-        configurable: String
-    ): AnAction {
+    private fun createGoToConfigurationAction(project: Project, configurable: String): AnAction {
         return NotificationAction.create("Show in settings...") { _, notification ->
             notification.hideBalloon()
             ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable)
@@ -104,9 +98,6 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
     }
 
     private fun createDontAskAgainAction(): NotificationAction {
-        return NotificationAction.create(MESSAGE_DONT_ASK_AGAIN) { _, notification ->
-            notification.expire()
-        }
+        return NotificationAction.create(MESSAGE_DONT_ASK_AGAIN) { _, notification -> notification.expire() }
     }
-
 }

@@ -10,7 +10,6 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.utils.IdeUtil
 import java.io.File
 
-
 class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
 
     private val ioFile: File = File(data["file"] as String)
@@ -19,19 +18,20 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
 
     override fun run(): HandlerResponse {
         if (isFileInsideProject(project, ioFile)) {
-            val result = VfsUtil.findFileByIoFile(ioFile, true)?.let { file ->
-                val openFileDescriptor = OpenFileDescriptor(project, file)
-                runInEdt {
-                    FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let { editor ->
-                        editor.selectionModel.removeSelection()
-                        editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
-                        editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+            val result =
+                VfsUtil.findFileByIoFile(ioFile, true)?.let { file ->
+                    val openFileDescriptor = OpenFileDescriptor(project, file)
+                    runInEdt {
+                        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, true)?.let { editor ->
+                            editor.selectionModel.removeSelection()
+                            editor.caretModel.currentCaret.moveToLogicalPosition(LogicalPosition(line, column))
+                            editor.scrollingModel.scrollToCaret(ScrollType.CENTER)
+                        }
+                        IdeUtil.bringToFront(project)
                     }
-                    IdeUtil.bringToFront(project)
+                    LOG.info("File $ioFile opened at $line:$column")
+                    true
                 }
-                LOG.info("File $ioFile opened at $line:$column")
-                true
-            }
             if (result != true) {
                 LOG.warn("Cannot open $ioFile at $line:$column, file does not exist or is not readable")
                 return RESPONSE_ERROR
@@ -43,5 +43,4 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
             return RESPONSE_BAD_REQUEST
         }
     }
-
 }

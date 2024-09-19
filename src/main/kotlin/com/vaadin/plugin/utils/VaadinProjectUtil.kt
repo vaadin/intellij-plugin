@@ -63,7 +63,8 @@ class VaadinProjectUtil {
                 while (en.hasMoreElements()) {
                     val zipEntry = en.nextElement()
                     // we do not necessarily get a separate entry for the subdirectory when the file
-                    // in the ZIP archive is placed in a subdirectory, so we need to check if the slash
+                    // in the ZIP archive is placed in a subdirectory, so we need to check if the
+                    // slash
                     // is found anywhere in the path
                     val indexOf = zipEntry.name.indexOf('/')
                     if (indexOf >= 0) {
@@ -86,7 +87,5 @@ class VaadinProjectUtil {
             }
             return hasVaadin
         }
-
     }
-
 }

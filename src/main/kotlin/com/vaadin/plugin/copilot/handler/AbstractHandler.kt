@@ -25,7 +25,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
     class FileEditorWrapper(
         private val fileEditor: FileEditor,
         private val project: Project,
-        private val closable: Boolean
+        private val closable: Boolean,
     ) : AutoCloseable {
 
         fun getFileEditor(): FileEditor {
@@ -37,7 +37,6 @@ abstract class AbstractHandler(val project: Project) : Handler {
                 FileEditorManager.getInstance(project).closeFile(fileEditor.file)
             }
         }
-
     }
 
     fun isFileInsideProject(project: Project, file: File): Boolean {
@@ -65,5 +64,4 @@ abstract class AbstractHandler(val project: Project) : Handler {
             FileDocumentManager.getInstance().saveDocument(vfsDoc)
         }
     }
-
 }

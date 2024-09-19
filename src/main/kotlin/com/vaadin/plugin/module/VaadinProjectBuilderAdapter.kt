@@ -13,7 +13,6 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.utils.VaadinProjectUtil
 import java.io.File
 
-
 class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
     GeneratorNewProjectWizardBuilderAdapter(vaadinWizard) {
 

@@ -16,9 +16,8 @@ class InstallOrUpdateHotSwapAction : AnAction() {
             CopilotPluginUtil.notify(
                 "Installation of hotswap-agent.jar failed, see logs for details",
                 NotificationType.ERROR,
-                p0.project
+                p0.project,
             )
         }
     }
-
 }

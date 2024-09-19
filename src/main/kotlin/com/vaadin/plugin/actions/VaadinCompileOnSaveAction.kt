@@ -39,15 +39,16 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
             return
         }
 
-        val task = object : Task.Backgroundable(project, "Vaadin: compiling...") {
-            override fun run(indicator: ProgressIndicator) {
-                val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
-                if (session != null) {
-                    HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
-                    LOG.info("File $vfsFile compiled")
+        val task =
+            object : Task.Backgroundable(project, "Vaadin: compiling...") {
+                override fun run(indicator: ProgressIndicator) {
+                    val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
+                    if (session != null) {
+                        HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
+                        LOG.info("File $vfsFile compiled")
+                    }
                 }
             }
-        }
         ProgressManager.getInstance().run(task)
     }
 }

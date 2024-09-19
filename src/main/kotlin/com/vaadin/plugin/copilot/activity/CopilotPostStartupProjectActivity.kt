@@ -22,11 +22,14 @@ class CopilotPostStartupProjectActivity : ProjectActivity {
             CopilotPluginUtil.saveDotFile(project)
         }
 
-        ProjectManager.getInstance().addProjectManagerListener(project, object : ProjectManagerListener {
-            override fun projectClosing(project: Project) {
-                CopilotPluginUtil.removeDotFile(project)
-            }
-        })
+        ProjectManager.getInstance()
+            .addProjectManagerListener(
+                project,
+                object : ProjectManagerListener {
+                    override fun projectClosing(project: Project) {
+                        CopilotPluginUtil.removeDotFile(project)
+                    }
+                },
+            )
     }
-
 }

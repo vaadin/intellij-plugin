@@ -21,9 +21,6 @@ object IdeUtil {
     }
 
     fun bringToFront(project: Project) {
-        runInEdt {
-            ProjectUtil.focusProjectWindow(project, true)
-        }
+        runInEdt { ProjectUtil.focusProjectWindow(project, true) }
     }
-
 }

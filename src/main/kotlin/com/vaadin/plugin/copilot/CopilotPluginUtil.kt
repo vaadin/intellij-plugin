@@ -23,7 +23,6 @@ import java.io.File
 import java.io.StringWriter
 import java.util.*
 
-
 class CopilotPluginUtil {
 
     companion object {
@@ -44,7 +43,7 @@ class CopilotPluginUtil {
             UNDO("undo"),
             REDO("redo"),
             REFRESH("refresh"),
-            SHOW_IN_IDE("showInIde")
+            SHOW_IN_IDE("showInIde"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -55,16 +54,12 @@ class CopilotPluginUtil {
 
         fun notify(content: String, type: NotificationType, project: Project?) {
             Notifications.Bus.notify(
-                Notification(NOTIFICATION_GROUP, content, type)
-                    .setIcon(VaadinIcons.VAADIN), project
+                Notification(NOTIFICATION_GROUP, content, type).setIcon(VaadinIcons.VAADIN),
+                project,
             )
         }
 
-        fun createCommandHandler(
-            command: String,
-            project: Project,
-            data: Map<String, Any>
-        ): Handler {
+        fun createCommandHandler(command: String, project: Project, data: Map<String, Any>): Handler {
             when (command) {
                 HANDLERS.WRITE.command -> return WriteFileHandler(project, data)
                 HANDLERS.WRITE_BASE64.command -> return WriteBase64FileHandler(project, data)
@@ -93,19 +88,21 @@ class CopilotPluginUtil {
                 props.setProperty("supportedActions", HANDLERS.entries.joinToString(",") { a -> a.command })
 
                 val stringWriter = StringWriter()
-                val bufferedWriter = object : BufferedWriter(stringWriter) {
-                    override fun newLine() {
-                        write(NORMALIZED_LINE_SEPARATOR)
+                val bufferedWriter =
+                    object : BufferedWriter(stringWriter) {
+                        override fun newLine() {
+                            write(NORMALIZED_LINE_SEPARATOR)
+                        }
                     }
-                }
                 props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
 
                 val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
                     ApplicationManager.getApplication().runWriteAction {
                         dotFileDirectory.findFile(DOTFILE)?.delete()
-                        val file = PsiFileFactory.getInstance(project)
-                            .createFileFromText(DOTFILE, fileType, stringWriter.toString())
+                        val file =
+                            PsiFileFactory.getInstance(project)
+                                .createFileFromText(DOTFILE, fileType, stringWriter.toString())
                         dotFileDirectory.add(file)
                         LOG.info("$DOTFILE created in ${dotFileDirectory.virtualFile.path}")
                     }
@@ -143,11 +140,8 @@ class CopilotPluginUtil {
         fun createIdeaDirectoryIfMissing(project: Project) {
             WriteCommandAction.runWriteCommandAction(project) {
                 val ideaDir = getIdeaDir(project).path
-                VfsUtil.createDirectoryIfMissing(ideaDir)?.let {
-                    LOG.info("$ideaDir created")
-                }
+                VfsUtil.createDirectoryIfMissing(ideaDir)?.let { LOG.info("$ideaDir created") }
             }
         }
     }
-
 }

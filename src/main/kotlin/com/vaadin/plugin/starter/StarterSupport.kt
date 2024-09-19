@@ -4,43 +4,30 @@ class StarterSupport {
 
     companion object {
 
-        val frameworks = linkedMapOf(
-            "flow" to "Flow / Java",
-            "hilla-react" to "Hilla / React"
-        )
+        val frameworks = linkedMapOf("flow" to "Flow / Java", "hilla-react" to "Hilla / React")
 
-        val languages = linkedMapOf(
-            "java" to "Java",
-            "kotlin" to "Kotlin"
-        )
+        val languages = linkedMapOf("java" to "Java", "kotlin" to "Kotlin")
 
-        val architectures = linkedMapOf(
-            "springboot" to "Spring Boot",
-            "quarkus" to "Quarkus",
-            "jakartaee" to "Jakarta EE",
-            "servlet" to "Servlet"
-        )
+        val architectures =
+            linkedMapOf(
+                "springboot" to "Spring Boot",
+                "quarkus" to "Quarkus",
+                "jakartaee" to "Jakarta EE",
+                "servlet" to "Servlet",
+            )
 
-        val buildTools = linkedMapOf(
-            "maven" to "Maven",
-            "gradle" to "Gradle"
-        )
+        val buildTools = linkedMapOf("maven" to "Maven", "gradle" to "Gradle")
 
-        private val supportMatrix = arrayOf(
-            StarterSupportMatrixElement(
-                "flow",
-                languages.keys,
-                setOf("springboot", "quarkus", "jakartaee", "servlet"),
-                buildTools.keys
-            ),
-            StarterSupportMatrixElement(
-                "hilla-react",
-                setOf("java"),
-                setOf("springboot"),
-                buildTools.keys
-            ),
-        )
-
+        private val supportMatrix =
+            arrayOf(
+                StarterSupportMatrixElement(
+                    "flow",
+                    languages.keys,
+                    setOf("springboot", "quarkus", "jakartaee", "servlet"),
+                    buildTools.keys,
+                ),
+                StarterSupportMatrixElement("hilla-react", setOf("java"), setOf("springboot"), buildTools.keys),
+            )
 
         fun isSupportedFramework(model: StarterModel, framework: String): Boolean {
             val foundSupport = getSupport(framework) ?: return false
@@ -55,9 +42,8 @@ class StarterSupport {
         fun isSupportedArchitecture(model: StarterModel, architecture: String): Boolean {
             val foundSupport = getSupport(model.framework) ?: return false
             if (model.buildTool == "gradle") {
-                return foundSupport.architectures.contains(architecture) && setOf("springboot", "servlet").contains(
-                    architecture
-                )
+                return foundSupport.architectures.contains(architecture) &&
+                    setOf("springboot", "servlet").contains(architecture)
             } else if (model.language == "kotlin") {
                 return architecture == "springboot"
             }
@@ -79,7 +65,5 @@ class StarterSupport {
         private fun getSupport(framework: String): StarterSupportMatrixElement? {
             return supportMatrix.find { it.framework == framework }
         }
-
     }
-
 }

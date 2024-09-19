@@ -11,5 +11,4 @@ class VaadinOnSaveInfoProvider : ActionOnSaveInfoProvider() {
         info.add(VaadinCompileOnSaveActionInfo(p0))
         return info
     }
-
 }

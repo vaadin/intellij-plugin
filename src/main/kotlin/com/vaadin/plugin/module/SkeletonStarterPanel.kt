@@ -12,70 +12,72 @@ import javax.swing.JRadioButton
 
 class SkeletonStarterPanel {
 
-    private val all = mapOf(
-        "frameworks" to HashMap<JRadioButton, String>(),
-        "languages" to HashMap(),
-        "buildTools" to HashMap(),
-        "architectures" to HashMap(),
-    )
+    private val all =
+        mapOf(
+            "frameworks" to HashMap<JRadioButton, String>(),
+            "languages" to HashMap(),
+            "buildTools" to HashMap(),
+            "architectures" to HashMap(),
+        )
 
     private var kotlinInfo: JEditorPane? = null
     private var notAllArchitecturesSupportedMessage: JEditorPane? = null
 
-    val model = StarterModel(
-        StarterSupport.frameworks.keys.first(),
-        StarterSupport.languages.keys.first(),
-        StarterSupport.buildTools.keys.first(),
-        StarterSupport.architectures.keys.first()
-    )
+    val model =
+        StarterModel(
+            StarterSupport.frameworks.keys.first(),
+            StarterSupport.languages.keys.first(),
+            StarterSupport.buildTools.keys.first(),
+            StarterSupport.architectures.keys.first(),
+        )
 
     val root: DialogPanel = panel {
         buttonsGroup {
-            row("Framework") {
-                for (el in StarterSupport.frameworks.entries) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["frameworks"]!![r.component] = el.key
+                row("Framework") {
+                    for (el in StarterSupport.frameworks.entries) {
+                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                        all["frameworks"]!![r.component] = el.key
+                    }
                 }
             }
-        }.bind(model::framework)
+            .bind(model::framework)
         buttonsGroup {
-            row("Language") {
-                for (el in StarterSupport.languages) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["languages"]!![r.component] = el.key
-                }
-            }.topGap(TopGap.SMALL)
-            row("") {
-                kotlinInfo = text("<i>Kotlin support uses a community add-on.</i>").component
+                row("Language") {
+                        for (el in StarterSupport.languages) {
+                            val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                            all["languages"]!![r.component] = el.key
+                        }
+                    }
+                    .topGap(TopGap.SMALL)
+                row("") { kotlinInfo = text("<i>Kotlin support uses a community add-on.</i>").component }
             }
-        }.bind(model::language)
+            .bind(model::language)
         buttonsGroup {
-            row("Build tool") {
-                for (el in StarterSupport.buildTools) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["buildTools"]!![r.component] = el.key
-                }
-            }.topGap(TopGap.SMALL)
-        }.bind(model::buildTool)
+                row("Build tool") {
+                        for (el in StarterSupport.buildTools) {
+                            val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                            all["buildTools"]!![r.component] = el.key
+                        }
+                    }
+                    .topGap(TopGap.SMALL)
+            }
+            .bind(model::buildTool)
         buttonsGroup {
-            row("Architecture") {
-                for (el in StarterSupport.architectures.entries) {
-                    val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                    all["architectures"]!![r.component] = el.key
+                row("Architecture") {
+                    for (el in StarterSupport.architectures.entries) {
+                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
+                        all["architectures"]!![r.component] = el.key
+                    }
                 }
+                row("") { notAllArchitecturesSupportedMessage = text("").component }
             }
-            row("") {
-                notAllArchitecturesSupportedMessage = text("").component
-            }
-        }.bind(model::architecture)
+            .bind(model::architecture)
     }
 
-    /**
-     * Enable / disable radio buttons depending on support matrix
-     */
+    /** Enable / disable radio buttons depending on support matrix */
     private fun refreshSupport() {
         // apply model updates
-        root?.apply() ?: null
+        root.apply()
         refreshGroup(all["frameworks"]!!, StarterSupport::isSupportedFramework)
         refreshGroup(all["languages"]!!, StarterSupport::isSupportedLanguage)
         refreshGroup(all["buildTools"]!!, StarterSupport::isSupportedBuildTool)
@@ -98,12 +100,10 @@ class SkeletonStarterPanel {
         kotlinInfo!!.isVisible = model.language == "kotlin"
     }
 
-    /**
-     * Checks all JRadioButtons in given group if they should be disabled, fallbacks to first enabled
-     */
+    /** Checks all JRadioButtons in given group if they should be disabled, fallbacks to first enabled */
     private fun refreshGroup(
         group: HashMap<JRadioButton, String>,
-        supportCheck: (model: StarterModel, framework: String) -> Boolean
+        supportCheck: (model: StarterModel, framework: String) -> Boolean,
     ) {
         var selectFirstEnabled = false
         group.forEach {
@@ -116,5 +116,4 @@ class SkeletonStarterPanel {
             group.filterKeys { it.isEnabled }.first().key.isSelected = true
         }
     }
-
 }

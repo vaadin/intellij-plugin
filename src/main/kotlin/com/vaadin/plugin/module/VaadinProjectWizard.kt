@@ -31,5 +31,4 @@ class VaadinProjectWizard : GeneratorNewProjectWizard {
         context.putUserData(PROJECT_MODEL_PROP_KEY, projectModelProperty)
         return VaadinProjectWizardStep(context, propertyGraph)
     }
-
 }

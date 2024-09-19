@@ -21,9 +21,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         for (path in paths) {
             val file = File(path)
             if (isFileInsideProject(project, file)) {
-                VfsUtil.findFileByIoFile(file, true)?.let {
-                    vfsFiles.add(it)
-                }
+                VfsUtil.findFileByIoFile(file, true)?.let { vfsFiles.add(it) }
             } else {
                 LOG.warn("File $file is not a part of a project")
             }
@@ -52,5 +50,4 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         }
         return RESPONSE_OK
     }
-
 }

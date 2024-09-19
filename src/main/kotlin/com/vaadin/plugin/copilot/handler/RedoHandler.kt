@@ -33,5 +33,4 @@ class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(projec
         }
         return RESPONSE_OK
     }
-
 }

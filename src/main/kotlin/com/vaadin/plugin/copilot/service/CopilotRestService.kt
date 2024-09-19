@@ -12,10 +12,10 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.*
-import org.jetbrains.ide.RestService
-import org.jetbrains.io.response
 import java.nio.charset.Charset
 import java.nio.file.Path
+import org.jetbrains.ide.RestService
+import org.jetbrains.io.response
 
 class CopilotRestService : RestService() {
 
@@ -28,11 +28,10 @@ class CopilotRestService : RestService() {
     override fun execute(
         urlDecoder: QueryStringDecoder,
         request: FullHttpRequest,
-        context: ChannelHandlerContext
+        context: ChannelHandlerContext,
     ): String? {
         val charset = HttpUtil.getCharset(request, Charset.defaultCharset())
-        val copilotRequest: CommandRequest = jacksonObjectMapper()
-            .readValue(request.content().toString(charset))
+        val copilotRequest: CommandRequest = jacksonObjectMapper().readValue(request.content().toString(charset))
 
         if (copilotRequest.projectBasePath == null) {
             sendStatus(HttpResponseStatus.BAD_REQUEST, false, context.channel())
@@ -40,9 +39,10 @@ class CopilotRestService : RestService() {
         }
 
         val projectBasePath = Path.of(copilotRequest.projectBasePath).toRealPath()
-        val project = ProjectManager.getInstance().openProjects.find {
-            Path.of(it.basePath!!).toRealPath().equals(projectBasePath)
-        }
+        val project =
+            ProjectManager.getInstance().openProjects.find {
+                Path.of(it.basePath!!).toRealPath().equals(projectBasePath)
+            }
 
         if (project == null) {
             LOG.error("Project location does not match any open project")
@@ -65,5 +65,4 @@ class CopilotRestService : RestService() {
     override fun isMethodSupported(method: HttpMethod): Boolean {
         return method === HttpMethod.POST
     }
-
 }

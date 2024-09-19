@@ -7,12 +7,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.vaadin.plugin.hotswapagent.HotswapAgentExecutor
 
 class DebugUsingHotSwapAgentAction : ExecutorAction() {
-    override fun update(p0: AnActionEvent, p1: Boolean) {
-
-    }
+    override fun update(p0: AnActionEvent, p1: Boolean) {}
 
     override fun getExecutor(): Executor {
         return ExecutorRegistry.getInstance().getExecutorById(HotswapAgentExecutor.ID)!!
     }
-
 }
