@@ -1,26 +1,39 @@
 package com.vaadin.plugin.starter
 
 import com.intellij.openapi.components.BaseState
+import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 
-class QuickStarterModel(var views: String, var authentication: Boolean, var version: String) :
-    BaseState(), DownloadableModel {
+class QuickStarterModel : BaseState(), DownloadableModel {
+
+    companion object {
+        val VIEWS = listOf("Flow (Java)", "Hilla (React)", "None")
+    }
+
+    private val graph: PropertyGraph = PropertyGraph()
+    val exampleViewsProperty = graph.property(VIEWS.first())
+    val useAuthenticationProperty = graph.property(false)
+    val usePrereleaseProperty = graph.property(false)
+
+    private val exampleViews by exampleViewsProperty
+    private val useAuthentication by useAuthenticationProperty
+    private val usePrerelease by usePrereleaseProperty
 
     override fun getDownloadLink(project: Project): String {
         var preset =
-            if (views.contains("Flow")) {
+            if (exampleViews == VIEWS[0]) {
                 "default"
-            } else if (views.contains("Hilla")) {
+            } else if (exampleViews == VIEWS[1]) {
                 "react"
             } else {
                 "empty"
             }
 
-        if (authentication) {
+        if (useAuthentication) {
             preset += "&preset=partial-auth"
         }
-        if (version === "Prerelease") {
+        if (usePrerelease) {
             preset += "&preset=partial-prerelease"
         }
 

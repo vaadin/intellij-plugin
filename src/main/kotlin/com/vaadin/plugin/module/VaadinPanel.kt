@@ -16,6 +16,8 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.UIBundle
 import com.intellij.ui.dsl.builder.*
+import com.vaadin.plugin.starter.QuickStarterModel
+import com.vaadin.plugin.starter.SkeletonStarterModel
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KEY
 import java.io.File
 import org.jetbrains.annotations.Nls
@@ -29,8 +31,11 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     private var quickStarterGroup: CollapsibleRow? = null
     private var skeletonStarterGroup: CollapsibleRow? = null
 
-    private val quickStarterPanel = QuickStarterPanel()
-    private val skeletonStarterPanel = SkeletonStarterPanel()
+    private val quickStarterModel = QuickStarterModel()
+    private val quickStarterPanel = QuickStarterPanel(quickStarterModel)
+
+    private val skeletonStarterModel = SkeletonStarterModel()
+    private val skeletonStarterPanel = SkeletonStarterPanel(skeletonStarterModel)
 
     init {
         builder.panel {
@@ -110,7 +115,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         wizardContext.setProjectFileDirectory(canonicalPathProperty.get())
         wizardContext.projectName = entityNameProperty.get()
         wizardContext.defaultModuleName = entityNameProperty.get()
-        val projectModel = if (quickStarterGroup!!.expanded) quickStarterPanel.model else skeletonStarterPanel.model
+        val projectModel = if (quickStarterGroup!!.expanded) quickStarterModel else skeletonStarterModel
         wizardContext.getUserData(PROJECT_MODEL_PROP_KEY)?.set(projectModel)
     }
 
