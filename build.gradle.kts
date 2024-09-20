@@ -71,7 +71,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 tasks {
   patchPluginXml {
     sinceBuild.set("233")
-    untilBuild.set("242.*")
+    untilBuild.set("243.*")
   }
 
   signPlugin {
