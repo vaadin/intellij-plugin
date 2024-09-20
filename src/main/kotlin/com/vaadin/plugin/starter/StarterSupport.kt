@@ -4,7 +4,7 @@ class StarterSupport {
 
     companion object {
 
-        val frameworks = linkedMapOf("flow" to "Flow / Java", "hilla-react" to "Hilla / React")
+        val frameworks = linkedMapOf("flow" to "Flow / Java", "hilla" to "Hilla / React")
 
         val languages = linkedMapOf("java" to "Java", "kotlin" to "Kotlin")
 
@@ -26,20 +26,20 @@ class StarterSupport {
                     setOf("springboot", "quarkus", "jakartaee", "servlet"),
                     buildTools.keys,
                 ),
-                StarterSupportMatrixElement("hilla-react", setOf("java"), setOf("springboot"), buildTools.keys),
+                StarterSupportMatrixElement("hilla", setOf("java"), setOf("springboot"), buildTools.keys),
             )
 
-        fun isSupportedFramework(model: StarterModel, framework: String): Boolean {
+        fun isSupportedFramework(model: SkeletonStarterModel, framework: String): Boolean {
             val foundSupport = getSupport(framework) ?: return false
             return foundSupport.architectures.contains(model.architecture)
         }
 
-        fun isSupportedLanguage(model: StarterModel, language: String): Boolean {
+        fun isSupportedLanguage(model: SkeletonStarterModel, language: String): Boolean {
             val foundSupport = getSupport(model.framework) ?: return false
             return foundSupport.languages.contains(language)
         }
 
-        fun isSupportedArchitecture(model: StarterModel, architecture: String): Boolean {
+        fun isSupportedArchitecture(model: SkeletonStarterModel, architecture: String): Boolean {
             val foundSupport = getSupport(model.framework) ?: return false
             if (model.buildTool == "gradle") {
                 return foundSupport.architectures.contains(architecture) &&
@@ -50,7 +50,7 @@ class StarterSupport {
             return foundSupport.architectures.contains(architecture)
         }
 
-        fun isSupportedBuildTool(model: StarterModel, buildTool: String): Boolean {
+        fun isSupportedBuildTool(model: SkeletonStarterModel, buildTool: String): Boolean {
             val foundSupport = getSupport(model.framework) ?: return false
             if (model.language == "kotlin") {
                 return foundSupport.buildTools.contains(buildTool) && buildTool == "maven"
@@ -58,7 +58,7 @@ class StarterSupport {
             return foundSupport.buildTools.contains(buildTool)
         }
 
-        fun supportsAllArchitectures(model: StarterModel): Boolean {
+        fun supportsAllArchitectures(model: SkeletonStarterModel): Boolean {
             return getSupport(model.framework)?.architectures?.containsAll(architectures.keys)!!
         }
 

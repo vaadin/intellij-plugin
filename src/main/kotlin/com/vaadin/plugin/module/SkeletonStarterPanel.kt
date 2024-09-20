@@ -1,119 +1,130 @@
 package com.vaadin.plugin.module
 
+import com.intellij.openapi.observable.properties.GraphProperty
+import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.ui.dsl.builder.TopGap
-import com.intellij.ui.dsl.builder.bind
+import com.intellij.ui.dsl.builder.Row
+import com.intellij.ui.dsl.builder.SegmentedButton
+import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
-import com.jetbrains.rd.util.first
-import com.vaadin.plugin.starter.StarterModel
+import com.vaadin.plugin.starter.SkeletonStarterModel
 import com.vaadin.plugin.starter.StarterSupport
-import javax.swing.JEditorPane
-import javax.swing.JRadioButton
 
-class SkeletonStarterPanel {
+class SkeletonStarterPanel(private val model: SkeletonStarterModel) {
 
-    private val all =
-        mapOf(
-            "frameworks" to HashMap<JRadioButton, String>(),
-            "languages" to HashMap(),
-            "buildTools" to HashMap(),
-            "architectures" to HashMap(),
-        )
+    private class SegmentModel(
+        val values: LinkedHashMap<String, String>,
+        val property: GraphProperty<String>,
+        val supported: ((SkeletonStarterModel, String) -> Boolean)
+    ) {
+        var component: SegmentedButton<String>? = null
 
-    private var kotlinInfo: JEditorPane? = null
-    private var notAllArchitecturesSupportedMessage: JEditorPane? = null
+        fun reset() {
+            property.set(values.keys.first())
+        }
 
-    val model =
-        StarterModel(
-            StarterSupport.frameworks.keys.first(),
-            StarterSupport.languages.keys.first(),
-            StarterSupport.buildTools.keys.first(),
-            StarterSupport.architectures.keys.first(),
-        )
+        fun value(): String {
+            return property.get()
+        }
 
-    val root: DialogPanel = panel {
-        buttonsGroup {
-                row("Framework") {
-                    for (el in StarterSupport.frameworks.entries) {
-                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                        all["frameworks"]!![r.component] = el.key
-                    }
-                }
-            }
-            .bind(model::framework)
-        buttonsGroup {
-                row("Language") {
-                        for (el in StarterSupport.languages) {
-                            val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                            all["languages"]!![r.component] = el.key
-                        }
-                    }
-                    .topGap(TopGap.SMALL)
-                row("") { kotlinInfo = text("<i>Kotlin support uses a community add-on.</i>").component }
-            }
-            .bind(model::language)
-        buttonsGroup {
-                row("Build tool") {
-                        for (el in StarterSupport.buildTools) {
-                            val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                            all["buildTools"]!![r.component] = el.key
-                        }
-                    }
-                    .topGap(TopGap.SMALL)
-            }
-            .bind(model::buildTool)
-        buttonsGroup {
-                row("Architecture") {
-                    for (el in StarterSupport.architectures.entries) {
-                        val r = radioButton(el.value, el.key).onChanged { refreshSupport() }
-                        all["architectures"]!![r.component] = el.key
-                    }
-                }
-                row("") { notAllArchitecturesSupportedMessage = text("").component }
-            }
-            .bind(model::architecture)
+        fun label(): String {
+            return values[value()]!!
+        }
+
+        fun label(key: String): String {
+            return values[key]!!
+        }
+
+        fun update() {
+            component?.let { values.forEach { v -> it.update(v.key) } }
+        }
     }
 
-    /** Enable / disable radio buttons depending on support matrix */
-    private fun refreshSupport() {
-        // apply model updates
-        root?.apply() ?: null
-        refreshGroup(all["frameworks"]!!, StarterSupport::isSupportedFramework)
-        refreshGroup(all["languages"]!!, StarterSupport::isSupportedLanguage)
-        refreshGroup(all["buildTools"]!!, StarterSupport::isSupportedBuildTool)
-        refreshGroup(all["architectures"]!!, StarterSupport::isSupportedArchitecture)
-        refreshKotlinMessage()
+    private class ViewModel(val model: SkeletonStarterModel) {
+        val framework =
+            SegmentModel(StarterSupport.frameworks, model.frameworkProperty, StarterSupport::isSupportedFramework)
+        val language =
+            SegmentModel(StarterSupport.languages, model.languageProperty, StarterSupport::isSupportedLanguage)
+        val buildTool =
+            SegmentModel(StarterSupport.buildTools, model.buildToolProperty, StarterSupport::isSupportedBuildTool)
+        val architecture =
+            SegmentModel(
+                StarterSupport.architectures, model.architectureProperty, StarterSupport::isSupportedArchitecture)
+
+        fun all(): List<SegmentModel> {
+            return listOf(framework, language, buildTool, architecture)
+        }
+
+        fun isSupported(segmentModel: SegmentModel, value: String): Boolean {
+            return segmentModel.supported(model, value)
+        }
+    }
+
+    private val viewModel: ViewModel = ViewModel(model)
+
+    private val graph: PropertyGraph = PropertyGraph()
+    private val kotlinInfoVisibleProperty = graph.property(false)
+    private val notAllArchitecturesVisibleProperty = graph.property(false)
+    private val notAllArchitecturesSupportedMessage = graph.property("")
+
+    init {
+        viewModel.framework.property.afterChange { refreshSegments("framework") }
+        viewModel.language.property.afterChange { refreshSegments("language") }
+        viewModel.buildTool.property.afterChange { refreshSegments("buildTool") }
+        viewModel.architecture.property.afterChange { refreshSegments("architecture") }
+        notAllArchitecturesSupportedMessage.afterChange { notAllArchitecturesVisibleProperty.set(it != "") }
+    }
+
+    private fun buildSegment(row: Row, segmentModel: SegmentModel) {
+        segmentModel.component =
+            row.segmentedButton(segmentModel.values.keys) {
+                    this.text = segmentModel.label(it)
+                    this.enabled = viewModel.isSupported(segmentModel, it)
+                }
+                .bind(segmentModel.property)
+    }
+
+    val root: DialogPanel = panel {
+        buildSegment(row("Framework") {}, viewModel.framework)
+        buildSegment(row("Language") {}, viewModel.language)
+        row("") { text("<i>Kotlin support uses a community add-on.</i>") }.visibleIf(kotlinInfoVisibleProperty)
+        buildSegment(row("Build tool") {}, viewModel.buildTool)
+        buildSegment(row("Architecture") {}, viewModel.architecture)
+        row("") { text("").bindText(notAllArchitecturesSupportedMessage) }.visibleIf(notAllArchitecturesVisibleProperty)
+    }
+
+    private fun refreshSegments(source: String) {
+        if (source != "framework") {
+            viewModel.framework.update()
+        }
+        if (source != "language") {
+            viewModel.language.update()
+        }
+        if (source != "buildTool") {
+            viewModel.buildTool.update()
+        }
+        if (source != "architecture") {
+            viewModel.architecture.update()
+        }
         refreshArchitecturesSupportedMessage()
+        refreshKotlinInfo()
+        fallbackToFirstEnabled()
+    }
+
+    private fun refreshKotlinInfo() {
+        kotlinInfoVisibleProperty.set(viewModel.language.value() == "kotlin")
     }
 
     private fun refreshArchitecturesSupportedMessage() {
         if (StarterSupport.supportsAllArchitectures(model)) {
-            notAllArchitecturesSupportedMessage?.isVisible = false
+            notAllArchitecturesSupportedMessage.set("")
         } else {
-            notAllArchitecturesSupportedMessage?.isVisible = true
-            val frameworkName = StarterSupport.frameworks[model.framework]
-            notAllArchitecturesSupportedMessage?.text = "<i>$frameworkName does not support all architectures.</i>"
+            val frameworkName = viewModel.framework.label()
+            notAllArchitecturesSupportedMessage.set("<i>$frameworkName does not support all architectures.</i>")
         }
     }
 
-    private fun refreshKotlinMessage() {
-        kotlinInfo!!.isVisible = model.language == "kotlin"
-    }
-
-    /** Checks all JRadioButtons in given group if they should be disabled, fallbacks to first enabled */
-    private fun refreshGroup(
-        group: HashMap<JRadioButton, String>,
-        supportCheck: (model: StarterModel, framework: String) -> Boolean,
-    ) {
-        var selectFirstEnabled = false
-        group.forEach {
-            it.key.isEnabled = supportCheck(model, it.value)
-            if (!it.key.isEnabled && it.key.isSelected) {
-                selectFirstEnabled = true
-            }
-        }
-        if (selectFirstEnabled) {
-            group.filterKeys { it.isEnabled }.first().key.isSelected = true
-        }
+    private fun fallbackToFirstEnabled() {
+        viewModel.all().filter { !viewModel.isSupported(it, it.value()) }.forEach { it.reset() }
     }
 }

@@ -32,7 +32,7 @@ class VaadinProjectUtil {
 
         fun downloadAndExtract(project: Project, url: String) {
             val filename = "project.zip"
-            LOG.info("Downloading $filename")
+            LOG.info("Downloading $url")
             val basePath: String = project.basePath!!
             val downloadedFile = File(basePath, filename)
             LOG.info("File saved to $downloadedFile")
