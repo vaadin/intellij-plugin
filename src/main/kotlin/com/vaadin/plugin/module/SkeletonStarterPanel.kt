@@ -77,7 +77,7 @@ class SkeletonStarterPanel {
     /** Enable / disable radio buttons depending on support matrix */
     private fun refreshSupport() {
         // apply model updates
-        root.apply()
+        root?.apply() ?: null
         refreshGroup(all["frameworks"]!!, StarterSupport::isSupportedFramework)
         refreshGroup(all["languages"]!!, StarterSupport::isSupportedLanguage)
         refreshGroup(all["buildTools"]!!, StarterSupport::isSupportedBuildTool)
