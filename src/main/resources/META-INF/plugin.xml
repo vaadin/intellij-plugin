@@ -37,10 +37,12 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <backgroundPostStartupActivity
+                implementation="com.vaadin.plugin.VaadinProjectDetector"/>
+
         <!-- Vaadin Copilot -->
         <notificationGroup id="Vaadin Copilot" displayType="BALLOON"/>
-        <backgroundPostStartupActivity
-                implementation="com.vaadin.plugin.copilot.activity.CopilotPostStartupProjectActivity"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
                                 id="CopilotStatusBarWidgetFactory" order="last"/>
@@ -62,11 +64,7 @@
         <executor implementation="com.vaadin.plugin.hotswapagent.HotswapAgentExecutor"/>
 
         <!-- Configuration check -->
-        <backgroundPostStartupActivity
-                implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
         <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
-
-        <dependencySupport kind="java" coordinate="com.vaadin:vaadin" displayName="Vaadin"/>
     </extensions>
 
     <actions>
@@ -89,8 +87,14 @@
 
     <projectListeners>
         <listener
-                class="com.vaadin.plugin.copilot.listeners.CopilotModuleRootListener"
+                class="com.vaadin.plugin.VaadinProjectDetector"
                 topic="com.intellij.openapi.roots.ModuleRootListener"/>
+        <listener
+                class="com.vaadin.plugin.copilot.listeners.CopilotVaadinProjectListener"
+                topic="com.vaadin.plugin.listeners.VaadinProjectListener"/>
+        <listener
+            class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
+            topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
     </projectListeners>
 
 </idea-plugin>
