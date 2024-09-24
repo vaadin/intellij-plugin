@@ -65,6 +65,8 @@
         <backgroundPostStartupActivity
                 implementation="com.vaadin.plugin.activity.ConfigurationCheckPostStartupProjectActivity"/>
         <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
+
+        <dependencySupport kind="java" coordinate="com.vaadin:vaadin" displayName="Vaadin"/>
     </extensions>
 
     <actions>
@@ -84,5 +86,11 @@
                           anchor="after"/>
         </action>
     </actions>
+
+    <projectListeners>
+        <listener
+                class="com.vaadin.plugin.copilot.listeners.CopilotModuleRootListener"
+                topic="com.intellij.openapi.roots.ModuleRootListener"/>
+    </projectListeners>
 
 </idea-plugin>
