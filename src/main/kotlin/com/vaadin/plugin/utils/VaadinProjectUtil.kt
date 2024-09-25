@@ -76,14 +76,16 @@ class VaadinProjectUtil {
         }
 
         fun isVaadinProject(project: Project): Boolean {
+            return ModuleManager.getInstance(project).modules.any { isVaadinModule(it) }
+        }
+
+        fun isVaadinModule(module: com.intellij.openapi.module.Module): Boolean {
             var hasVaadin = false
-            ModuleManager.getInstance(project).modules.forEach { module ->
-                ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                    if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
-                        hasVaadin = true
-                    }
-                    true
+            ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
+                if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
+                    hasVaadin = true
                 }
+                true
             }
             return hasVaadin
         }

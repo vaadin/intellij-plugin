@@ -1,4 +1,4 @@
-package com.vaadin.plugin.activity
+package com.vaadin.plugin.listeners
 
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
@@ -11,7 +11,6 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.vcs.VcsBundle
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
@@ -20,7 +19,7 @@ import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 
-class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
+class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
 
     companion object {
         const val NOTIFICATION_GROUP = "Vaadin Configuration Check"
@@ -38,11 +37,16 @@ class ConfigurationCheckPostStartupProjectActivity : ProjectActivity {
         val MESSAGE_DONT_ASK_AGAIN = IdeCoreBundle.message("dialog.options.do.not.ask")
     }
 
-    override suspend fun execute(project: Project) {
-        checkReloadClassesSetting(project)
-        checkVcsAddConfirmationSetting(project)
-        RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
-            VaadinHomeUtil.updateOrInstallHotSwapJar()
+    private var triggered = false
+
+    override fun vaadinProjectDetected(project: Project) {
+        if (!triggered) {
+            triggered = true
+            checkReloadClassesSetting(project)
+            checkVcsAddConfirmationSetting(project)
+            RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
+                VaadinHomeUtil.updateOrInstallHotSwapJar()
+            }
         }
     }
 
