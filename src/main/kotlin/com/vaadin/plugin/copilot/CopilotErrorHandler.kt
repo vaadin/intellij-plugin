@@ -10,6 +10,8 @@ import java.awt.Component
 
 class CopilotErrorHandler : ErrorReportSubmitter() {
 
+    private val ghMaxBodyLength = 5000
+
     private val url = "https://github.com/vaadin/intellij-plugin/issues/new"
 
     override fun getReportActionText(): String {
@@ -22,9 +24,13 @@ class CopilotErrorHandler : ErrorReportSubmitter() {
         parentComponent: Component,
         consumer: Consumer<in SubmittedReportInfo>,
     ): Boolean {
-        val throwableText = events.iterator().next().throwableText
+        var throwableText = events.iterator().next().throwableText
         val firstLine = throwableText.split("\\n".toRegex(), 2)[0].trim()
         val appName = ApplicationInfo.getInstance().fullApplicationName
+
+        if (throwableText.length > ghMaxBodyLength) {
+            throwableText = throwableText.substring(0, ghMaxBodyLength)
+        }
 
         var body =
             "Plugin version: **${pluginDescriptor.version}**\n" +
@@ -35,7 +41,7 @@ class CopilotErrorHandler : ErrorReportSubmitter() {
             body += "Additional info:\n" + "> ${additionalInfo.replace("\\n+".toRegex(), "\n")}" + "\n\n"
         }
 
-        body += "Stacktrace:\n" + "```\n" + throwableText + "\n```"
+        body += "Stacktrace:\n```\n$throwableText\n```"
 
         val title = "[Error report] $firstLine"
         BrowserUtil.browse("$url?title=$title&body=$body")
