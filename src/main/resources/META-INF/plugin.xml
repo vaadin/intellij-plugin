@@ -82,6 +82,9 @@
             <add-to-group group-id="RunDashboardContentToolbar"
                           relative-to-action="RunDashboard.Debug"
                           anchor="after"/>
+            <add-to-group group-id="XDebugger.ToolWindow.TopToolbar3"
+                          relative-to-action="Rerun"
+                          anchor="after" />
         </action>
     </actions>
 
