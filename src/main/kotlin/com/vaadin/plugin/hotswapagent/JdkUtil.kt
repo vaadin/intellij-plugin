@@ -18,7 +18,7 @@ class JdkUtil {
         fun isJetbrainsRuntime(jdk: Sdk?): Boolean {
             val homePath = jdk?.homePath ?: throw IllegalStateException("JDK has no home path: $jdk")
             val jdkInfo = JdkVersionDetector.getInstance().detectJdkVersionInfo(homePath)
-            return "JBR" == jdkInfo?.variant?.prefix
+            return "jbr" == jdkInfo?.variant?.prefix?.lowercase();
         }
 
         fun getBundledJetbrainsJdk(): Sdk {
