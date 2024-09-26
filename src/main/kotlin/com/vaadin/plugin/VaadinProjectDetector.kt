@@ -13,7 +13,7 @@ class VaadinProjectDetector : ModuleRootListener, ProjectActivity {
     private val LOG: Logger = Logger.getInstance(VaadinProjectDetector::class.java)
 
     override fun rootsChanged(event: ModuleRootEvent) {
-        if (isVaadinProject(event.project) && event.project.isOpen) {
+        if (event.project.isOpen && isVaadinProject(event.project)) {
             doNotifyAboutVaadinProject(event.project)
             LOG.info("Vaadin detected in dependencies of " + event.project.name)
         }
