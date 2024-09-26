@@ -45,9 +45,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                 override fun run(indicator: ProgressIndicator) {
                     val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                     if (session != null) {
-                        WriteIntentReadAction.run {
-                            HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
-                        }
+                        WriteIntentReadAction.run { HotSwapUI.getInstance(project).compileAndReload(session, vfsFile) }
                         LOG.info("File $vfsFile compiled")
                     }
                 }
