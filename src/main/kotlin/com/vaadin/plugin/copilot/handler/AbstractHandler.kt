@@ -61,7 +61,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
     fun commitAndFlush(vfsDoc: Document?) {
         if (vfsDoc != null) {
             PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
-            FileDocumentManager.getInstance().saveDocument(vfsDoc)
+            FileDocumentManager.getInstance().saveDocuments(vfsDoc::equals)
         }
     }
 }
