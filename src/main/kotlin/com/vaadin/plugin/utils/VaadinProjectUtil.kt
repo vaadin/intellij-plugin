@@ -1,6 +1,7 @@
 package com.vaadin.plugin.utils
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
@@ -8,6 +9,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.libraries.Library
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
@@ -25,6 +27,8 @@ class VaadinProjectUtil {
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
 
         private const val VAADIN_LIB_PREFIX = "com.vaadin:"
+
+        val VAADIN_MODULE_ROOTS = Key<Array<VirtualFile>>("vaadin_module_roots")
 
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 
@@ -75,11 +79,11 @@ class VaadinProjectUtil {
             }
         }
 
-        fun isVaadinProject(project: Project): Boolean {
-            return ModuleManager.getInstance(project).modules.any { isVaadinModule(it) }
+        fun findVaadinModule(project: Project): Module? {
+            return ModuleManager.getInstance(project).modules.find { isVaadinModule(it) }
         }
 
-        fun isVaadinModule(module: com.intellij.openapi.module.Module): Boolean {
+        private fun isVaadinModule(module: Module): Boolean {
             var hasVaadin = false
             ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
                 if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
