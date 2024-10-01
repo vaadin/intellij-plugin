@@ -23,9 +23,8 @@ class WriteBase64FileHandler(project: Project, data: Map<String, Any>) : WriteFi
 
     override fun doCreate(ioFile: File, content: String): PsiFile {
         Files.createFile(ioFile.toPath())
-        val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)!!
-        doWrite(vfsFile, null, content)
-        copyResource(vfsFile)
+        val vfsFile = VfsUtil.findFileByIoFile(ioFile, true)
+        doWrite(vfsFile!!, null, content)
         return PsiManager.getInstance(project).findFile(vfsFile)!!
     }
 
