@@ -35,8 +35,8 @@ class WriteBase64FileHandler(project: Project, data: Map<String, Any>) : WriteFi
         val resourceRoot = list.find { vfsFile.path.startsWith(it.path) }
         val resourceRelativeParentPath = vfsFile.parent.path.substringAfter(resourceRoot!!.path)
         val output = CompilerPaths.getModuleOutputPath(module, false)
-        val resourceOutput = VfsUtil.createDirectoryIfMissing(output + resourceRelativeParentPath)
+        val resourceOutput = VfsUtil.createDirectories(output + resourceRelativeParentPath)
         LOG.info("Copying resource: ${vfsFile.path} to $resourceOutput")
-        VfsUtil.copyFile(this, vfsFile, resourceOutput!!)
+        VfsUtil.copyFile(this, vfsFile, resourceOutput)
     }
 }
