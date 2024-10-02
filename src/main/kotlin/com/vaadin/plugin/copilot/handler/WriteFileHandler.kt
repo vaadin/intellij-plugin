@@ -21,6 +21,8 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
 import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 import com.vaadin.plugin.utils.IdeUtil
+import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.copyResource
+import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.isResource
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
@@ -39,6 +41,9 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                 runInEdt {
                     if (ReadonlyStatusHandler.ensureFilesWritable(project, vfsFile)) {
                         writeAndFlush(vfsFile)
+                        if (isResource(project, vfsFile)) {
+                            copyResource(project, vfsFile)
+                        }
                     } else {
                         LOG.warn("File $ioFile is not writable")
                     }
@@ -100,6 +105,9 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                                 VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
                                     compile(vfsFile)
                                     openFileInEditor(vfsFile)
+                                    if (isResource(project, vfsFile)) {
+                                        copyResource(project, vfsFile)
+                                    }
                                 }
                             }
                             LOG.info("File $ioFile contents saved")

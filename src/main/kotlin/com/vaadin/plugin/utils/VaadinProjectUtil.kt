@@ -1,13 +1,18 @@
 package com.vaadin.plugin.utils
 
+import com.intellij.openapi.application.runWriteAction
+import com.intellij.openapi.compiler.CompilerPaths
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.roots.libraries.Library
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
@@ -17,6 +22,7 @@ import java.io.IOException
 import java.nio.file.Path
 import java.util.*
 import java.util.zip.ZipFile
+import org.jetbrains.jps.model.java.JavaResourceRootType
 
 class VaadinProjectUtil {
 
@@ -88,6 +94,25 @@ class VaadinProjectUtil {
                 true
             }
             return hasVaadin
+        }
+
+        fun isResource(project: Project, vfsFile: VirtualFile): Boolean {
+            val module = ProjectRootManager.getInstance(project).fileIndex.getModuleForFile(vfsFile)!!
+            val list = ModuleRootManager.getInstance(module).getSourceRoots(JavaResourceRootType.RESOURCE)
+            // find matching resource root for given resource file
+            return list.any { vfsFile.path.startsWith(it.path) }
+        }
+
+        fun copyResource(project: Project, vfsFile: VirtualFile) {
+            val module = ProjectRootManager.getInstance(project).fileIndex.getModuleForFile(vfsFile)!!
+            val list = ModuleRootManager.getInstance(module).getSourceRoots(JavaResourceRootType.RESOURCE)
+            // find matching resource root for given resource file
+            val resourceRoot = list.find { vfsFile.path.startsWith(it.path) }
+            val resourceRelativeParentPath = vfsFile.parent.path.substringAfter(resourceRoot!!.path)
+            val output = CompilerPaths.getModuleOutputPath(module, false)
+            val resourceOutput = VfsUtil.createDirectories(output + resourceRelativeParentPath)
+            LOG.info("Copying resource: ${vfsFile.path} to $resourceOutput")
+            runWriteAction { VfsUtil.copyFile(this, vfsFile, resourceOutput) }
         }
     }
 }
