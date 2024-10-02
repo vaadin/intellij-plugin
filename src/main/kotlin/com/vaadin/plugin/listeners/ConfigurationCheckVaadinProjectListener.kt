@@ -4,7 +4,6 @@ import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.IdeCoreBundle
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
@@ -91,9 +90,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     }
 
     private fun checkCompileOnSave(project: Project) {
-        if (!PropertiesComponent.getInstance(project)
-            .getBoolean(
-                VaadinCompileOnSaveActionInfo.Companion.PROPERTY, VaadinCompileOnSaveActionInfo.Companion.DEFAULT)) {
+        if (!VaadinCompileOnSaveActionInfo.isEnabledForProject(project)) {
             notify(
                 project,
                 "Turn on Compile Java Files action while Debugging using HotSwap to see instant changes.",
