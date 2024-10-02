@@ -4,7 +4,6 @@ import com.intellij.debugger.DebuggerManagerEx
 import com.intellij.debugger.ui.HotSwapUI
 import com.intellij.ide.actionsOnSave.impl.ActionsOnSaveFileDocumentManagerListener
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -45,10 +44,8 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                 override fun run(indicator: ProgressIndicator) {
                     val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                     if (session != null) {
-                        runWriteAction {
-                            LOG.info("${vfsFile.name} compiling...")
-                            HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
-                        }
+                        LOG.info("${vfsFile.name} compiling...")
+                        HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
                     }
                 }
             }
