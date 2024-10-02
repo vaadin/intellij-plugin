@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ModuleRootEvent
 import com.intellij.openapi.roots.ModuleRootListener
 import com.intellij.openapi.startup.ProjectActivity
@@ -70,7 +71,8 @@ class VaadinProjectDetector : ModuleRootListener, ProjectActivity {
             return externalRootPath
         }
 
-        LOG.info("Project base path: ${project.basePath}")
-        return project.basePath
+        val guessedPath = project.guessProjectDir()?.path
+        LOG.info("Project guessed path: $guessedPath")
+        return guessedPath
     }
 }
