@@ -117,29 +117,35 @@ class CopilotPluginUtil {
                         LOG.info("$newFile created")
                     }
                 }
-            } else {
-                LOG.error("Dot file directory does not exist and cannot be created, check logs for details")
             }
         }
 
         fun removeDotFile(project: Project) {
-            runWriteAction {
-                val dotFile = getDotFileDirectory(project)?.findFile(DOTFILE)
-                dotFile?.let {
-                    try {
-                        it.delete(this)
-                        LOG.info("$it removed")
-                    } catch (e: IOException) {
-                        LOG.error("Failed to delete $DOTFILE: ${e.message}")
+            runInEdt {
+                runWriteAction {
+                    val dotFile = getDotFileDirectory(project)?.findFile(DOTFILE)
+                    dotFile?.let {
+                        try {
+                            it.delete(this)
+                            LOG.info("$it removed")
+                        } catch (e: IOException) {
+                            LOG.error("Failed to delete $DOTFILE: ${e.message}")
+                        }
+                        return@runWriteAction
                     }
-                    return@runWriteAction
+                    LOG.warn("Cannot remove $dotFile - file does not exist")
                 }
-                LOG.warn("Cannot remove $dotFile - file does not exist")
             }
         }
 
         private fun getDotFileDirectory(project: Project): VirtualFile? {
-            return project.guessProjectDir()?.findOrCreateDirectory(IDEA_DIR)
+            val projectDir = project.guessProjectDir()
+            if (projectDir == null) {
+                LOG.error("Cannot guess project directory")
+                return null
+            }
+            LOG.info("Project directory: $projectDir")
+            return projectDir.findOrCreateDirectory(IDEA_DIR)
         }
     }
 }
