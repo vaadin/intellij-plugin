@@ -11,9 +11,9 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.listeners.VaadinProjectListener
 import com.vaadin.plugin.utils.VaadinProjectUtil
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.findVaadinModule
+import java.io.File
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.plugins.gradle.settings.GradleSettings
-import java.io.File
 
 class VaadinProjectDetector : ModuleRootListener, ProjectActivity {
 
