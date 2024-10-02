@@ -28,7 +28,7 @@ class VaadinProjectUtil {
 
         private const val VAADIN_LIB_PREFIX = "com.vaadin:"
 
-        val VAADIN_MODULE_ROOTS = Key<Array<VirtualFile>>("vaadin_module_roots")
+        val VAADIN_ROOT_MODULE_PATH_KEY = Key<VirtualFile>("vaadin_root_module_path")
 
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 

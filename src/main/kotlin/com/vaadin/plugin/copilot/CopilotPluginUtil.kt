@@ -125,9 +125,8 @@ class CopilotPluginUtil {
         }
 
         private fun getIdeaDir(project: Project): VirtualFile {
-            val roots = project.getUserData(VaadinProjectUtil.VAADIN_MODULE_ROOTS)
-            val firstRoot = roots!!.iterator().next()
-            return firstRoot.findOrCreateDirectory(IDEA_DIR)
+            val root = project.getUserData(VaadinProjectUtil.VAADIN_ROOT_MODULE_PATH_KEY)
+            return root!!.findOrCreateDirectory(IDEA_DIR)
         }
 
         private fun getDotFileDirectory(project: Project): PsiDirectory? {
