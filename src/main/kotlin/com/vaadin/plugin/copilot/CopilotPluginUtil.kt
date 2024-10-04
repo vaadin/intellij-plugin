@@ -4,22 +4,18 @@ import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
-import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.psi.PsiDirectory
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiManager
+import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.vfs.*
 import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
-import java.io.File
+import java.io.IOException
 import java.io.StringWriter
 import java.util.*
 
@@ -95,53 +91,61 @@ class CopilotPluginUtil {
                         }
                     }
                 props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
-
-                val fileType = FileTypeManager.getInstance().getStdFileType("properties")
                 runInEdt {
-                    ApplicationManager.getApplication().runWriteAction {
-                        dotFileDirectory.findFile(DOTFILE)?.delete()
-                        val file =
-                            PsiFileFactory.getInstance(project)
-                                .createFileFromText(DOTFILE, fileType, stringWriter.toString())
-                        dotFileDirectory.add(file)
-                        LOG.info("$DOTFILE created in ${dotFileDirectory.virtualFile.path}")
+                    runWriteAction {
+                        val dotFile = dotFileDirectory.findFile(DOTFILE)
+                        dotFile?.let {
+                            try {
+                                it.delete(this)
+                            } catch (e: IOException) {
+                                LOG.error("Failed to delete $DOTFILE: ${e.message}")
+                            }
+                        }
+                        val newFile =
+                            try {
+                                dotFileDirectory.createChildData(this, DOTFILE)
+                            } catch (e: IOException) {
+                                LOG.error("Failed to create $DOTFILE: ${e.message}")
+                                return@runWriteAction
+                            }
+
+                        try {
+                            VfsUtil.saveText(newFile, stringWriter.toString())
+                        } catch (e: IOException) {
+                            LOG.error("Failed to write to $DOTFILE: ${e.message}")
+                        }
+                        LOG.info("$newFile created")
                     }
                 }
-            } else {
-                LOG.error("Cannot create $DOTFILE")
             }
         }
 
         fun removeDotFile(project: Project) {
-            ApplicationManager.getApplication().runWriteAction {
-                val dotFileDirectory = getDotFileDirectory(project)
-                dotFileDirectory?.findFile(DOTFILE)?.let {
-                    it.delete()
-                    LOG.info("$DOTFILE removed from ${dotFileDirectory.virtualFile.path}")
-                    return@runWriteAction
+            runInEdt {
+                runWriteAction {
+                    val dotFile = getDotFileDirectory(project)?.findFile(DOTFILE)
+                    dotFile?.let {
+                        try {
+                            it.delete(this)
+                            LOG.info("$it removed")
+                        } catch (e: IOException) {
+                            LOG.error("Failed to delete $DOTFILE: ${e.message}")
+                        }
+                        return@runWriteAction
+                    }
+                    LOG.warn("Cannot remove $dotFile - file does not exist")
                 }
-                LOG.warn("Cannot remove $DOTFILE")
             }
         }
 
-        private fun getIdeaDir(project: Project): File {
-            return File(project.basePath, IDEA_DIR)
-        }
-
-        fun getDotFileDirectory(project: Project): PsiDirectory? {
-            return ApplicationManager.getApplication().runReadAction<PsiDirectory?> {
-                VfsUtil.findFileByIoFile(getIdeaDir(project), false)?.let {
-                    return@runReadAction PsiManager.getInstance(project).findDirectory(it)
-                }
-                return@runReadAction null
+        private fun getDotFileDirectory(project: Project): VirtualFile? {
+            val projectDir = project.guessProjectDir()
+            if (projectDir == null) {
+                LOG.error("Cannot guess project directory")
+                return null
             }
-        }
-
-        fun createIdeaDirectoryIfMissing(project: Project) {
-            WriteCommandAction.runWriteCommandAction(project) {
-                val ideaDir = getIdeaDir(project).path
-                VfsUtil.createDirectoryIfMissing(ideaDir)?.let { LOG.info("$ideaDir created") }
-            }
+            LOG.info("Project directory: $projectDir")
+            return projectDir.findOrCreateDirectory(IDEA_DIR)
         }
     }
 }
