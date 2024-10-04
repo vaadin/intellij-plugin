@@ -3,6 +3,7 @@ package com.vaadin.plugin.listeners
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.IdeCoreBundle
+import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
@@ -15,6 +16,7 @@ import com.intellij.openapi.vcs.VcsBundle
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
+import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
@@ -44,6 +46,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
             triggered = true
             checkReloadClassesSetting(project)
             checkVcsAddConfirmationSetting(project)
+            checkCompileOnSave(project)
             RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
                 VaadinHomeUtil.updateOrInstallHotSwapJar()
             }
@@ -82,6 +85,16 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
                     "It will cause popups appear while working with Vaadin Copilot. " +
                     "To improve experience please set \"$MESSAGE_WHEN_FILES_CREATED\" to \"$MESSAGE_ADD_SILENTLY\" or \"$MESSAGE_DO_NOT_ADD\"",
                 VCS_CONFIRMATION_CONFIGURABLE,
+            )
+        }
+    }
+
+    private fun checkCompileOnSave(project: Project) {
+        if (!VaadinCompileOnSaveActionInfo.isEnabledForProject(project)) {
+            notify(
+                project,
+                "Turn on Compile Java Files action while Debugging using HotSwap to see instant changes.",
+                ActionsOnSaveConfigurable.CONFIGURABLE_ID,
             )
         }
     }

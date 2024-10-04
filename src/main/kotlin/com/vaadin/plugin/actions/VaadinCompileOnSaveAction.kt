@@ -3,8 +3,6 @@ package com.vaadin.plugin.actions
 import com.intellij.debugger.DebuggerManagerEx
 import com.intellij.debugger.ui.HotSwapUI
 import com.intellij.ide.actionsOnSave.impl.ActionsOnSaveFileDocumentManagerListener
-import com.intellij.ide.util.PropertiesComponent
-import com.intellij.openapi.application.WriteIntentReadAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -13,8 +11,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.DEFAULT
-import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo.Companion.PROPERTY
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 
 class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
@@ -22,7 +18,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
     override fun isEnabledForProject(project: Project): Boolean {
-        return PropertiesComponent.getInstance(project).getBoolean(PROPERTY, DEFAULT)
+        return VaadinCompileOnSaveActionInfo.isEnabledForProject(project)
     }
 
     override fun processDocuments(project: Project, documents: Array<Document?>) {
@@ -45,8 +41,8 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                 override fun run(indicator: ProgressIndicator) {
                     val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                     if (session != null) {
-                        WriteIntentReadAction.run { HotSwapUI.getInstance(project).compileAndReload(session, vfsFile) }
-                        LOG.info("File $vfsFile compiled")
+                        LOG.info("${vfsFile.name} compiling...")
+                        HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
                     }
                 }
             }

@@ -19,7 +19,6 @@ import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiManager
-import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
 import com.vaadin.plugin.utils.IdeUtil
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
@@ -70,8 +69,6 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                             doWrite(vfsFile, it, content)
                             commitAndFlush(it)
                             LOG.info("File $ioFile contents saved")
-
-                            compile(vfsFile)
                             openFileInEditor(vfsFile)
                         }
                     },
@@ -103,12 +100,9 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                                     psiDir.add(psiFile)
                                 }
 
-                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile ->
-                                    compile(vfsFile)
-                                    openFileInEditor(vfsFile)
-                                }
+                                LOG.info("File $ioFile contents saved")
+                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile -> openFileInEditor(vfsFile) }
                             }
-                            LOG.info("File $ioFile contents saved")
                         },
                         undoLabel ?: "Vaadin Copilot Write File",
                         null,
@@ -121,10 +115,6 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     private fun openFileInEditor(vfsFile: VirtualFile) {
         val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
         FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
-    }
-
-    private fun compile(vfsFile: VirtualFile) {
-        VaadinCompileOnSaveAction().compile(project, vfsFile)
     }
 
     private fun getOrCreateParentDir(): VirtualFile? {
