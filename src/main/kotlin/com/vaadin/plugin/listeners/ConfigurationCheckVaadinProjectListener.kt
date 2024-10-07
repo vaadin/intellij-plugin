@@ -25,7 +25,7 @@ import com.vaadin.plugin.utils.VaadinIcons
 class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
 
     companion object {
-        const val NOTIFICATION_GROUP = "Vaadin Configuration Check"
+        const val NOTIFICATION_GROUP = "Vaadin configuration check"
 
         val VCS_CONFIRMATION_CONFIGURABLE =
             VcsBundle.message("configurable.VcsGeneralConfigurationConfigurable.display.name")
