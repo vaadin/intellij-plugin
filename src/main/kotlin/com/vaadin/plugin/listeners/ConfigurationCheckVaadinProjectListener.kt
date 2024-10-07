@@ -3,8 +3,8 @@ package com.vaadin.plugin.listeners
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.IdeCoreBundle
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
