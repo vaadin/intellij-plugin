@@ -64,7 +64,7 @@
         <executor implementation="com.vaadin.plugin.hotswapagent.HotswapAgentExecutor"/>
 
         <!-- Configuration check -->
-        <notificationGroup id="Vaadin Configuration Check" displayType="STICKY_BALLOON"/>
+        <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
     </extensions>
 
     <actions>

@@ -4,6 +4,7 @@ import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.IdeCoreBundle
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
@@ -100,11 +101,14 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     }
 
     private fun notify(project: Project, content: String, configurable: String) {
-        val notification =
-            Notification(NOTIFICATION_GROUP, content, NotificationType.INFORMATION).setIcon(VaadinIcons.VAADIN)
-        notification.addAction(createGoToConfigurationAction(project, configurable))
-        notification.addAction(createDontAskAgainAction())
-        Notifications.Bus.notify(notification)
+        val notificationId = "vaadin.notify.$configurable"
+        if (PropertiesComponent.getInstance(project).getBoolean(notificationId, true)) {
+            val notification =
+                Notification(NOTIFICATION_GROUP, content, NotificationType.INFORMATION).setIcon(VaadinIcons.VAADIN)
+            notification.addAction(createGoToConfigurationAction(project, configurable))
+            notification.addAction(createDontAskAgainAction(project, notificationId))
+            Notifications.Bus.notify(notification)
+        }
     }
 
     private fun createGoToConfigurationAction(project: Project, configurable: String): AnAction {
@@ -114,7 +118,12 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
         }
     }
 
-    private fun createDontAskAgainAction(): NotificationAction {
-        return NotificationAction.create(MESSAGE_DONT_ASK_AGAIN) { _, notification -> notification.expire() }
+    private fun createDontAskAgainAction(project: Project, id: String): NotificationAction {
+        return NotificationAction.create(MESSAGE_DONT_ASK_AGAIN) { _, notification ->
+            run {
+                PropertiesComponent.getInstance(project).setValue(id, false, true)
+                notification.expire()
+            }
+        }
     }
 }
