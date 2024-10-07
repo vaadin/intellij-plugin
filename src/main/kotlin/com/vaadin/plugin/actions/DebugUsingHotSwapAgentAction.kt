@@ -11,8 +11,7 @@ class DebugUsingHotSwapAgentAction : ExecutorAction() {
     override fun update(event: AnActionEvent, isRunning: Boolean) {
         if (isRunning) {
             event.presentation.text = "Rerun using HotSwapAgent"
-            // TODO: https://github.com/vaadin/intellij-plugin/issues/101
-            event.presentation.icon = VaadinIcons.DEBUG_HOTSWAP
+            event.presentation.icon = VaadinIcons.RERUN_HOTSWAP
         } else {
             event.presentation.text = "Debug using HotSwapAgent"
             event.presentation.icon = VaadinIcons.DEBUG_HOTSWAP
