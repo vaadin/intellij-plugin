@@ -7,8 +7,6 @@ import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.text.Strings
@@ -67,9 +65,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                     {
                         WriteCommandAction.runWriteCommandAction(project) {
                             doWrite(vfsFile, it, content)
-                            commitAndFlush(it)
-                            LOG.info("File $ioFile contents saved")
-                            openFileInEditor(vfsFile)
+                            postSave(vfsFile)
                         }
                     },
                     undoLabel ?: "Vaadin Copilot Write File",
@@ -99,9 +95,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                                 if (psiFile.containingDirectory == null) {
                                     psiDir.add(psiFile)
                                 }
-
-                                LOG.info("File $ioFile contents saved")
-                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile -> openFileInEditor(vfsFile) }
+                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile -> postSave(vfsFile) }
                             }
                         },
                         undoLabel ?: "Vaadin Copilot Write File",
@@ -110,11 +104,6 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                     )
             }
         }
-    }
-
-    private fun openFileInEditor(vfsFile: VirtualFile) {
-        val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
-        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }
 
     private fun getOrCreateParentDir(): VirtualFile? {
