@@ -33,7 +33,7 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
                 javaParameters.jdk =
                     JdkUtil.getCompatibleJetbrainsJdk(module)
                         ?: throw IllegalArgumentException("The bundled JBR is not compatible with the project JDK")
-            } catch (e:BrokenJbrException) {
+            } catch (e: BrokenJbrException) {
                 throw IllegalArgumentException("The bundled JBR is known to be broken")
             }
         }

@@ -40,11 +40,8 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                     NoJBRFoundDialog(bundledJetbrainsJdk, projectSdkMajor).show()
                 }
             }
-        } catch (e:BrokenJbrException) {
-            ApplicationManager.getApplication().invokeLater {
-                BadJBRFoundDialog().show()
-            }
+        } catch (e: BrokenJbrException) {
+            ApplicationManager.getApplication().invokeLater { BadJBRFoundDialog().show() }
         }
-
     }
 }
