@@ -47,6 +47,9 @@
         <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
                                 id="CopilotStatusBarWidgetFactory" order="last"/>
         <httpRequestHandler implementation="com.vaadin.plugin.copilot.service.CopilotRestService"/>
+        <projectService
+                serviceInterface="com.vaadin.plugin.copilot.service.CopilotUndoManager"
+                serviceImplementation="com.vaadin.plugin.copilot.service.CopilotUndoManagerImpl"/>
 
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>
