@@ -8,6 +8,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
+import java.io.File
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.jps.model.java.JdkVersionDetector
 import org.jetbrains.plugins.gradle.util.GradleUtil
@@ -33,11 +34,25 @@ class JdkUtil {
                 JavaSdk.getInstance().getVersion(jbrSdk)
                     ?: throw IllegalArgumentException("Unable to detect bundled sdk version")
 
+            if (isBrokenJbr(jbrSdk)) {
+                throw BrokenJbrException()
+            }
+
             if (projectJavaVersion == null ||
                 bundledSdkVersion.maxLanguageLevel.toJavaVersion().isAtLeast(projectJavaVersion)) {
                 return jbrSdk
             }
             return null
+        }
+
+        private fun isBrokenJbr(sdk: Sdk): Boolean {
+            val release = File(sdk.homePath, "release")
+            val version = sdk.versionString
+            if (version != null && version.contains("21.0.4") && release.exists()) {
+                return release.readText().contains("JAVA_RUNTIME_VERSION=\"21.0.4+13-b509.17\"")
+            }
+
+            return false
         }
 
         private fun getProjectJavaVersion(module: Module): Int? {
@@ -76,3 +91,5 @@ class JdkUtil {
         }
     }
 }
+
+class BrokenJbrException : Exception() {}
