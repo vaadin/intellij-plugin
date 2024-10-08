@@ -26,16 +26,25 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
         val module = runProfile.configurationModule?.module ?: throw IllegalStateException("$runnerId needs a module")
 
         val javaParameters = javaCommandLine.javaParameters
-        val jdkOk = JdkUtil.isJetbrainsRuntime(javaParameters.jdk) || JdkUtil.getCompatibleJetbrainsJdk(module) != null
-        if (jdkOk) {
-            super.execute(environment)
-        } else {
-            val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
-            val projectSdkMajor = JdkUtil.getProjectSdkVersion(module)
+        try {
+            val jdkOk =
+                JdkUtil.isJetbrainsRuntime(javaParameters.jdk) || JdkUtil.getCompatibleJetbrainsJdk(module) != null
 
+            if (jdkOk) {
+                super.execute(environment)
+            } else {
+                val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
+                val projectSdkMajor = JdkUtil.getProjectSdkVersion(module)
+
+                ApplicationManager.getApplication().invokeLater {
+                    NoJBRFoundDialog(bundledJetbrainsJdk, projectSdkMajor).show()
+                }
+            }
+        } catch (e:BrokenJbrException) {
             ApplicationManager.getApplication().invokeLater {
-                NoJBRFoundDialog(bundledJetbrainsJdk, projectSdkMajor).show()
+                BadJBRFoundDialog().show()
             }
         }
+
     }
 }

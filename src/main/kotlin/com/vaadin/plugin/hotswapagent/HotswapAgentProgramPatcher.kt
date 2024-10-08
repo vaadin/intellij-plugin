@@ -29,9 +29,13 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
         }
         if (!JdkUtil.isJetbrainsRuntime(javaParameters.jdk)) {
             // Use the bundled Jetbrains Runtime
-            javaParameters.jdk =
-                JdkUtil.getCompatibleJetbrainsJdk(module)
-                    ?: throw IllegalArgumentException("The bundled JBR is not compatible with the project JDK")
+            try {
+                javaParameters.jdk =
+                    JdkUtil.getCompatibleJetbrainsJdk(module)
+                        ?: throw IllegalArgumentException("The bundled JBR is not compatible with the project JDK")
+            } catch (e:BrokenJbrException) {
+                throw IllegalArgumentException("The bundled JBR is known to be broken")
+            }
         }
         val agentInHome = VaadinHomeUtil.getHotSwapAgentJar()
 
