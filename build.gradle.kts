@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
@@ -48,7 +50,12 @@ dependencies {
     pluginVerifier()
     zipSigner()
     instrumentationTools()
+
+    testFramework(TestFrameworkType.Platform)
   }
+
+  testImplementation(kotlin("test"))
+  testImplementation("junit:junit:4.13.2")
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
@@ -84,4 +91,6 @@ tasks {
     channels.set(listOf(publishChannel))
     token.set(System.getenv("PUBLISH_TOKEN"))
   }
+
+  test { useJUnitPlatform() }
 }
