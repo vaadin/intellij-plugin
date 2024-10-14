@@ -73,7 +73,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
         FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }
 
-    private fun notifyUndoManager(vfsFile: VirtualFile) {
+    fun notifyUndoManager(vfsFile: VirtualFile) {
         getCopilotUndoManager().fileWritten(vfsFile)
     }
 

@@ -20,9 +20,20 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
         for (path in paths) {
             val file = File(path)
             if (isFileInsideProject(project, file)) {
-                VfsUtil.findFileByIoFile(file, true)?.let { vfsFiles.add(it) }
+                var vfsFile = VfsUtil.findFileByIoFile(file, true)
+                if (vfsFile != null) {
+                    vfsFiles.add(vfsFile)
+                } else {
+                    // if we want to undo file removal we need to create empty virtual file to write
+                    // content
+                    runWriteAction {
+                        val parent = VfsUtil.createDirectories(file.parent)
+                        vfsFile = parent.createChildData(this, file.name)
+                        vfsFiles.add(vfsFile!!)
+                    }
+                }
             } else {
-                LOG.warn("File $file is not a part of a project")
+                LOG.warn("File $path is not a part of a project")
             }
         }
     }

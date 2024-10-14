@@ -7,43 +7,55 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import java.util.Stack
 import java.util.concurrent.locks.ReentrantLock
 
 @Service(Service.Level.PROJECT)
 class CopilotUndoManagerImpl(val project: Project) : CopilotUndoManager, Disposable {
 
     companion object {
-        const val ACTIONS_ON_SAVE_WINDOW = 500 // ms window for actions on save
+        const val ACTIONS_ON_SAVE_WINDOW = 1000 // ms window for actions on save
     }
 
-    data class FileModification(val modified: Long, var count: Int) {
-        fun isCurrent(): Boolean {
-            return System.currentTimeMillis() - modified <= ACTIONS_ON_SAVE_WINDOW
+    class Batch() {
+        private val time = System.currentTimeMillis()
+        private var count = 0
+
+        fun getCount(): Int {
+            return count
+        }
+
+        fun increment() {
+            count += 1
+        }
+
+        fun isInProgress(): Boolean {
+            return System.currentTimeMillis() - time <= ACTIONS_ON_SAVE_WINDOW
         }
     }
 
-    private val undoStack: MutableMap<String, FileModification> = mutableMapOf()
-    private val redoStack: MutableMap<String, FileModification> = mutableMapOf()
+    private val undoStack: MutableMap<String, Stack<Batch>> = mutableMapOf()
+    private val redoStack: MutableMap<String, Stack<Batch>> = mutableMapOf()
+    private val locks: MutableMap<String, ReentrantLock> = mutableMapOf()
 
-    private val lock = ReentrantLock()
-
+    // increments latest batch for file if is current batch
+    // locking prevents modifying stack during undo / redo
     private val bulkFileListener =
         object : BulkFileListener {
             override fun after(events: MutableList<out VFileEvent>) {
-                if (!lock.isLocked) {
-                    events
-                        .filter { ev -> ev.isFromSave }
-                        .forEach {
-                            if (undoStack.containsKey(it.path)) {
-                                val fileModification = undoStack[it.path]!!
-                                if (fileModification.isCurrent()) {
-                                    undoStack[it.path]!!.count += 1
-                                } else {
-                                    undoStack.remove(it.path)
-                                }
+                events
+                    .filter { ev -> ev.isFromSave }
+                    .filter { ev -> locks[ev.path] == null || !locks[ev.path]!!.isLocked }
+                    .forEach {
+                        val stack = undoStack[it.path]
+                        if (stack != null) {
+                            if (stack.peek().isInProgress()) {
+                                stack.peek().increment()
+                            } else {
+                                undoStack.remove(it.path)
                             }
                         }
-                }
+                    }
             }
         }
 
@@ -52,35 +64,45 @@ class CopilotUndoManagerImpl(val project: Project) : CopilotUndoManager, Disposa
     }
 
     override fun fileWritten(file: VirtualFile) {
-        undoStack[file.path] = FileModification(System.currentTimeMillis(), 0)
+        undoStack.getOrPut(file.path) { Stack() }.push(Batch())
     }
 
     override fun getUndoCount(file: VirtualFile): Int {
-        return undoStack[file.path]?.count ?: 0
+        return undoStack[file.path]?.peek()?.getCount() ?: 0
     }
 
     override fun getRedoCount(file: VirtualFile): Int {
-        return redoStack[file.path]?.count ?: 0
+        return redoStack[file.path]?.peek()?.getCount() ?: 0
     }
 
     override fun undoStart(file: VirtualFile) {
-        lock.lock()
+        locks.getOrPut(file.path) { ReentrantLock() }.lock()
     }
 
     override fun redoStart(file: VirtualFile) {
-        lock.lock()
+        locks.getOrPut(file.path) { ReentrantLock() }.lock()
     }
 
     override fun undoDone(file: VirtualFile) {
-        redoStack[file.path] = FileModification(System.currentTimeMillis(), undoStack[file.path]!!.count)
-        undoStack.remove(file.path)
-        lock.unlock()
+        popAndPush(file, undoStack, redoStack)
+        locks[file.path]?.unlock()
     }
 
     override fun redoDone(file: VirtualFile) {
-        undoStack[file.path] = FileModification(System.currentTimeMillis(), redoStack[file.path]!!.count)
-        redoStack.remove(file.path)
-        lock.unlock()
+        popAndPush(file, redoStack, undoStack)
+        locks[file.path]?.unlock()
+    }
+
+    private fun popAndPush(
+        file: VirtualFile,
+        fromStacksMap: MutableMap<String, Stack<Batch>>,
+        targetStacksMap: MutableMap<String, Stack<Batch>>
+    ) {
+        val batch = fromStacksMap[file.path]?.pop()
+        targetStacksMap.getOrPut(file.path) { Stack() }.push(batch)
+        if (fromStacksMap[file.path]?.isEmpty() == true) {
+            fromStacksMap.remove(file.path)
+        }
     }
 
     override fun dispose() {
