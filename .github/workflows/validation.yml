@@ -23,6 +23,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Check Spotless
         run: ./gradlew spotlessCheck
+      - name: Run Unit Tests
+        run: ./gradlew test
 
   buildPlugin:
     runs-on: ubuntu-latest

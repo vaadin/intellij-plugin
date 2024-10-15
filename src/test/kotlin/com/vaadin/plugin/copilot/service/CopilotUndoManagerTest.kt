@@ -69,7 +69,7 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
         vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
         assertTrue(vfsFile?.exists() == true)
         assertEquals(2, undoManager.getUndoCount(vfsFile!!))
-        assertEquals(0, undoManager.getRedoCount(vfsFile!!))
+        assertEquals(0, undoManager.getRedoCount(vfsFile))
     }
 
     @Test
