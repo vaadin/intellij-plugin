@@ -5,6 +5,8 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
   id("org.jetbrains.intellij.platform") version "2.0.0"
   id("com.diffplug.spotless") version "7.0.0.BETA2"
+
+  id("com.adarshr.test-logger") version "4.0.0"
 }
 
 group = "com.vaadin"
