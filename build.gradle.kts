@@ -1,8 +1,12 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
   id("org.jetbrains.intellij.platform") version "2.0.0"
   id("com.diffplug.spotless") version "7.0.0.BETA2"
+
+  id("com.adarshr.test-logger") version "4.0.0"
 }
 
 group = "com.vaadin"
@@ -48,7 +52,12 @@ dependencies {
     pluginVerifier()
     zipSigner()
     instrumentationTools()
+
+    testFramework(TestFrameworkType.Platform)
   }
+
+  testImplementation(kotlin("test"))
+  testImplementation("junit:junit:4.13.2")
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
@@ -84,4 +93,6 @@ tasks {
     channels.set(listOf(publishChannel))
     token.set(System.getenv("PUBLISH_TOKEN"))
   }
+
+  test { useJUnitPlatform() }
 }

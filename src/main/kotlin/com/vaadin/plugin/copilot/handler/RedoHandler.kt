@@ -1,36 +1,26 @@
 package com.vaadin.plugin.copilot.handler
 
-import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.application.runWriteAction
-import com.intellij.openapi.command.impl.UndoManagerImpl
+import com.intellij.openapi.command.undo.UndoManager
+import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.findDocument
-import com.vaadin.plugin.actions.VaadinCompileOnSaveAction
+import com.intellij.openapi.vfs.VirtualFile
 
 class RedoHandler(project: Project, data: Map<String, Any>) : UndoHandler(project, data) {
 
-    private val copilotActionPrefix = "_Redo Vaadin Copilot"
+    override fun getOpsCount(vfsFile: VirtualFile): Int {
+        return getCopilotUndoManager().getRedoCount(vfsFile)
+    }
 
-    override fun run(): HandlerResponse {
-        for (vfsFile in vfsFiles) {
-            runInEdt {
-                getEditorWrapper(vfsFile).use { wrapper ->
-                    val editor = wrapper.getFileEditor()
-                    val undoManager = UndoManagerImpl.getInstance(project)
-                    runWriteAction {
-                        if (undoManager.isRedoAvailable(editor)) {
-                            val redo = undoManager.getRedoActionNameAndDescription(editor).first
-                            if (redo.startsWith(copilotActionPrefix)) {
-                                undoManager.redo(editor)
-                                commitAndFlush(vfsFile.findDocument())
-                                LOG.info("$redo performed on ${vfsFile.path}")
-                                VaadinCompileOnSaveAction().compile(project, vfsFile)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return RESPONSE_OK
+    override fun before(vfsFile: VirtualFile) {
+        getCopilotUndoManager().redoStart(vfsFile)
+    }
+
+    override fun runManagerAction(undoManager: UndoManager, editor: FileEditor) {
+        undoManager.redo(editor)
+    }
+
+    override fun after(vfsFile: VirtualFile) {
+        getCopilotUndoManager().redoDone(vfsFile)
+        LOG.info("$vfsFile redo performed")
     }
 }

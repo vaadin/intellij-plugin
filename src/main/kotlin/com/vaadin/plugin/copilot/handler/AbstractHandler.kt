@@ -5,10 +5,13 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiDocumentManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.copilot.service.CopilotUndoManager
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
@@ -58,10 +61,30 @@ abstract class AbstractHandler(val project: Project) : Handler {
         return FileEditorWrapper(editors.first(), project, false)
     }
 
+    open fun postSave(vfsFile: VirtualFile) {
+        LOG.info("File $vfsFile contents saved")
+        notifyUndoManager(vfsFile)
+        commitAndFlush(vfsFile.findDocument())
+        openFileInEditor(vfsFile)
+    }
+
+    private fun openFileInEditor(vfsFile: VirtualFile) {
+        val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
+        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
+    }
+
+    fun notifyUndoManager(vfsFile: VirtualFile) {
+        getCopilotUndoManager().fileWritten(vfsFile)
+    }
+
     fun commitAndFlush(vfsDoc: Document?) {
         if (vfsDoc != null) {
             PsiDocumentManager.getInstance(project).commitDocument(vfsDoc)
             FileDocumentManager.getInstance().saveDocuments(vfsDoc::equals)
         }
+    }
+
+    fun getCopilotUndoManager(): CopilotUndoManager {
+        return project.getService(CopilotUndoManager::class.java)
     }
 }

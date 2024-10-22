@@ -1,24 +1,17 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.text.Strings
 import com.intellij.openapi.vfs.ReadonlyStatusHandler
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiManager
 import com.vaadin.plugin.utils.IdeUtil
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
@@ -67,9 +60,7 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
                     {
                         WriteCommandAction.runWriteCommandAction(project) {
                             doWrite(vfsFile, it, content)
-                            commitAndFlush(it)
-                            LOG.info("File $ioFile contents saved")
-                            openFileInEditor(vfsFile)
+                            postSave(vfsFile)
                         }
                     },
                     undoLabel ?: "Vaadin Copilot Write File",
@@ -80,54 +71,28 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
     }
 
     private fun create() {
-        val psiDir = runReadAction {
-            val parentDir = getOrCreateParentDir()
-            if (parentDir != null) {
-                return@runReadAction PsiManager.getInstance(project).findDirectory(parentDir)
-            }
-            return@runReadAction null
-        }
-
-        if (psiDir != null) {
-            runInEdt {
-                CommandProcessor.getInstance()
-                    .executeCommand(
-                        project,
-                        {
-                            WriteCommandAction.runWriteCommandAction(project) {
-                                val psiFile = doCreate(ioFile, content)
-                                if (psiFile.containingDirectory == null) {
-                                    psiDir.add(psiFile)
-                                }
-
-                                LOG.info("File $ioFile contents saved")
-                                VfsUtil.findFileByIoFile(ioFile, true)?.let { vfsFile -> openFileInEditor(vfsFile) }
-                            }
-                        },
-                        undoLabel ?: "Vaadin Copilot Write File",
-                        null,
-                        UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
-                    )
-            }
+        runInEdt {
+            CommandProcessor.getInstance()
+                .executeCommand(
+                    project,
+                    {
+                        WriteCommandAction.runWriteCommandAction(project) {
+                            val vfsFile = doCreate(ioFile, content)
+                            postSave(vfsFile)
+                        }
+                    },
+                    undoLabel ?: "Vaadin Copilot Write File",
+                    null,
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION,
+                )
         }
     }
 
-    private fun openFileInEditor(vfsFile: VirtualFile) {
-        val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
-        FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
-    }
-
-    private fun getOrCreateParentDir(): VirtualFile? {
-        if (!ioFile.parentFile.exists() && !ioFile.parentFile.mkdirs()) {
-            LOG.warn("Cannot create parent directories for ${ioFile.parent}")
-            return null
-        }
-        return VfsUtil.findFileByIoFile(ioFile.parentFile, true)
-    }
-
-    open fun doCreate(ioFile: File, content: String): PsiFile {
-        val fileType = FileTypeManager.getInstance().getFileTypeByFileName(ioFile.name)
-        return PsiFileFactory.getInstance(project).createFileFromText(ioFile.name, fileType, content)
+    open fun doCreate(file: File, content: String): VirtualFile {
+        val parent = VfsUtil.createDirectories(file.parent)
+        val vfsFile = parent.createChildData(this, file.name)
+        doWrite(vfsFile, vfsFile.findDocument(), content)
+        return vfsFile
     }
 
     open fun doWrite(vfsFile: VirtualFile?, doc: Document?, content: String) {
