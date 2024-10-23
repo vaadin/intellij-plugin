@@ -3,6 +3,7 @@ package com.vaadin.plugin.actions
 import com.intellij.debugger.DebuggerManagerEx
 import com.intellij.debugger.ui.HotSwapUI
 import com.intellij.ide.actionsOnSave.impl.ActionsOnSaveFileDocumentManagerListener
+import com.intellij.openapi.application.WriteIntentReadAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -42,7 +43,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                     val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                     if (session != null) {
                         LOG.info("${vfsFile.name} compiling...")
-                        HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
+                        WriteIntentReadAction.run { HotSwapUI.getInstance(project).compileAndReload(session, vfsFile) }
                     }
                 }
             }
