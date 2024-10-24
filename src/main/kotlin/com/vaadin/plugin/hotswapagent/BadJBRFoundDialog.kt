@@ -31,6 +31,8 @@ class BadJBRFoundDialog() : DialogWrapper(true) {
     }
 
     override fun createCenterPanel(): JComponent {
-        return JPanel().apply { add(JTextArea(message)) }
+        val textArea = JTextArea(message)
+        textArea.isEditable = false
+        return JPanel().apply { add(textArea) }
     }
 }
