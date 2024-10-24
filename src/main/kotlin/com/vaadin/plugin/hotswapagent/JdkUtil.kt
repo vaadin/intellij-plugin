@@ -49,7 +49,13 @@ class JdkUtil {
             val release = File(sdk.homePath, "release")
             val version = sdk.versionString
             if (version != null && version.contains("21.0.4") && release.exists()) {
-                return release.readText().contains("JAVA_RUNTIME_VERSION=\"21.0.4+13-b509.17\"")
+                // Find the line with JAVA_RUNTIME_VERSION and check if it's the broken version
+                val runtimeVersion = release.readLines().find { it.startsWith("JAVA_RUNTIME_VERSION") }
+                if (runtimeVersion != null &&
+                    runtimeVersion.contains("21.0.4+13") &&
+                    runtimeVersion.contains("b509.17")) {
+                    return true
+                }
             }
 
             return false
