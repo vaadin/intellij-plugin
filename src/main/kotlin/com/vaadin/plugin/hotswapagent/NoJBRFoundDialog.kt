@@ -47,6 +47,8 @@ class NoJBRFoundDialog(bundledJetbrainsJdkMajor: Int?, projectJdkMajor: Int?) : 
     }
 
     override fun createCenterPanel(): JComponent {
-        return JPanel().apply { add(JTextArea(message)) }
+        val textArea = JTextArea(message)
+        textArea.isEditable = false
+        return JPanel().apply { add(textArea) }
     }
 }
