@@ -21,8 +21,7 @@ class BadJBRFoundDialog() : DialogWrapper(true) {
             append(
                 "Your IntelliJ IDEA installation includes a bundled JetBrains Runtime JDK which is known not work for this purpose.\n\n")
             append("You can resolve this by one of the following:\n")
-            append("- Downgrade IntelliJ IDEA to version 2024.2.2 or earlier which bundle a working version\n")
-            append("- Once released, upgrade IntelliJ IDEA to a version newer than 2024.2.3\n")
+            append("- Upgrade IntelliJ IDEA to 2024.2.4 or newer\n")
             append(
                 "- Download a newer JetBrains runtime from https://github.com/JetBrains/JetBrainsRuntime/releases and set your run configuration to use it.")
             append("\n")
