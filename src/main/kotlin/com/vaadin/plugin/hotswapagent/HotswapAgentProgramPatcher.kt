@@ -3,9 +3,12 @@ package com.vaadin.plugin.hotswapagent
 import com.intellij.execution.Executor
 import com.intellij.execution.JavaRunConfigurationBase
 import com.intellij.execution.configurations.JavaParameters
+import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.JavaProgramPatcher
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 
 class HotswapAgentProgramPatcher : JavaProgramPatcher() {
@@ -13,15 +16,30 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
     private val LOG: Logger = Logger.getInstance(HotswapAgentProgramPatcher::class.java)
 
     override fun patchJavaParameters(executor: Executor?, runProfile: RunProfile?, javaParameters: JavaParameters?) {
+
+        // Create plugin present property -DcopilotPluginActive=true
+        if (javaParameters == null) {
+            return
+        }
+        val paramsList = javaParameters.vmParametersList
+
+        if (runProfile is RunConfiguration) {
+            val project: Project = runProfile.project
+            val projectBasePath: String? = project.basePath
+
+            projectBasePath?.let {
+                val dotFilePath = CopilotPluginUtil.getDotFileDirectory(project)?.path + '/' + CopilotPluginUtil.DOTFILE
+                paramsList.add("-DcopilotPluginPath=$dotFilePath")
+            }
+        }
+
         if (executor !is HotswapAgentExecutor) {
             return
         }
         if (runProfile !is JavaRunConfigurationBase) {
             return
         }
-        if (javaParameters == null) {
-            return
-        }
+
         val module = runProfile.configurationModule?.module ?: return
 
         if (runProfile.javaClass.simpleName == "SpringBootApplicationRunConfiguration") {
@@ -38,8 +56,6 @@ class HotswapAgentProgramPatcher : JavaProgramPatcher() {
             }
         }
         val agentInHome = VaadinHomeUtil.getHotSwapAgentJar()
-
-        val paramsList = javaParameters.vmParametersList
 
         val addOpens = "--add-opens"
         paramsList.add(addOpens)

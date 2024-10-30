@@ -25,7 +25,7 @@ class CopilotPluginUtil {
 
         private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
-        private const val DOTFILE = ".copilot-plugin"
+        const val DOTFILE = ".copilot-plugin"
 
         private const val IDEA_DIR = ".idea"
 
@@ -138,7 +138,7 @@ class CopilotPluginUtil {
             }
         }
 
-        private fun getDotFileDirectory(project: Project): VirtualFile? {
+        fun getDotFileDirectory(project: Project): VirtualFile? {
             val projectDir = project.guessProjectDir()
             if (projectDir == null) {
                 LOG.error("Cannot guess project directory")
