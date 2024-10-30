@@ -16,12 +16,12 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
 import com.vaadin.plugin.starter.DownloadableModel
-import org.jetbrains.jps.model.java.JavaResourceRootType
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
 import java.util.*
 import java.util.zip.ZipFile
+import org.jetbrains.jps.model.java.JavaResourceRootType
 
 class VaadinProjectUtil {
 
@@ -112,7 +112,8 @@ class VaadinProjectUtil {
                 return
             }
 
-            val resourceOutputPath = VfsUtil.createDirectories(moduleOutputPath + File.separator + resourceRelativeParentPath)
+            val resourceOutputPath =
+                VfsUtil.createDirectories(moduleOutputPath + File.separator + resourceRelativeParentPath)
             LOG.info("Copying resource: $vfsFile to $resourceOutputPath")
             VfsUtil.copyFile(this, vfsFile, resourceOutputPath)
         }
