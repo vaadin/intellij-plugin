@@ -1,5 +1,6 @@
 package com.vaadin.plugin.copilot.listeners
 
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -15,9 +16,11 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
     override fun vaadinProjectDetected(project: Project) {
         if (!triggered) {
             triggered = true
-            runWriteAction {
-                saveDotFile(project)
-                removeDotFileOnExit(project)
+            runInEdt {
+                runWriteAction {
+                    saveDotFile(project)
+                    removeDotFileOnExit(project)
+                }
             }
         }
     }
