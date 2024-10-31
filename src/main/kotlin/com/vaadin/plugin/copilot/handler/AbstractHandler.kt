@@ -12,7 +12,6 @@ import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiDocumentManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.service.CopilotUndoManager
-import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.copyIfResource
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
@@ -67,10 +66,9 @@ abstract class AbstractHandler(val project: Project) : Handler {
         notifyUndoManager(vfsFile)
         commitAndFlush(vfsFile.findDocument())
         openFileInEditor(vfsFile)
-        copyIfResource(project, vfsFile)
     }
 
-    private fun openFileInEditor(vfsFile: VirtualFile) {
+    fun openFileInEditor(vfsFile: VirtualFile) {
         val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
         FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }

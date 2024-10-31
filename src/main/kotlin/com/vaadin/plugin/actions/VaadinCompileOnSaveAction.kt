@@ -12,8 +12,10 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.task.ProjectTaskManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 
+/** Action run after Document has been saved. Is not run for binary files. */
 class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
@@ -32,21 +34,30 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
         compile(project, vfsFile)
     }
 
-    fun compile(project: Project, vfsFile: VirtualFile) {
-        if (!vfsFile.extension.equals("java")) {
-            return
-        }
+    private fun compile(project: Project, vfsFile: VirtualFile) {
 
-        val task =
-            object : Task.Backgroundable(project, "Vaadin: compiling...") {
-                override fun run(indicator: ProgressIndicator) {
-                    val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
-                    if (session != null) {
-                        LOG.info("${vfsFile.name} compiling...")
-                        ReadAction.run<Exception> { HotSwapUI.getInstance(project).compileAndReload(session, vfsFile) }
+        // compile Java files using HotSwap
+        if (vfsFile.extension.equals("java")) {
+            val task =
+                object : Task.Backgroundable(project, "Vaadin: compiling...") {
+                    override fun run(indicator: ProgressIndicator) {
+                        val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
+                        if (session != null) {
+                            LOG.info("${vfsFile.name} compiling...")
+                            ReadAction.run<Exception> {
+                                HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
+                            }
+                        }
                     }
                 }
+            ProgressManager.getInstance().run(task)
+        } // process all other Documents to be included in output build directory
+        else {
+            ProjectTaskManager.getInstance(project).compile(vfsFile).then {
+                if (it.hasErrors()) {
+                    LOG.warn("Cannot process $vfsFile")
+                }
             }
-        ProgressManager.getInstance().run(task)
+        }
     }
 }
