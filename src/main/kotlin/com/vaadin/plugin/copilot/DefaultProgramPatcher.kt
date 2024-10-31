@@ -7,6 +7,7 @@ import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.JavaProgramPatcher
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import java.io.File
 
 class DefaultProgramPatcher : JavaProgramPatcher() {
 
@@ -25,7 +26,7 @@ class DefaultProgramPatcher : JavaProgramPatcher() {
             val projectBasePath: String? = project.basePath
 
             projectBasePath?.let {
-                val dotFilePath = CopilotPluginUtil.getDotFileDirectory(project)?.path + '/' + CopilotPluginUtil.DOTFILE
+                val dotFilePath = CopilotPluginUtil.getDotFileDirectory(project)?.path + File.separator + CopilotPluginUtil.DOTFILE
                 paramsList.add("-DcopilotPluginPath=$dotFilePath")
             }
         }
