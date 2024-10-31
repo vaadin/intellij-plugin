@@ -15,7 +15,8 @@ class WriteBase64FileHandler(project: Project, data: Map<String, Any>) : WriteFi
     override fun postSave(vfsFile: VirtualFile) {
         LOG.info("File $vfsFile created")
         notifyUndoManager(vfsFile)
-        // there is no Document associated with binary VirtualFile, call "compile" always to process resource
+        // there is no Document associated with binary VirtualFile, call "compile" always to process
+        // resource
         processResource(vfsFile)
         openFileInEditor(vfsFile)
     }
