@@ -36,7 +36,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
 
     private fun compile(project: Project, vfsFile: VirtualFile) {
 
-        // compile Java files using HotSwap
+        // compile and reload Java files using HotSwap util
         if (vfsFile.extension.equals("java")) {
             val task =
                 object : Task.Backgroundable(project, "Vaadin: compiling...") {
