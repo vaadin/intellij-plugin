@@ -1,13 +1,13 @@
 package com.vaadin.plugin.copilot.listeners
 
-import com.intellij.openapi.application.writeAction
+import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.saveDotFile
 import com.vaadin.plugin.listeners.VaadinProjectListener
-import kotlinx.coroutines.runBlocking
 
 class CopilotVaadinProjectListener : VaadinProjectListener {
 
@@ -16,8 +16,8 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
     override fun vaadinProjectDetected(project: Project) {
         if (!triggered) {
             triggered = true
-            runBlocking {
-                writeAction {
+            runInEdt {
+                WriteAction.run<Throwable> {
                     saveDotFile(project)
                     removeDotFileOnExit(project)
                 }
