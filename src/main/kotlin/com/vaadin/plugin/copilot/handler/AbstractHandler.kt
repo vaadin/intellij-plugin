@@ -68,7 +68,7 @@ abstract class AbstractHandler(val project: Project) : Handler {
         openFileInEditor(vfsFile)
     }
 
-    private fun openFileInEditor(vfsFile: VirtualFile) {
+    fun openFileInEditor(vfsFile: VirtualFile) {
         val openFileDescriptor = OpenFileDescriptor(project, vfsFile)
         FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }
