@@ -15,7 +15,6 @@ import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
-import java.io.File
 import java.io.IOException
 import java.io.StringWriter
 import java.util.*
@@ -149,12 +148,8 @@ class CopilotPluginUtil {
             return projectDir.findOrCreateDirectory(IDEA_DIR)
         }
 
-        fun getDotFilePath(project: Project): String? {
-            val path = getDotFileDirectory(project)?.path + File.separator + DOTFILE
-            if (File(path).exists()) {
-                return path
-            }
-            return null
+        fun getDotFile(project: Project): VirtualFile? {
+            return getDotFileDirectory(project)?.findFile(DOTFILE)
         }
     }
 }

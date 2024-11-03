@@ -6,7 +6,6 @@ import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.JavaProgramPatcher
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
 
 class DefaultProgramPatcher : JavaProgramPatcher() {
 
@@ -21,15 +20,7 @@ class DefaultProgramPatcher : JavaProgramPatcher() {
         val paramsList = javaParameters.vmParametersList
 
         if (runProfile is RunConfiguration) {
-            val project: Project = runProfile.project
-            val projectBasePath: String? = project.basePath
-
-            projectBasePath?.let {
-                val dotFilePath = CopilotPluginUtil.getDotFilePath(project)
-                if (dotFilePath != null) {
-                    paramsList.add("-DcopilotPluginPath=$dotFilePath")
-                }
-            }
+            CopilotPluginUtil.getDotFile(runProfile.project)?.let { paramsList.add("-DcopilotPluginPath=${it.path}") }
         }
     }
 }
