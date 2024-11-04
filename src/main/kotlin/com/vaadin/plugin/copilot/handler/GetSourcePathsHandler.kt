@@ -20,9 +20,15 @@ class GetSourcePathsHandler(project: Project) : AbstractHandler(project) {
             sourcePaths.addAll(moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path })
             testSourcePaths.addAll(moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map { it.path })
             resourcePaths.addAll(moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path })
-            testResourcePaths.addAll(moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path })
+            testResourcePaths.addAll(
+                moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path })
         }
-        val data: Map<String, Any> = mapOf("sourcePaths" to sourcePaths, "testSourcePaths" to testSourcePaths, "resourcePaths" to resourcePaths, "testResourcePaths" to testResourcePaths)
+        val data: Map<String, Any> =
+            mapOf(
+                "sourcePaths" to sourcePaths,
+                "testSourcePaths" to testSourcePaths,
+                "resourcePaths" to resourcePaths,
+                "testResourcePaths" to testResourcePaths)
         return HandlerResponse(HttpResponseStatus.OK, data)
     }
 }
