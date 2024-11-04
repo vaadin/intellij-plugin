@@ -25,7 +25,7 @@ class CopilotPluginUtil {
 
         private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
 
-        const val DOTFILE = ".copilot-plugin"
+        private const val DOTFILE = ".copilot-plugin"
 
         private const val IDEA_DIR = ".idea"
 
