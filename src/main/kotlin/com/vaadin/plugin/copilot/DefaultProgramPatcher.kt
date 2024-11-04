@@ -10,7 +10,6 @@ class DefaultProgramPatcher : JavaProgramPatcher() {
 
     override fun patchJavaParameters(executor: Executor?, runProfile: RunProfile?, javaParameters: JavaParameters?) {
 
-        // Create plugin present property -DcopilotPluginActive=true
         if (javaParameters == null) {
             return
         }
