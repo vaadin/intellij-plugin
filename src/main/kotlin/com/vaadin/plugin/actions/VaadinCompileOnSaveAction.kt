@@ -11,6 +11,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.task.ProjectTaskManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
@@ -35,6 +36,11 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
     }
 
     private fun compile(project: Project, vfsFile: VirtualFile) {
+        val fileIndex = ProjectFileIndex.getInstance(project)
+        if (!fileIndex.isInSourceContent(vfsFile)) {
+            // Something else than source file or resource
+            return
+        }
 
         // compile and reload Java files using HotSwap util
         if (vfsFile.extension.equals("java")) {
