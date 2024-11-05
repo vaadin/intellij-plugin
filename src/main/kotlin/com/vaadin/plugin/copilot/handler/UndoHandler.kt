@@ -1,7 +1,7 @@
 package com.vaadin.plugin.copilot.handler
 
+import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.impl.UndoManagerImpl
 import com.intellij.openapi.command.undo.UndoManager
 import com.intellij.openapi.fileEditor.FileEditor
@@ -26,7 +26,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 } else {
                     // if we want to undo file removal we need to create empty virtual file to write
                     // content
-                    runWriteAction {
+                    WriteAction.run<Throwable> {
                         val parent = VfsUtil.createDirectories(file.parent)
                         vfsFile = parent.createChildData(this, file.name)
                         vfsFiles.add(vfsFile!!)
@@ -49,7 +49,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 getEditorWrapper(vfsFile).use { wrapper ->
                     val undoManager = UndoManagerImpl.getInstance(project)
                     val editor = wrapper.getFileEditor()
-                    runWriteAction {
+                    WriteAction.run<Throwable> {
                         try {
                             before(vfsFile)
                             var i = 0
