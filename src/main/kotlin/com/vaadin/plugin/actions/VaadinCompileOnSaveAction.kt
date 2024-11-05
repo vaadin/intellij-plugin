@@ -26,44 +26,42 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
     }
 
     override fun processDocuments(project: Project, documents: Array<Document?>) {
-        if (documents.size != 1) {
-            return
-        }
+        val task =
+            object : Task.Backgroundable(project, "Vaadin: compiling...") {
+                override fun run(indicator: ProgressIndicator) {
 
-        val doc = documents[0] ?: return
-        val vfsFile = FileDocumentManager.getInstance().getFile(doc) ?: return
-        compile(project, vfsFile)
-    }
+                    LOG.info("Processing ${documents.size} document(s)")
 
-    private fun compile(project: Project, vfsFile: VirtualFile) {
-        val fileIndex = ProjectFileIndex.getInstance(project)
-        if (!fileIndex.isInSourceContent(vfsFile)) {
-            // Something else than source file or resource
-            return
-        }
+                    val fileIndex = ProjectFileIndex.getInstance(project)
+                    val vfsFiles =
+                        ReadAction.compute<List<VirtualFile>, Exception> {
+                            documents
+                                .filterNotNull()
+                                .mapNotNull { FileDocumentManager.getInstance().getFile(it) }
+                                .filter { fileIndex.isInSourceContent(it) }
+                        }
 
-        // compile and reload Java files using HotSwap util
-        if (vfsFile.extension.equals("java")) {
-            val task =
-                object : Task.Backgroundable(project, "Vaadin: compiling...") {
-                    override fun run(indicator: ProgressIndicator) {
+                    if (vfsFiles.isEmpty()) {
+                        return
+                    }
+
+                    val javaFiles = vfsFiles.filter { it.extension == "java" }
+                    if (javaFiles.isNotEmpty()) {
                         val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                         if (session != null) {
-                            LOG.info("${vfsFile.name} compiling...")
-                            ReadAction.run<Exception> {
-                                HotSwapUI.getInstance(project).compileAndReload(session, vfsFile)
+                            ReadAction.run<Throwable> {
+                                HotSwapUI.getInstance(project).compileAndReload(session, *javaFiles.toTypedArray())
                             }
                         }
+                        return
+                    }
+
+                    val nonJavaFiles = vfsFiles.filter { it.extension != "java" }
+                    if (nonJavaFiles.isNotEmpty()) {
+                        ProjectTaskManager.getInstance(project).compile(*nonJavaFiles.toTypedArray())
                     }
                 }
-            ProgressManager.getInstance().run(task)
-        } // process all other Documents to be included in output build directory
-        else {
-            ProjectTaskManager.getInstance(project).compile(vfsFile).then {
-                if (it.hasErrors()) {
-                    LOG.warn("Cannot process $vfsFile")
-                }
             }
-        }
+        ProgressManager.getInstance().run(task)
     }
 }
