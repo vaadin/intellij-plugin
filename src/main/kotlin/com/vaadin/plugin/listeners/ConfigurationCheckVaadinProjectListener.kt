@@ -80,7 +80,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
         if (value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION) {
             notify(
                 project,
-                "Change your $MESSAGE_VCS to \"$MESSAGE_DO_NOT_ADD\" or \"$MESSAGE_ADD_SILENTLY\". " +
+                "Change your $MESSAGE_VCS setting to \"$MESSAGE_DO_NOT_ADD\" or \"$MESSAGE_ADD_SILENTLY\". " +
                     "The current \"$MESSAGE_ASK\" setting may trigger blocking dialogs in the IDE while using Vaadin Copilot.",
                 VCS_CONFIRMATION_CONFIGURABLE,
             )
