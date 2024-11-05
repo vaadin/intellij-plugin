@@ -61,6 +61,9 @@
         <actionOnSave id="VaadinCompileOnSaveAction"
                       implementation="com.vaadin.plugin.actions.VaadinCompileOnSaveAction" order="last"/>
 
+        <!-- Default program patcher to inject plugin file location -->
+        <java.programPatcher implementation="com.vaadin.plugin.copilot.DefaultProgramPatcher"/>
+
         <!-- Debug using Hotswap Agent -->
         <programRunner implementation="com.vaadin.plugin.hotswapagent.HotswapAgentRunner"/>
         <java.programPatcher implementation="com.vaadin.plugin.hotswapagent.HotswapAgentProgramPatcher"/>

@@ -149,5 +149,9 @@ class CopilotPluginUtil {
             LOG.info("Project directory: $projectDir")
             return projectDir.findOrCreateDirectory(IDEA_DIR)
         }
+
+        fun getDotFile(project: Project): VirtualFile? {
+            return getDotFileDirectory(project)?.findFile(DOTFILE)
+        }
     }
 }
