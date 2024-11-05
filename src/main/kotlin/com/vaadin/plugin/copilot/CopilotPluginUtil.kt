@@ -140,7 +140,7 @@ class CopilotPluginUtil {
             }
         }
 
-        fun getDotFileDirectory(project: Project): VirtualFile? {
+        private fun getDotFileDirectory(project: Project): VirtualFile? {
             val projectDir = project.guessProjectDir()
             if (projectDir == null) {
                 LOG.error("Cannot guess project directory")
