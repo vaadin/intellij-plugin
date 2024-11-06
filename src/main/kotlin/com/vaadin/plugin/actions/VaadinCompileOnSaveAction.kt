@@ -50,6 +50,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                         val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                         if (session != null) {
                             ReadAction.run<Throwable> {
+                                Thread.sleep(1)
                                 HotSwapUI.getInstance(project).compileAndReload(session, *javaFiles.toTypedArray())
                             }
                         }
