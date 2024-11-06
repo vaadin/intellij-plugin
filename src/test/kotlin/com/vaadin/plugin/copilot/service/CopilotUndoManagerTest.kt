@@ -18,7 +18,9 @@ import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.function.Supplier
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -53,13 +55,11 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
 
         // simulate save action
         writeFile(vfsFile, "Updated Content", "Format On Save")
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertUndoRedo(2, 0, vfsFile)
 
         // undo should remove file
         callUndoHandler(tempFile.path)
-        assertEquals(0, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertUndoRedo(0, 2, vfsFile)
         vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
         assertTrue(vfsFile == null)
 
@@ -67,9 +67,25 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
         callRedoHandler(tempFile.path)
 
         vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
-        assertTrue(vfsFile?.exists() == true)
-        assertEquals(2, undoManager.getUndoCount(vfsFile!!))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertTrue(vfsFile!!.exists() == true)
+        assertUndoRedo(2, 0, vfsFile)
+    }
+
+    private fun assertUndoRedo(expectedUndo: Int, expectedRedo: Int, vfsFile: VirtualFile) {
+        waitFor(expectedUndo) { undoManager.getUndoCount(vfsFile) }
+        waitFor(expectedRedo) { undoManager.getRedoCount(vfsFile) }
+    }
+
+    private fun waitFor(expected: Int, supplier: Supplier<Int>) {
+        var count = 0
+        while (count < 10) {
+            if (supplier.get() == expected) {
+                return
+            }
+            count++
+            Thread.sleep(100)
+        }
+        return Assertions.fail("Expected $expected but got ${supplier.get()}")
     }
 
     @Test
@@ -82,20 +98,17 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
 
         callFileWriteHandler(vfsFile.path, "Some changes")
 
-        assertEquals(1, undoManager.getUndoCount(vfsFile))
+        assertUndoRedo(1, 0, vfsFile)
 
         // simulate save action
         writeFile(vfsFile, "Updated Content", "Format On Save")
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertUndoRedo(2, 0, vfsFile)
 
         callUndoHandler(vfsFile.path)
-        assertEquals(0, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertUndoRedo(0, 2, vfsFile)
 
         callRedoHandler(vfsFile.path)
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertUndoRedo(2, 0, vfsFile)
 
         runWriteActionAndWait { vfsFile.delete(this) }
     }
