@@ -20,14 +20,13 @@ class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
         val testResourcePaths: Array<String>
     )
 
-
     override fun run(): HandlerResponse {
-        val modules = ArrayList<ModuleInfo>();
+        val modules = ArrayList<ModuleInfo>()
         ModuleManager.getInstance(project).modules.forEach { module: Module ->
             val moduleRootManager = ModuleRootManager.getInstance(module)
             val contentRoots = moduleRootManager.contentRoots.map { it.path }
             // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
-            val javaSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path };
+            val javaSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path }
             val javaTestSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map { it.path }
             val resourcePaths = moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path }
             val testResourcePaths = moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path }
@@ -38,9 +37,7 @@ class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
                     javaSourcePaths.toTypedArray(),
                     javaTestSourcePaths.toTypedArray(),
                     resourcePaths.toTypedArray(),
-                    testResourcePaths.toTypedArray()
-                )
-            );
+                    testResourcePaths.toTypedArray()))
         }
         val data = mapOf("modules" to modules)
         return HandlerResponse(HttpResponseStatus.OK, data)
