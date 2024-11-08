@@ -3,6 +3,7 @@ package com.vaadin.plugin.copilot.handler
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -11,6 +12,11 @@ import org.jetbrains.jps.model.java.JavaSourceRootType
 
 class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
 
+    @JvmRecord
+    data class ProjectInfo(
+        val basePath: String?,
+        val modules: List<ModuleInfo>
+    )
     @JvmRecord
     data class ModuleInfo(
         val name: String,
@@ -48,7 +54,8 @@ class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
                     testResourcePaths.toTypedArray(),
                     outputPath ))
         }
-        val data = mapOf("modules" to modules)
+        val projectInfo = ProjectInfo(project.guessProjectDir()?.path, modules)
+        val data = mapOf("project" to projectInfo)
         return HandlerResponse(HttpResponseStatus.OK, data)
     }
 }
