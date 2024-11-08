@@ -41,10 +41,10 @@ class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
             val javaSourcePaths =
                 moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).filter(exclude(outputPath)).map({ it.path })
             val javaTestSourcePaths =
-                moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).filter(exclude(outputPath)) map
-                    {
-                        it.path
-                    }
+                moduleRootManager
+                    .getSourceRoots(JavaSourceRootType.TEST_SOURCE)
+                    .filter(exclude(outputPath))
+                    .map({ it.path })
 
             val resourcePaths =
                 moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).filter(exclude(outputPath)).map {
