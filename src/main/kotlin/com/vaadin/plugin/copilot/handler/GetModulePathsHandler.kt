@@ -26,6 +26,7 @@ class GetModulePathsHandler(project: Project) : AbstractHandler(project) {
         ModuleManager.getInstance(project).modules.forEach { module: Module ->
             val moduleRootManager = ModuleRootManager.getInstance(module)
             val contentRoots = moduleRootManager.contentRoots.map { it.path }
+            // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
             val javaSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path };
             val javaTestSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map { it.path }
             val resourcePaths = moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path }
