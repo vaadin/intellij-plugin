@@ -2,7 +2,6 @@ package com.vaadin.plugin.listeners
 
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
-import com.intellij.ide.IdeCoreBundle
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.RunOnceUtil
@@ -34,10 +33,9 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
         val MESSAGE_RELOAD_CLASSES = JavaDebuggerBundle.message("label.debugger.hotswap.configurable.reload.classes")
         val MESSAGE_RELOAD_ALWAYS = JavaDebuggerBundle.message("label.debugger.hotswap.configurable.always")
         val MESSAGE_VCS = VcsBundle.message("version.control.main.configurable.name")
-        val MESSAGE_WHEN_FILES_CREATED = VcsBundle.message("settings.border.when.files.are.created")
         val MESSAGE_ADD_SILENTLY = VcsBundle.message("radio.after.creation.add.silently")
         val MESSAGE_DO_NOT_ADD = VcsBundle.message("radio.after.creation.do.not.add")
-        val MESSAGE_DONT_ASK_AGAIN = IdeCoreBundle.message("dialog.options.do.not.ask")
+        val MESSAGE_ASK = VcsBundle.message("radio.after.creation.show.options")
     }
 
     private var triggered = false
@@ -82,9 +80,8 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
         if (value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION) {
             notify(
                 project,
-                "Your $MESSAGE_VCS settings requires confirmation after creating each new file. " +
-                    "It will cause popups appear while working with Vaadin Copilot. " +
-                    "To improve experience please set \"$MESSAGE_WHEN_FILES_CREATED\" to \"$MESSAGE_ADD_SILENTLY\" or \"$MESSAGE_DO_NOT_ADD\"",
+                "Change your $MESSAGE_VCS setting to \"$MESSAGE_DO_NOT_ADD\" or \"$MESSAGE_ADD_SILENTLY\". " +
+                    "The current \"$MESSAGE_ASK\" setting may trigger blocking dialogs in the IDE while using Vaadin Copilot.",
                 VCS_CONFIRMATION_CONFIGURABLE,
             )
         }
@@ -112,14 +109,14 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     }
 
     private fun createGoToConfigurationAction(project: Project, configurable: String): AnAction {
-        return NotificationAction.create("Show in settings...") { _, notification ->
+        return NotificationAction.create("Go to settings...") { _, notification ->
             notification.hideBalloon()
             ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable)
         }
     }
 
     private fun createDontAskAgainAction(project: Project, id: String): NotificationAction {
-        return NotificationAction.create(MESSAGE_DONT_ASK_AGAIN) { _, notification ->
+        return NotificationAction.create("Don't show again") { _, notification ->
             run {
                 PropertiesComponent.getInstance(project).setValue(id, false, true)
                 notification.expire()

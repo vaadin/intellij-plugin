@@ -40,7 +40,7 @@ class CopilotPluginUtil {
             REDO("redo"),
             REFRESH("refresh"),
             SHOW_IN_IDE("showInIde"),
-            GET_SOURCE_PATHS("getSourcePaths"),
+            GET_MODULE_PATHS("getModulePaths"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -64,7 +64,7 @@ class CopilotPluginUtil {
                 HANDLERS.REDO.command -> return RedoHandler(project, data)
                 HANDLERS.SHOW_IN_IDE.command -> return ShowInIdeHandler(project, data)
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
-                HANDLERS.GET_SOURCE_PATHS.command -> return GetSourcePathsHandler(project)
+                HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
@@ -148,6 +148,10 @@ class CopilotPluginUtil {
             }
             LOG.info("Project directory: $projectDir")
             return projectDir.findOrCreateDirectory(IDEA_DIR)
+        }
+
+        fun getDotFile(project: Project): VirtualFile? {
+            return getDotFileDirectory(project)?.findFile(DOTFILE)
         }
     }
 }
