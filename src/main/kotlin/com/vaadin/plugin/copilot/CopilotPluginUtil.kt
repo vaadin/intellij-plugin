@@ -4,8 +4,8 @@ import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.application.runInEdt
-import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
@@ -94,7 +94,7 @@ class CopilotPluginUtil {
                     }
                 props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
                 runInEdt {
-                    runWriteAction {
+                    WriteAction.run<Throwable> {
                         val dotFile = dotFileDirectory.findFile(DOTFILE)
                         dotFile?.let {
                             try {
@@ -108,7 +108,7 @@ class CopilotPluginUtil {
                                 dotFileDirectory.createChildData(this, DOTFILE)
                             } catch (e: IOException) {
                                 LOG.error("Failed to create $DOTFILE: ${e.message}")
-                                return@runWriteAction
+                                return@run
                             }
 
                         try {
@@ -124,7 +124,7 @@ class CopilotPluginUtil {
 
         fun removeDotFile(project: Project) {
             runInEdt {
-                runWriteAction {
+                WriteAction.run<Throwable> {
                     val dotFile = getDotFileDirectory(project)?.findFile(DOTFILE)
                     dotFile?.let {
                         try {
@@ -133,7 +133,7 @@ class CopilotPluginUtil {
                         } catch (e: IOException) {
                             LOG.error("Failed to delete $DOTFILE: ${e.message}")
                         }
-                        return@runWriteAction
+                        return@run
                     }
                     LOG.warn("Cannot remove $dotFile - file does not exist")
                 }
