@@ -78,10 +78,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 }
 
 tasks {
-  patchPluginXml {
-    sinceBuild.set("233")
-    untilBuild.set("243.*")
-  }
+  patchPluginXml { sinceBuild.set("233") }
 
   signPlugin {
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
