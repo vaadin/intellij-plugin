@@ -32,8 +32,7 @@ object VaadinHomeUtil {
         // might only happen if user removes hotswap-agent.jar manually after plugin is already
         // installed
         if (!hotSwapAgentJarFile.exists()) {
-            throw IllegalStateException(
-                "hotswap-agent.jar is not present, run \"HotSwap: Install or update\" action to install")
+            updateOrInstallHotSwapJar()
         }
         return hotSwapAgentJarFile
     }
