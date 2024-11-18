@@ -8,8 +8,10 @@ import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.*
 import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
@@ -152,6 +154,26 @@ class CopilotPluginUtil {
 
         fun getDotFile(project: Project): VirtualFile? {
             return getDotFileDirectory(project)?.findFile(DOTFILE)
+        }
+
+        /**
+         * Returns a map of all base directories related to the project. This includes any external module and the main
+         * project base folders. For the main project, the base directory is the project root and the module name is
+         * "base-module".
+         */
+        fun getBaseDirectoriesForProject(project: Project): Map<String, List<String>> {
+            val moduleManager = ModuleManager.getInstance(project)
+            val moduleBaseDirectories = mutableMapOf<String, List<String>>()
+
+            moduleManager.modules.forEach { module ->
+                val contentRootPaths =
+                    ModuleRootManager.getInstance(module).contentRoots.map {
+                        it.path
+                    } // Convert each VirtualFile to its path as a String
+                moduleBaseDirectories[module.name] = contentRootPaths
+            }
+            moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
+            return moduleBaseDirectories
         }
     }
 }

@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiDocumentManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.getBaseDirectoriesForProject
 import com.vaadin.plugin.copilot.service.CopilotUndoManager
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
@@ -45,7 +46,9 @@ abstract class AbstractHandler(val project: Project) : Handler {
     fun isFileInsideProject(project: Project, file: File): Boolean {
         if (file.exists()) {
             val path = file.toPath()
-            return path.toRealPath().startsWith(project.basePath!!)
+            return getBaseDirectoriesForProject(project).values.flatten().any { baseDirectory ->
+                path.startsWith(baseDirectory)
+            }
         } else {
             // New file
             return isFileInsideProject(project, file.parentFile)
