@@ -220,7 +220,7 @@ class CopilotPluginUtil {
             getModulesInfo(project).forEach { module ->
                 moduleBaseDirectories[module.name] = module.contentRoots.toList()
             }
-            moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
+            moduleBaseDirectories["base-module"] = listOf(project.guessProjectDir()) as List<String>
             return moduleBaseDirectories
         }
     }
