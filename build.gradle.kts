@@ -44,10 +44,12 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    create("IC", "2023.3")
+    create("IU", "2023.3")
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.idea.maven")
     bundledPlugin("org.jetbrains.plugins.gradle")
+    bundledPlugin("com.intellij.properties")
+    bundledPlugin("com.intellij.microservices.jvm")
 
     pluginVerifier()
     zipSigner()
