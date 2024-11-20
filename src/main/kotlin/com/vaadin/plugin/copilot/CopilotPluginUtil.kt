@@ -8,8 +8,12 @@ import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.project.modules
+import com.intellij.openapi.roots.CompilerModuleExtension
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.*
 import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
@@ -18,8 +22,23 @@ import java.io.BufferedWriter
 import java.io.IOException
 import java.io.StringWriter
 import java.util.*
+import org.jetbrains.jps.model.java.JavaResourceRootType
+import org.jetbrains.jps.model.java.JavaSourceRootType
 
 class CopilotPluginUtil {
+
+    @JvmRecord
+    data class ModuleInfo(
+        val name: String,
+        val contentRoots: Array<String>,
+        val javaSourcePaths: Array<String>,
+        val javaTestSourcePaths: Array<String>,
+        val resourcePaths: Array<String>,
+        val testResourcePaths: Array<String>,
+        val outputPath: String?
+    )
+
+    @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<CopilotPluginUtil.ModuleInfo>)
 
     companion object {
 
@@ -152,6 +171,57 @@ class CopilotPluginUtil {
 
         fun getDotFile(project: Project): VirtualFile? {
             return getDotFileDirectory(project)?.findFile(DOTFILE)
+        }
+
+        /**
+         * Returns a list of all modules in the project. Each module contains information about the module name, content
+         * roots, source paths, test source paths, resource paths, test resource paths, and output path.
+         */
+        fun getModulesInfo(project: Project): ArrayList<ModuleInfo> {
+            val modules = ArrayList<ModuleInfo>()
+            ModuleManager.getInstance(project).modules.forEach { module ->
+                val moduleRootManager = ModuleRootManager.getInstance(module)
+                val contentRoots = moduleRootManager.contentRoots.map { it.path }
+
+                val compilerModuleExtension = CompilerModuleExtension.getInstance(module)
+                val outputPath = compilerModuleExtension?.compilerOutputPath
+
+                // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
+                // Only include folder if is is not in the output path
+                val javaSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map({ it.path })
+                val javaTestSourcePaths =
+                    moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map({ it.path })
+
+                val resourcePaths = moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path }
+                val testResourcePaths =
+                    moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path }
+
+                modules.add(
+                    ModuleInfo(
+                        module.name,
+                        contentRoots.toTypedArray(),
+                        javaSourcePaths.toTypedArray(),
+                        javaTestSourcePaths.toTypedArray(),
+                        resourcePaths.toTypedArray(),
+                        testResourcePaths.toTypedArray(),
+                        outputPath?.path))
+            }
+            return modules
+        }
+
+        /**
+         * Returns a map of all base directories related to the project. This includes any external module and the main
+         * project base folders. For the main project, the base directory is the project root and the module name is
+         * "base-module".
+         */
+        fun getBaseDirectoriesForProject(project: Project): Map<String, List<String>> {
+
+            val moduleBaseDirectories = mutableMapOf<String, List<String>>()
+            getModulesInfo(project).forEach { module ->
+                moduleBaseDirectories[module.name] = module.contentRoots.toList()
+            }
+            moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
+            return moduleBaseDirectories
         }
     }
 }
