@@ -10,14 +10,14 @@ import com.intellij.psi.util.InheritanceUtil
 
 internal class VaadinImplicitUsageProvider : ImplicitUsageProvider {
     override fun isImplicitUsage(element: PsiElement): Boolean {
-        return element is PsiClass
-                && !element.isInterface
-                && !element.isEnum
-                && !element.hasModifier(JvmModifier.ABSTRACT)
-                && !element.isAnnotationType
-                && (AnnotationUtil.isAnnotated(element, VAADIN_ROUTE, 0)
-                || AnnotationUtil.isAnnotated(element, VAADIN_TAG, 0)
-                || InheritanceUtil.isInheritor(element, VAADIN_APP_SHELL_CONFIGURATOR))
+        return element is PsiClass &&
+            !element.isInterface &&
+            !element.isEnum &&
+            !element.hasModifier(JvmModifier.ABSTRACT) &&
+            !element.isAnnotationType &&
+            (AnnotationUtil.isAnnotated(element, VAADIN_ROUTE, 0) ||
+                AnnotationUtil.isAnnotated(element, VAADIN_TAG, 0) ||
+                InheritanceUtil.isInheritor(element, VAADIN_APP_SHELL_CONFIGURATOR))
     }
 
     override fun isImplicitRead(element: PsiElement): Boolean {
@@ -25,7 +25,6 @@ internal class VaadinImplicitUsageProvider : ImplicitUsageProvider {
     }
 
     override fun isImplicitWrite(element: PsiElement): Boolean {
-        return element is PsiField
-                && AnnotationUtil.isAnnotated(element, VAADIN_ID, 0)
+        return element is PsiField && AnnotationUtil.isAnnotated(element, VAADIN_ID, 0)
     }
 }

@@ -27,36 +27,27 @@ internal class VaadinUrlResolver(private val project: Project) : UrlResolver {
         get() = HTTP_SCHEMES
 
     override fun getVariants(): Iterable<UrlTargetInfo> {
-        return getAllModuleVariants(project)
-            .asIterable()
+        return getAllModuleVariants(project).asIterable()
     }
 
     override fun resolve(request: UrlResolveRequest): Iterable<UrlTargetInfo> {
         if (request.method != HttpMethods.GET) return emptyList()
 
-        val allModuleVariants = getAllModuleVariants(project)
-            .toList()
+        val allModuleVariants = getAllModuleVariants(project).toList()
 
         return UrlPath.combinations(request.path)
-            .flatMap { path ->
-                allModuleVariants.asSequence()
-                    .filter { it.path.isCompatibleWith(path) }
-            }
+            .flatMap { path -> allModuleVariants.asSequence().filter { it.path.isCompatibleWith(path) } }
             .asIterable()
     }
 }
 
 internal val VAADIN_ROUTES_SEARCH: SourceLibSearchProvider<List<VaadinRoute>, Module> =
-    SourceLibSearchProvider("VAADIN_ROUTES") { p, _, scope ->
-        findVaadinRoutes(p, scope).toList()
-    }
+    SourceLibSearchProvider("VAADIN_ROUTES") { p, _, scope -> findVaadinRoutes(p, scope).toList() }
 
 private fun getAllModuleVariants(project: Project): Sequence<VaadinUrlTargetInfo> {
     val modules = ModuleManager.getInstance(project).modules
 
-    return modules.asSequence()
-        .flatMap(::getVariants)
-        .map(::VaadinUrlTargetInfo)
+    return modules.asSequence().flatMap(::getVariants).map(::VaadinUrlTargetInfo)
 }
 
 private fun getVariants(module: Module): Sequence<VaadinRoute> {
@@ -82,22 +73,18 @@ private class VaadinUrlTargetInfo(route: VaadinRoute) : UrlTargetInfo {
     override fun resolveToPsiElement(): PsiElement? = anchor.retrieve()
 }
 
-internal val vaadinUrlPksParser: UrlPksParser = UrlPksParser(
-    splitEscaper = { _, _ -> SplitEscaper.AcceptAll },
-    customPathSegmentExtractor = { part ->
-        if (part.startsWith(":")) {
-            val varName = part.removePrefix(":")
-                .substringBefore("?")
-                .substringBefore("(")
-            PathSegment.Variable(varName)
-        } else {
-            PathSegment.Exact(part)
-        }
-    }
-)
+internal val vaadinUrlPksParser: UrlPksParser =
+    UrlPksParser(
+        splitEscaper = { _, _ -> SplitEscaper.AcceptAll },
+        customPathSegmentExtractor = { part ->
+            if (part.startsWith(":")) {
+                val varName = part.removePrefix(":").substringBefore("?").substringBefore("(")
+                PathSegment.Variable(varName)
+            } else {
+                PathSegment.Exact(part)
+            }
+        })
 
 internal fun parseVaadinUrlMapping(urlMapping: String): UrlPath {
-    return vaadinUrlPksParser
-        .parseUrlPath(PartiallyKnownString(urlMapping))
-        .urlPath
+    return vaadinUrlPksParser.parseUrlPath(PartiallyKnownString(urlMapping)).urlPath
 }
