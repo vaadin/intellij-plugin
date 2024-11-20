@@ -28,12 +28,12 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.jetbrains.plugins.gradle</depends>
 
-    <depends>com.intellij.properties</depends>
 
     <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
-    <depends optional="true">com.intellij.modules.microservices</depends>
-    <depends optional="true">com.intellij.microservices.jvm</depends>
-    <depends optional="true">com.intellij.modules.ultimate</depends>
+    <depends>com.intellij.properties</depends>
+    <depends>com.intellij.modules.microservices</depends>
+    <depends>com.intellij.microservices.jvm</depends>
+    <depends>com.intellij.modules.ultimate</depends>
 
     <change-notes>
         <![CDATA[
