@@ -91,6 +91,7 @@
             <add-to-group group-id="XDebugger.ToolWindow.TopToolbar3"
                           relative-to-action="Rerun"
                           anchor="after" />
+            <add-to-group group-id="RunDashboardPopup" anchor="last" />
         </action>
     </actions>
 
