@@ -14,7 +14,6 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.project.modules
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.*
@@ -41,7 +40,7 @@ class CopilotPluginUtil {
         val outputPath: String?
     )
 
-    @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<CopilotPluginUtil.ModuleInfo>)
+    @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<ModuleInfo>)
 
     companion object {
 
