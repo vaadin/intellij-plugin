@@ -28,6 +28,13 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.jetbrains.plugins.gradle</depends>
 
+
+    <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
+    <depends>com.intellij.properties</depends>
+    <depends optional="true">com.intellij.modules.microservices</depends>
+    <depends optional="true">com.intellij.microservices.jvm</depends>
+    <depends optional="true">com.intellij.modules.ultimate</depends>
+
     <change-notes>
         <![CDATA[
         <p>Check <a href="https://github.com/vaadin/intellij-plugin/releases">release notes at GitHub</a> for more information.</p>
@@ -71,6 +78,14 @@
 
         <!-- Configuration check -->
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
+
+        <!-- Vaadin Endpoints -->
+        <psi.referenceContributor language="UAST" implementation="com.vaadin.plugin.endpoints.VaadinReferenceContributor"/>
+        <microservices.endpointsProvider implementation="com.vaadin.plugin.endpoints.VaadinEndpointsProvider"/>
+        <microservices.urlResolverFactory implementation="com.vaadin.plugin.endpoints.VaadinUrlResolverFactory"/>
+        <implicitUsageProvider implementation="com.vaadin.plugin.endpoints.VaadinImplicitUsageProvider"/>
+
+        <dependencySupport kind="java" coordinate="com.vaadin:flow-server" displayName="Vaadin Flow"/>
     </extensions>
 
     <actions>
