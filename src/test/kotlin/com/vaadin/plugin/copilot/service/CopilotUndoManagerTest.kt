@@ -6,6 +6,7 @@ import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
@@ -31,6 +32,7 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
     @BeforeEach
     fun setup() {
         super.setUp()
+        DumbService.getInstance(project).waitForSmartMode()
         tempFile = File("${project.basePath}/${UUID.random().text}.tmp")
         tempFile.deleteOnExit()
         Files.createDirectories(Path.of(project.basePath))
