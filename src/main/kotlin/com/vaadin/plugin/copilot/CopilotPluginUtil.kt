@@ -9,9 +9,11 @@ import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.project.DumbModeTask
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.project.modules
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.*
@@ -38,7 +40,7 @@ class CopilotPluginUtil {
         val outputPath: String?
     )
 
-    @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<CopilotPluginUtil.ModuleInfo>)
+    @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<ModuleInfo>)
 
     companion object {
 
@@ -96,6 +98,16 @@ class CopilotPluginUtil {
         }
 
         fun saveDotFile(project: Project) {
+            val task =
+                object : DumbModeTask() {
+                    override fun performInDumbMode(progressIndicator: ProgressIndicator) {
+                        saveDotFileInternal(project)
+                    }
+                }
+            DumbService.getInstance(project).queueTask(task)
+        }
+
+        private fun saveDotFileInternal(project: Project) {
             val dotFileDirectory = getDotFileDirectory(project)
             if (dotFileDirectory != null) {
                 val props = Properties()
