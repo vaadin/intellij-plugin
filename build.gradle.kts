@@ -3,7 +3,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij.platform") version "2.0.0"
+  id("org.jetbrains.intellij.platform") version "2.1.0"
   id("com.diffplug.spotless") version "7.0.0.BETA2"
 
   id("com.adarshr.test-logger") version "4.0.0"
@@ -17,18 +17,6 @@ val publishChannel =
     } else {
       "Stable"
     }
-
-intellijPlatform {
-  pluginConfiguration {
-    version =
-        if (hasProperty("projVersion")) {
-          property("projVersion") as String
-        } else {
-          "1.0-SNAPSHOT"
-        }
-  }
-  pluginVerification { ides { recommended() } }
-}
 
 java {
   sourceCompatibility = JavaVersion.VERSION_17
@@ -44,7 +32,7 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    create("IC", "2023.3")
+    intellijIdeaUltimate("2023.3")
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.idea.maven")
     bundledPlugin("org.jetbrains.plugins.gradle")
@@ -58,6 +46,18 @@ dependencies {
 
   testImplementation(kotlin("test"))
   testImplementation("junit:junit:4.13.2")
+}
+
+intellijPlatform {
+  pluginConfiguration {
+    version =
+        if (hasProperty("projVersion")) {
+          property("projVersion") as String
+        } else {
+          "1.0-SNAPSHOT"
+        }
+  }
+  pluginVerification { ides { recommended() } }
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
