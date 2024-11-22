@@ -1,7 +1,5 @@
 package com.vaadin.plugin.endpoints
 
-import com.intellij.java.library.JavaLibraryUtil.hasLibraryClass
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiAnchor
@@ -17,10 +15,6 @@ internal const val VAADIN_ROUTE = "com.vaadin.flow.router.Route"
 internal const val VAADIN_APP_SHELL_CONFIGURATOR = "com.vaadin.flow.component.page.AppShellConfigurator"
 internal const val VAADIN_ID = "com.vaadin.flow.component.template.Id"
 internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
-
-internal fun hasVaadinFlow(project: Project): Boolean = hasLibraryClass(project, VAADIN_ROUTE)
-
-internal fun hasVaadinFlow(module: Module): Boolean = hasLibraryClass(module, VAADIN_ROUTE)
 
 internal fun findVaadinRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val vaadinRouteClass =
