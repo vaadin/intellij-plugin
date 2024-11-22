@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
   id("java")
@@ -59,7 +60,10 @@ intellijPlatform {
           "1.0-SNAPSHOT"
         }
   }
-  pluginVerification { ides { recommended() } }
+  pluginVerification {
+    ides { recommended() }
+    verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
+  }
 }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {

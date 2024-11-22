@@ -44,6 +44,7 @@ jobs:
           path: build/distributions
       - uses: mshick/add-pr-comment@v2
         with:
+          message-id: download-artifact-comment
           refresh-message-position: true
           message: |
             Artifact build on last commit: [distributions.zip](${{ steps.artifact.outputs.artifact-url }}). 
@@ -62,3 +63,14 @@ jobs:
           cache: gradle
       - name: Verify plugin
         run: ./gradlew --no-configuration-cache verifyPlugin
+      - name: Find version
+        id: version
+        run: |
+          echo "IDE_VERSION=`ls build/reports/pluginVerifier/`" >> $GITHUB_OUTPUT
+      - name: Publish report
+        uses: mshick/add-pr-comment@v2
+        with:
+          message-id: verify-plugin-comment
+          refresh-message-position: true
+          message-path: |
+            build/reports/pluginVerifier/${{ steps.version.outputs.IDE_VERSION }}/report.md
