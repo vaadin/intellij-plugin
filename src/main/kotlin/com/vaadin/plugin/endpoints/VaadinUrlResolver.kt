@@ -14,11 +14,12 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PartiallyKnownString
 import com.intellij.psi.util.SplitEscaper
 import com.vaadin.plugin.utils.VaadinIcons
+import com.vaadin.plugin.utils.hasVaadin
 import javax.swing.Icon
 
 internal class VaadinUrlResolverFactory : UrlResolverFactory {
     override fun forProject(project: Project): UrlResolver? {
-        return if (hasVaadinFlow(project)) VaadinUrlResolver(project) else null
+        return if (hasVaadin(project)) VaadinUrlResolver(project) else null
     }
 }
 
@@ -51,7 +52,7 @@ private fun getAllModuleVariants(project: Project): Sequence<VaadinUrlTargetInfo
 }
 
 private fun getVariants(module: Module): Sequence<VaadinRoute> {
-    if (!hasVaadinFlow(module)) return emptySequence()
+    if (!hasVaadin(module)) return emptySequence()
 
     return sequenceWithCache(ModuleCacheValueHolder(module), VAADIN_ROUTES_SEARCH)
 }

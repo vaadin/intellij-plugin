@@ -1,7 +1,12 @@
 package com.vaadin.plugin.endpoints
 
-import com.intellij.microservices.endpoints.*
+import com.intellij.microservices.endpoints.EndpointType
+import com.intellij.microservices.endpoints.EndpointsFilter
+import com.intellij.microservices.endpoints.EndpointsProvider
 import com.intellij.microservices.endpoints.EndpointsProvider.Status
+import com.intellij.microservices.endpoints.FrameworkPresentation
+import com.intellij.microservices.endpoints.HTTP_SERVER_TYPE
+import com.intellij.microservices.endpoints.ModuleEndpointsFilter
 import com.intellij.microservices.endpoints.presentation.HttpUrlPresentation
 import com.intellij.microservices.url.UrlPath
 import com.intellij.navigation.ItemPresentation
@@ -10,6 +15,7 @@ import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.uast.UastModificationTracker
 import com.vaadin.plugin.utils.VaadinIcons
+import com.vaadin.plugin.utils.hasVaadin
 
 internal class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRoute> {
     override val endpointType: EndpointType = HTTP_SERVER_TYPE
@@ -18,7 +24,7 @@ internal class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRo
         FrameworkPresentation("Vaadin", "Vaadin Flow", VaadinIcons.VAADIN_BLUE)
 
     override fun getStatus(project: Project): Status {
-        if (hasVaadinFlow(project)) return Status.HAS_ENDPOINTS
+        if (hasVaadin(project)) return Status.HAS_ENDPOINTS
 
         return Status.UNAVAILABLE
     }
@@ -29,7 +35,7 @@ internal class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRo
 
     override fun getEndpointGroups(project: Project, filter: EndpointsFilter): Iterable<VaadinRoute> {
         if (filter !is ModuleEndpointsFilter) return emptyList()
-        if (!hasVaadinFlow(filter.module)) return emptyList()
+        if (!hasVaadin(filter.module)) return emptyList()
 
         return findVaadinRoutes(project, filter.transitiveSearchScope)
     }

@@ -1,11 +1,9 @@
 package com.vaadin.plugin.utils
 
+import com.intellij.java.library.JavaLibraryUtil.hasLibraryClass
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.libraries.Library
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -18,13 +16,13 @@ import java.nio.file.Path
 import java.util.*
 import java.util.zip.ZipFile
 
+internal const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
+
 class VaadinProjectUtil {
 
     companion object {
 
         private val LOG: Logger = Logger.getInstance(VaadinProjectUtil::class.java)
-
-        private const val VAADIN_LIB_PREFIX = "com.vaadin:"
 
         val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
 
@@ -74,20 +72,9 @@ class VaadinProjectUtil {
                 return null
             }
         }
-
-        fun isVaadinProject(project: Project): Boolean {
-            return ModuleManager.getInstance(project).modules.any { isVaadinModule(it) }
-        }
-
-        fun isVaadinModule(module: com.intellij.openapi.module.Module): Boolean {
-            var hasVaadin = false
-            ModuleRootManager.getInstance(module).orderEntries().forEachLibrary { library: Library ->
-                if (library.name?.contains(VAADIN_LIB_PREFIX) == true) {
-                    hasVaadin = true
-                }
-                true
-            }
-            return hasVaadin
-        }
     }
 }
+
+internal fun hasVaadin(project: Project): Boolean = hasLibraryClass(project, VAADIN_SERVICE)
+
+internal fun hasVaadin(module: com.intellij.openapi.module.Module): Boolean = hasLibraryClass(module, VAADIN_SERVICE)
