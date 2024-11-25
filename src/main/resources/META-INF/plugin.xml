@@ -15,9 +15,13 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description>
         <![CDATA[
-        <p>Official Vaadin plugin for JetBrains IntelliJ, currently featuring undo support for Vaadin Copilot modifications.</p>
-        <p>This plugin integrates directly with IntelliJ’s undo stack, allowing developers to easily reverse changes made by Vaadin Copilot.</p>
-        <p>While initially focused on enhancing undo functionality, the plugin is designed for future expansion with additional features to streamline your Vaadin development workflow.</p>
+        <p>Improves developer experience while working with <a href="https://vaadin.com">Vaadin</a> framework.</p>
+        <ul>
+         <li>Helps to create new Vaadin projects using configurable Hello World starters.</li>
+         <li>Boosts <a href="https://vaadin.com/copilot">Vaadin Copilot</a> experience.</li>
+         <li>Helps to set up and run projects using HotSwap Agent.</li>
+         <li>Provides navigation to <a href="https://vaadin.com/flow">Flow</a> @Route views in Endpoints tool window.</li>
+        </ul>
         ]]>
     </description>
 
@@ -79,7 +83,7 @@
         <!-- Configuration check -->
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
 
-        <dependencySupport kind="java" coordinate="com.vaadin:flow-server" displayName="Vaadin Flow"/>
+        <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
 
     <actions>
