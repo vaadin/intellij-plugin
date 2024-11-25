@@ -1,3 +1,4 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
@@ -9,6 +10,9 @@ plugins {
 
   id("com.adarshr.test-logger") version "4.0.0"
 }
+
+// version for building and verifying plugin
+val buildVersion = "2023.3"
 
 group = "com.vaadin"
 
@@ -33,7 +37,7 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaUltimate("2023.3")
+    intellijIdeaUltimate(buildVersion)
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.idea.maven")
     bundledPlugin("org.jetbrains.plugins.gradle")
@@ -61,7 +65,10 @@ intellijPlatform {
         }
   }
   pluginVerification {
-    ides { recommended() }
+    ides {
+      ide(IntelliJPlatformType.IntellijIdeaCommunity, buildVersion)
+      ide(IntelliJPlatformType.IntellijIdeaUltimate, buildVersion)
+    }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
 }
