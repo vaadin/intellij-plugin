@@ -67,6 +67,10 @@ jobs:
         run: |
           DIRECTORIES=$(ls build/reports/pluginVerifier/ | jq -R -s -c 'split("\n")[:-1]')
           echo "DIRECTORIES=$DIRECTORIES" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pluginVerifierReports
+          path: build/reports/pluginVerifier
     outputs:
       directories: ${{ env.DIRECTORIES }}
 
@@ -77,10 +81,13 @@ jobs:
       matrix:
         dir: ${{fromJson(needs.runPluginVerifier.outputs.directories)}}
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pluginVerifierReports
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
-          message-id: verify-plugin-comment
+          message-id: verify-plugin-comment-${{ matrix.dir }}
           refresh-message-position: true
           message-path: |
-            build/reports/pluginVerifier/${{ matrix.dir }}/report.md
+            pluginVerifier/${{ matrix.dir }}/report.md
