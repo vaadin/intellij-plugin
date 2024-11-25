@@ -63,14 +63,31 @@ jobs:
           cache: gradle
       - name: Verify plugin
         run: ./gradlew --no-configuration-cache verifyPlugin
-      - name: Find version
-        id: version
+      - name: Get result directories
         run: |
-          echo "IDE_VERSION=`ls build/reports/pluginVerifier/`" >> $GITHUB_OUTPUT
+          DIRECTORIES=$(ls build/reports/pluginVerifier/ | jq -R -s -c 'split("\n")[:-1]')
+          echo "DIRECTORIES=$DIRECTORIES" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pluginVerifierReports
+          path: build/reports/pluginVerifier
+    outputs:
+      directories: ${{ env.DIRECTORIES }}
+
+  addComments:
+    runs-on: ubuntu-latest
+    needs: runPluginVerifier
+    strategy:
+      matrix:
+        dir: ${{fromJson(needs.runPluginVerifier.outputs.directories)}}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pluginVerifierReports
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
-          message-id: verify-plugin-comment
+          message-id: verify-plugin-comment-${{ matrix.dir }}
           refresh-message-position: true
           message-path: |
-            build/reports/pluginVerifier/${{ steps.version.outputs.IDE_VERSION }}/report.md
+            ${{ matrix.dir }}/report.md

@@ -83,12 +83,6 @@
         <!-- Configuration check -->
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
 
-        <!-- Vaadin Endpoints -->
-        <psi.referenceContributor language="UAST" implementation="com.vaadin.plugin.endpoints.VaadinReferenceContributor"/>
-        <microservices.endpointsProvider implementation="com.vaadin.plugin.endpoints.VaadinEndpointsProvider"/>
-        <microservices.urlResolverFactory implementation="com.vaadin.plugin.endpoints.VaadinUrlResolverFactory"/>
-        <implicitUsageProvider implementation="com.vaadin.plugin.endpoints.VaadinImplicitUsageProvider"/>
-
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
 
