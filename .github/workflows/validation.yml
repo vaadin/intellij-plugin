@@ -84,10 +84,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: pluginVerifierReports
+      - run: |
+          ls
+          unzip pluginVerifierReports.zip
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
           message-id: verify-plugin-comment-${{ matrix.dir }}
           refresh-message-position: true
           message-path: |
-            pluginVerifierReports/${{ matrix.dir }}/report.md
+            ${{ matrix.dir }}/report.md
