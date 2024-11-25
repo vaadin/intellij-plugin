@@ -84,9 +84,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: pluginVerifierReports
-      - run: |
-          ls
-          unzip pluginVerifierReports.zip
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
