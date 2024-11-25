@@ -90,4 +90,4 @@ jobs:
           message-id: verify-plugin-comment-${{ matrix.dir }}
           refresh-message-position: true
           message-path: |
-            pluginVerifier/${{ matrix.dir }}/report.md
+            pluginVerifierReports/${{ matrix.dir }}/report.md
