@@ -191,7 +191,14 @@ class CopilotPluginUtil {
          */
         fun getModulesInfo(project: Project): ArrayList<ModuleInfo> {
             val modules = ArrayList<ModuleInfo>()
-            ModuleManager.getInstance(project).modules.forEach { module ->
+            val moduleManager = ModuleManager.getInstance(project)
+            val projectModules = moduleManager.modules
+            val moduleMap = projectModules.associateBy({ it.name }, { it })
+            projectModules.forEach { module: Module ->
+                if ((module.name.endsWith(".main") || module.name.endsWith(".test")) &&
+                    moduleMap.containsKey(module.name.substring(0, module.name.lastIndexOf('.')))) {
+                    return@forEach
+                }
                 val moduleRootManager = ModuleRootManager.getInstance(module)
                 val contentRoots = moduleRootManager.contentRoots.map { it.path }
 
@@ -200,9 +207,30 @@ class CopilotPluginUtil {
 
                 // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
                 // Only include folder if is is not in the output path
-                val javaSourcePaths = moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map({ it.path })
-                val javaTestSourcePaths =
-                    moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map({ it.path })
+                val javaSourcePaths = ArrayList<String>()
+                val javaTestSourcePaths = ArrayList<String>()
+
+                javaSourcePaths.addAll(moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map({ it.path }))
+                javaTestSourcePaths.addAll(
+                    moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map({ it.path }))
+
+                // .main and .test are probably source sets in Gradle projects, and probably we
+                // should take into account that any suffix can contain any type of folders. But
+                // this is what we have a test for
+                val mainGradleModule = moduleMap[module.name + ".main"]
+                if (mainGradleModule != null) {
+                    javaSourcePaths.addAll(
+                        ModuleRootManager.getInstance(mainGradleModule)
+                            .getSourceRoots(JavaSourceRootType.SOURCE)
+                            .map({ it.path }))
+                }
+                val testGradleModule = moduleMap[module.name + ".test"]
+                if (testGradleModule != null) {
+                    javaTestSourcePaths.addAll(
+                        ModuleRootManager.getInstance(testGradleModule)
+                            .getSourceRoots(JavaSourceRootType.TEST_SOURCE)
+                            .map({ it.path }))
+                }
 
                 val resourcePaths = moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path }
                 val testResourcePaths =
