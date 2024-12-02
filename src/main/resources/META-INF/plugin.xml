@@ -31,7 +31,7 @@
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.jetbrains.plugins.gradle</depends>
-
+    <depends>JavaScript</depends>
 
     <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
     <depends>com.intellij.properties</depends>
