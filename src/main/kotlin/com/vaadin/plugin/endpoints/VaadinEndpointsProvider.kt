@@ -14,14 +14,26 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.uast.UastModificationTracker
+import com.vaadin.plugin.endpoints.VaadinEndpointsProvider.VaadinEndpointGroup
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasVaadin
 
-internal class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRoute> {
+internal class VaadinEndpointsProvider : EndpointsProvider<VaadinEndpointGroup, VaadinRoute> {
     override val endpointType: EndpointType = HTTP_SERVER_TYPE
 
+    enum class ENDPOINT_GROUP {
+        HILLA,
+        FLOW
+    }
+
+    internal class VaadinEndpointGroup(
+        val project: Project,
+        val filter: ModuleEndpointsFilter,
+        val endPointGroup: ENDPOINT_GROUP
+    )
+
     override val presentation: FrameworkPresentation =
-        FrameworkPresentation("Vaadin", "Vaadin Flow", VaadinIcons.VAADIN_BLUE)
+        FrameworkPresentation("Vaadin", "Vaadin", VaadinIcons.VAADIN_BLUE)
 
     override fun getStatus(project: Project): Status {
         if (hasVaadin(project)) return Status.HAS_ENDPOINTS
@@ -33,36 +45,46 @@ internal class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRo
         return UastModificationTracker.getInstance(project)
     }
 
-    override fun getEndpointGroups(project: Project, filter: EndpointsFilter): Iterable<VaadinRoute> {
+    override fun getEndpointGroups(project: Project, filter: EndpointsFilter): Iterable<VaadinEndpointGroup> {
         if (filter !is ModuleEndpointsFilter) return emptyList()
         if (!hasVaadin(filter.module)) return emptyList()
 
-        return findVaadinRoutes(project, filter.transitiveSearchScope)
+        return listOf(
+            VaadinEndpointGroup(project, filter, ENDPOINT_GROUP.FLOW),
+            VaadinEndpointGroup(project, filter, ENDPOINT_GROUP.HILLA))
     }
 
-    override fun getEndpoints(group: VaadinRoute): Iterable<VaadinRoute> {
-        return listOf(group)
+    override fun getEndpoints(group: VaadinEndpointGroup): Iterable<VaadinRoute> {
+        if (group.endPointGroup === ENDPOINT_GROUP.FLOW)
+            return findFlowRoutes(group.project, group.filter.transitiveSearchScope)
+        if (group.endPointGroup === ENDPOINT_GROUP.HILLA)
+            return findHillaEndpoints(group.project, group.filter.transitiveSearchScope)
+        return emptyList()
     }
 
-    override fun isValidEndpoint(group: VaadinRoute, endpoint: VaadinRoute): Boolean {
-        return group.isValid()
+    override fun isValidEndpoint(group: VaadinEndpointGroup, endpoint: VaadinRoute): Boolean {
+        return endpoint.isValid()
     }
 
-    override fun getEndpointPresentation(group: VaadinRoute, endpoint: VaadinRoute): ItemPresentation {
-        return HttpUrlPresentation(normalizeUrl(group.urlMapping), group.locationString, VaadinIcons.VAADIN_BLUE)
+    override fun getEndpointPresentation(group: VaadinEndpointGroup, endpoint: VaadinRoute): ItemPresentation {
+        val item =
+            HttpUrlPresentation(
+                normalizeUrl(group, endpoint.urlMapping), endpoint.locationString, VaadinIcons.VAADIN_BLUE)
+        return item
     }
 
-    private fun normalizeUrl(urlMapping: String): String {
+    private fun normalizeUrl(group: VaadinEndpointGroup, urlMapping: String): String {
         val urlString = run {
             if (urlMapping.isBlank()) return@run "/"
-            if (!urlMapping.startsWith("/")) return@run "/$urlMapping"
+            if (group.endPointGroup == ENDPOINT_GROUP.FLOW && !urlMapping.startsWith("/")) return@run "/$urlMapping"
+            if (group.endPointGroup == ENDPOINT_GROUP.HILLA) return@run "$urlMapping"
             return@run urlMapping
         }
 
         return parseVaadinUrlMapping(urlString).getPresentation(VaadinUrlRenderer)
     }
 
-    override fun getDocumentationElement(group: VaadinRoute, endpoint: VaadinRoute): PsiElement? {
+    override fun getDocumentationElement(group: VaadinEndpointGroup, endpoint: VaadinRoute): PsiElement? {
         return endpoint.anchor.retrieve()
     }
 }

@@ -8,7 +8,11 @@ import com.intellij.microservices.url.HTTP_SCHEMES
 import com.intellij.patterns.PsiJavaPatterns.psiMethod
 import com.intellij.patterns.uast.callExpression
 import com.intellij.patterns.uast.injectionHostUExpression
-import com.intellij.psi.*
+import com.intellij.psi.PsiReference
+import com.intellij.psi.PsiReferenceContributor
+import com.intellij.psi.PsiReferenceRegistrar
+import com.intellij.psi.UastReferenceProvider
+import com.intellij.psi.registerUastReferenceProvider
 import com.intellij.util.ProcessingContext
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.expressions.UInjectionHost
