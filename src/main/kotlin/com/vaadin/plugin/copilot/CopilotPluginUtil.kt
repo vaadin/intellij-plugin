@@ -52,8 +52,6 @@ class CopilotPluginUtil {
 
         private const val NORMALIZED_LINE_SEPARATOR = "\n"
 
-        private const val NOTIFICATION_GROUP = "Vaadin Copilot"
-
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
             WRITE_BASE64("writeBase64"),
@@ -65,6 +63,8 @@ class CopilotPluginUtil {
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
+
+        const val NOTIFICATION_GROUP = "Vaadin Copilot"
 
         fun getPluginVersion(): String? {
             return pluginVersion

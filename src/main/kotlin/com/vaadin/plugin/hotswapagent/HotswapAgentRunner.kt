@@ -5,7 +5,10 @@ import com.intellij.execution.JavaRunConfigurationBase
 import com.intellij.execution.configurations.JavaCommandLine
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.NOTIFICATION_GROUP
 
 class HotswapAgentRunner : GenericDebuggerRunner() {
 
@@ -18,9 +21,19 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
     }
 
     override fun execute(environment: ExecutionEnvironment) {
-        val runProfile =
-            environment.runProfile as? JavaRunConfigurationBase
-                ?: throw IllegalStateException("$runnerId can only run Java configurations")
+
+        if (environment.runProfile !is JavaRunConfigurationBase) {
+            Notification(
+                    NOTIFICATION_GROUP,
+                    "To launch, open the Spring Boot application class and press \"Debug using Hotswap Agent\". " +
+                        "Do not launch through Maven or Gradle.",
+                    NotificationType.WARNING)
+                .setTitle("Only Spring Boot applications are supported")
+                .notify(environment.project)
+            return
+        }
+
+        val runProfile = environment.runProfile as JavaRunConfigurationBase
         val javaCommandLine =
             environment.state as? JavaCommandLine ?: throw IllegalStateException("$runnerId needs a JavaCommandLine")
         val module = runProfile.configurationModule?.module ?: throw IllegalStateException("$runnerId needs a module")
