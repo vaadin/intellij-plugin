@@ -55,8 +55,8 @@
         <!-- Vaadin Copilot -->
         <notificationGroup id="Vaadin Copilot" displayType="BALLOON"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
-        <statusBarWidgetFactory implementation="com.vaadin.plugin.copilot.CopilotStatusBarWidgetFactory"
-                                id="CopilotStatusBarWidgetFactory" order="last"/>
+        <statusBarWidgetFactory implementation="com.vaadin.plugin.ui.VaadinStatusBarWidgetFactory"
+                                id="VaadinStatusBarWidgetFactory" order="last"/>
         <httpRequestHandler implementation="com.vaadin.plugin.copilot.service.CopilotRestService"/>
         <projectService
                 serviceInterface="com.vaadin.plugin.copilot.service.CopilotUndoManager"
