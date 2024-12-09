@@ -176,9 +176,7 @@ class CopilotPluginUtil {
                         } catch (e: IOException) {
                             LOG.error("Failed to delete $DOTFILE: ${e.message}")
                         }
-                        return@run
                     }
-                    LOG.warn("Cannot remove $dotFile - file does not exist")
                 }
             }
         }
@@ -195,6 +193,10 @@ class CopilotPluginUtil {
 
         fun getDotFile(project: Project): VirtualFile? {
             return getDotFileDirectory(project)?.findFile(DOTFILE)
+        }
+
+        fun isActive(project: Project): Boolean {
+            return getDotFile(project)?.exists() ?: false
         }
 
         /**
