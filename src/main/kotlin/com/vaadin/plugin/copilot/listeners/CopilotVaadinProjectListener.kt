@@ -1,5 +1,6 @@
 package com.vaadin.plugin.copilot.listeners
 
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
@@ -17,7 +18,9 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
             triggered = true
             saveDotFile(project)
             removeDotFileOnExit(project)
-            VaadinStatusBarWidget.update(project)
+            DumbService.getInstance(project).smartInvokeLater {
+                VaadinStatusBarWidget.update(project)
+            }
         }
     }
 
