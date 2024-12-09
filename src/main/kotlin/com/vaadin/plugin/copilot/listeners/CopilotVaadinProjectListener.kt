@@ -18,9 +18,7 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
             triggered = true
             saveDotFile(project)
             removeDotFileOnExit(project)
-            DumbService.getInstance(project).smartInvokeLater {
-                VaadinStatusBarWidget.update(project)
-            }
+            DumbService.getInstance(project).smartInvokeLater { VaadinStatusBarWidget.update(project) }
         }
     }
 
