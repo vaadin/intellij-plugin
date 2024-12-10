@@ -4,19 +4,20 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.NewUiValue
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBEmptyBorder
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.hasEndpoints
+import org.jdesktop.swingx.HorizontalLayout
+import org.jdesktop.swingx.VerticalLayout
 import java.awt.Component
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
-import org.jdesktop.swingx.HorizontalLayout
-import org.jdesktop.swingx.VerticalLayout
 
 class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
 
@@ -86,7 +87,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
 
     private fun createDescription(text: String): JComponent {
         val desc = JLabel(text)
-        desc.font = JBFont.smallOrNewUiMedium()
+        desc.font = if (NewUiValue.isEnabled()) JBFont.medium() else JBFont.small()
         desc.foreground = UIUtil.getLabelInfoForeground()
 
         return desc
