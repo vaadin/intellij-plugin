@@ -4,9 +4,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.ui.BadgeIconSupplier
+import com.intellij.ui.IconManager
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.Consumer
+import com.intellij.util.ui.JBUI.CurrentTheme.IconBadge
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
@@ -22,8 +23,6 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
             WindowManager.getInstance().getStatusBar(project).updateWidget(ID)
         }
     }
-
-    private val iconSupplier: BadgeIconSupplier = BadgeIconSupplier(VaadinIcons.VAADIN)
 
     override fun ID(): String {
         return ID
@@ -57,9 +56,9 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
 
     override fun getIcon(): Icon {
         if (!CopilotPluginUtil.isActive(project) || !hasEndpoints()) {
-            return iconSupplier.warningIcon
+            return IconManager.getInstance().withIconBadge(VaadinIcons.VAADIN, IconBadge.WARNING)
         }
 
-        return iconSupplier.originalIcon
+        return VaadinIcons.VAADIN
     }
 }
