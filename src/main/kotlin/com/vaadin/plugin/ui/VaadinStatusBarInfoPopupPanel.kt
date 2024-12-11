@@ -11,13 +11,13 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.hasEndpoints
-import org.jdesktop.swingx.HorizontalLayout
-import org.jdesktop.swingx.VerticalLayout
 import java.awt.Component
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import org.jdesktop.swingx.HorizontalLayout
+import org.jdesktop.swingx.VerticalLayout
 
 class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
 
