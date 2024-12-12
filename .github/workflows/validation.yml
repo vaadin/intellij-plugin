@@ -53,6 +53,9 @@ jobs:
   runPluginVerifier:
     runs-on: ubuntu-latest
     needs: codeChecks
+    strategy:
+      matrix:
+        version: [ "2023.3", "2024.3" ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -62,7 +65,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Verify plugin
-        run: ./gradlew --no-configuration-cache verifyPlugin
+        run: ./gradlew --no-configuration-cache -PbuildVersion=${{ matrix.version }} verifyPlugin
       - name: Get result directories
         run: |
           DIRECTORIES=$(ls build/reports/pluginVerifier/ | jq -R -s -c 'split("\n")[:-1]')

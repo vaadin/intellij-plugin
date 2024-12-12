@@ -12,7 +12,12 @@ plugins {
 }
 
 // version for building and verifying plugin
-val buildVersion = "2023.3"
+val buildVersion =
+  if (hasProperty("buildVersion")) {
+    property("buildVersion") as String
+  } else {
+    "2023.3"
+  }
 
 group = "com.vaadin"
 
