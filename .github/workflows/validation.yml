@@ -78,7 +78,7 @@ jobs:
       - uses: actions/download-artifact@v4
       - name: Get result directories
         run: |
-          DIRECTORIES=$(find . -name 'I*' -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
+          DIRECTORIES=$(find . -name 'I*' | jq -R -s -c 'split("\n")[:-1]')
           echo "DIRECTORIES=$DIRECTORIES" >> $GITHUB_ENV
     outputs:
       directories: ${{ env.DIRECTORIES }}
