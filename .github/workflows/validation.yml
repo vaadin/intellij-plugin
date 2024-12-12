@@ -53,6 +53,9 @@ jobs:
   runPluginVerifier:
     runs-on: ubuntu-latest
     needs: codeChecks
+    strategy:
+      matrix:
+        version: [ "2023.3", "2024.3" ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -62,28 +65,33 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Verify plugin
-        run: ./gradlew --no-configuration-cache verifyPlugin
-      - name: Get result directories
-        run: |
-          DIRECTORIES=$(ls build/reports/pluginVerifier/ | jq -R -s -c 'split("\n")[:-1]')
-          echo "DIRECTORIES=$DIRECTORIES" >> $GITHUB_ENV
+        run: ./gradlew --no-configuration-cache -PverifyVersion=${{ matrix.version }} verifyPlugin
       - uses: actions/upload-artifact@v4
         with:
-          name: pluginVerifierReports
+          name: pluginVerifierReports-${{ matrix.version }}
           path: build/reports/pluginVerifier
+
+  waitForResults:
+    runs-on: ubuntu-latest
+    needs: runPluginVerifier
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Get result directories
+        run: |
+          DIRECTORIES=$(find . -name 'I*' | jq -R -s -c 'split("\n")[:-1]')
+          echo "DIRECTORIES=$DIRECTORIES" >> $GITHUB_ENV
     outputs:
       directories: ${{ env.DIRECTORIES }}
 
   addComments:
     runs-on: ubuntu-latest
-    needs: runPluginVerifier
+    needs: waitForResults
     strategy:
       matrix:
-        dir: ${{fromJson(needs.runPluginVerifier.outputs.directories)}}
+        dir: ${{fromJson(needs.waitForResults.outputs.directories)}}
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          name: pluginVerifierReports
+      - run: ls
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
@@ -91,3 +99,6 @@ jobs:
           refresh-message-position: true
           message-path: |
             ${{ matrix.dir }}/report.md
+      - uses: int128/hide-comment-action@v1
+        with:
+          contains: "Compatible."
