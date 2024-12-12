@@ -14,7 +14,7 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
     private var triggered = false
 
     override fun vaadinProjectDetected(project: Project) {
-        if (!triggered) {
+        if (!triggered && !project.isDisposed) {
             triggered = true
             saveDotFile(project)
             removeDotFileOnExit(project)
