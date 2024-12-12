@@ -11,8 +11,16 @@ plugins {
   id("com.adarshr.test-logger") version "4.0.0"
 }
 
-// version for building and verifying plugin
+// version for building plugin
 val buildVersion = "2023.3"
+
+// version for verifying plugin, check validation.yml
+val verifyVersion =
+    if (hasProperty("verifyVersion")) {
+      property("verifyVersion") as String
+    } else {
+      buildVersion
+    }
 
 group = "com.vaadin"
 
@@ -65,8 +73,8 @@ intellijPlatform {
   }
   pluginVerification {
     ides {
-      ide(IntelliJPlatformType.IntellijIdeaCommunity, buildVersion)
-      ide(IntelliJPlatformType.IntellijIdeaUltimate, buildVersion)
+      ide(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
+      ide(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
     }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
