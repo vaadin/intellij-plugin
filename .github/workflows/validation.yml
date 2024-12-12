@@ -65,7 +65,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Verify plugin
-        run: ./gradlew --no-configuration-cache -PbuildVersion=${{ matrix.version }} verifyPlugin
+        run: ./gradlew --no-configuration-cache -PverifyVersion=${{ matrix.version }} verifyPlugin
       - name: Get result directories
         run: |
           DIRECTORIES=$(ls build/reports/pluginVerifier/ | jq -R -s -c 'split("\n")[:-1]')
