@@ -101,6 +101,4 @@ jobs:
             ${{ matrix.dir }}/report.md
       - uses: int128/hide-comment-action@v1
         with:
-          contains:
-            Compatible
-            verify-plugin-comment-${{ matrix.dir }}
+          contains: "Compatible."
