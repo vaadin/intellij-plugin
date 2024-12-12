@@ -83,4 +83,5 @@ internal fun hasVaadin(project: Project): Boolean = hasLibraryClass(project, VAA
 
 internal fun hasVaadin(module: com.intellij.openapi.module.Module): Boolean = hasLibraryClass(module, VAADIN_SERVICE)
 
-internal fun hasEndpoints(): Boolean = PluginManager.isPluginInstalled(PluginId.findId(ENDPOINTS_PLUGIN_ID))
+internal fun hasEndpoints(): Boolean =
+    PluginId.findId(ENDPOINTS_PLUGIN_ID)?.let { PluginManager.isPluginInstalled(it) } ?: false
