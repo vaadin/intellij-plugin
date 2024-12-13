@@ -5,14 +5,22 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij.platform") version "2.1.0"
+  id("org.jetbrains.intellij.platform") version "2.2.0"
   id("com.diffplug.spotless") version "7.0.0.BETA2"
 
   id("com.adarshr.test-logger") version "4.0.0"
 }
 
-// version for building and verifying plugin
+// version for building plugin
 val buildVersion = "2023.3"
+
+// version for verifying plugin, check validation.yml
+val verifyVersion =
+    if (hasProperty("verifyVersion")) {
+      property("verifyVersion") as String
+    } else {
+      buildVersion
+    }
 
 group = "com.vaadin"
 
@@ -47,7 +55,6 @@ dependencies {
 
     pluginVerifier()
     zipSigner()
-    instrumentationTools()
 
     testFramework(TestFrameworkType.Platform)
   }
@@ -67,8 +74,8 @@ intellijPlatform {
   }
   pluginVerification {
     ides {
-      ide(IntelliJPlatformType.IntellijIdeaCommunity, buildVersion)
-      ide(IntelliJPlatformType.IntellijIdeaUltimate, buildVersion)
+      ide(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
+      ide(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
     }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
