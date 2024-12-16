@@ -32,6 +32,7 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.jetbrains.plugins.gradle</depends>
 
+
     <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
     <depends>com.intellij.properties</depends>
     <depends optional="true" config-file="vaadin-with-microservices.xml">com.intellij.modules.microservices</depends>
