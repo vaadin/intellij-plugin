@@ -2,7 +2,6 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <psi.referenceContributor language="UAST" implementation="com.vaadin.plugin.endpoints.VaadinReferenceContributor"/>
-        <psi.referenceContributor language="TypeScript" implementation="com.vaadin.plugin.endpoints.HillaReferenceContributor"/>
     </extensions>
 
 </idea-plugin>

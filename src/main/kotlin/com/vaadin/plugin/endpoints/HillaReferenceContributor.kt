@@ -17,6 +17,8 @@ class HillaReferenceContributor : PsiReferenceContributor() {
 
     internal class TsxToJavaReferenceProvider : PsiReferenceProvider() {
         override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
+            println(element.toString())
+            println(element.text)
             if (element.parent is JSCallExpression) {
                 val methodExpression = (element.parent as JSCallExpression).methodExpression
                 val className = methodExpression?.firstChild?.text
@@ -54,8 +56,8 @@ class HillaReferenceContributor : PsiReferenceContributor() {
     }
 
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
-
         registrar.registerReferenceProvider(
-            PlatformPatterns.psiElement(JSReferenceExpression::class.java), TsxToJavaReferenceProvider())
+            PlatformPatterns.psiElement(JSReferenceExpression::class.java),
+                TsxToJavaReferenceProvider())
     }
 }

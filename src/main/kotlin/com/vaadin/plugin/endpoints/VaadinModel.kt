@@ -60,8 +60,6 @@ internal fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Col
                 val className = psiClass.name
 
                 if (sourcePsi == null || className == null) return@Processor true
-                //                val uAnnotation = uClass.findAnnotation(HILLA_BROWSER_CALLABLE) ?:
-                // return@Processor true
 
                 endpoints.add(VaadinRoute(className, className, PsiAnchor.create(sourcePsi)))
 

@@ -14,23 +14,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.uast.UastModificationTracker
-import com.vaadin.plugin.endpoints.VaadinEndpointsProvider.VaadinEndpointGroup
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasVaadin
 
 internal class VaadinEndpointsProvider : EndpointsProvider<VaadinEndpointGroup, VaadinRoute> {
     override val endpointType: EndpointType = HTTP_SERVER_TYPE
-
-    enum class ENDPOINT_GROUP {
-        HILLA,
-        FLOW
-    }
-
-    internal class VaadinEndpointGroup(
-        val project: Project,
-        val filter: ModuleEndpointsFilter,
-        val endPointGroup: ENDPOINT_GROUP
-    )
 
     override val presentation: FrameworkPresentation =
         FrameworkPresentation("Vaadin", "Vaadin", VaadinIcons.VAADIN_BLUE)
@@ -77,7 +65,7 @@ internal class VaadinEndpointsProvider : EndpointsProvider<VaadinEndpointGroup, 
         val urlString = run {
             if (urlMapping.isBlank()) return@run "/"
             if (group.endPointGroup == ENDPOINT_GROUP.FLOW && !urlMapping.startsWith("/")) return@run "/$urlMapping"
-            if (group.endPointGroup == ENDPOINT_GROUP.HILLA) return@run "$urlMapping"
+            if (group.endPointGroup == ENDPOINT_GROUP.HILLA) return@run urlMapping
             return@run urlMapping
         }
 
