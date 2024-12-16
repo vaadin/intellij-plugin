@@ -1,7 +1,8 @@
 <idea-plugin>
 
     <extensions defaultExtensionNs="com.intellij">
-        <microservices.endpointsProvider implementation="com.vaadin.plugin.endpoints.VaadinEndpointsProvider"/>
+        <microservices.endpointsProvider implementation="com.vaadin.plugin.endpoints.VaadinFlowEndpointsProvider"/>
+        <microservices.endpointsProvider implementation="com.vaadin.plugin.endpoints.VaadinHillaEndpointsProvider"/>
         <microservices.urlResolverFactory implementation="com.vaadin.plugin.endpoints.VaadinUrlResolverFactory"/>
         <implicitUsageProvider implementation="com.vaadin.plugin.endpoints.VaadinImplicitUsageProvider"/>
     </extensions>

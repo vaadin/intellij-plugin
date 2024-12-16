@@ -15,32 +15,16 @@ import com.intellij.uast.UastModificationTracker
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasVaadin
 
-abstract class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRoute> {
+internal class VaadinFlowEndpointsProvider : VaadinEndpointsProvider() {
 
-    override val endpointType: EndpointType = HTTP_SERVER_TYPE
-
-    override fun getStatus(project: Project): EndpointsProvider.Status {
-        if (hasVaadin(project)) return EndpointsProvider.Status.HAS_ENDPOINTS
-        return EndpointsProvider.Status.UNAVAILABLE
-    }
-
-    override fun getModificationTracker(project: Project): ModificationTracker {
-        return UastModificationTracker.getInstance(project)
-    }
+    override val presentation: FrameworkPresentation =
+        FrameworkPresentation("Vaadin", "Vaadin Flow", VaadinIcons.VAADIN_BLUE)
 
     override fun getEndpointGroups(project: Project, filter: EndpointsFilter): Iterable<VaadinRoute> {
         if (filter !is ModuleEndpointsFilter) return emptyList()
         if (!hasVaadin(filter.module)) return emptyList()
 
         return findFlowRoutes(project, filter.transitiveSearchScope)
-    }
-
-    override fun getEndpoints(group: VaadinRoute): Iterable<VaadinRoute> {
-        return listOf(group)
-    }
-
-    override fun isValidEndpoint(group: VaadinRoute, endpoint: VaadinRoute): Boolean {
-        return group.isValid()
     }
 
     override fun getEndpointPresentation(group: VaadinRoute, endpoint: VaadinRoute): ItemPresentation {
@@ -55,10 +39,6 @@ abstract class VaadinEndpointsProvider : EndpointsProvider<VaadinRoute, VaadinRo
         }
 
         return parseVaadinUrlMapping(urlString).getPresentation(VaadinUrlRenderer)
-    }
-
-    override fun getDocumentationElement(group: VaadinRoute, endpoint: VaadinRoute): PsiElement? {
-        return endpoint.anchor.retrieve()
     }
 
 }
