@@ -12,7 +12,7 @@ import com.vaadin.plugin.utils.hasVaadin
 internal class VaadinHillaEndpointsProvider : VaadinEndpointsProvider() {
 
     override val presentation: FrameworkPresentation =
-        FrameworkPresentation("Vaadin", "Vaadin Hilla", VaadinIcons.VAADIN_BLUE)
+        FrameworkPresentation("Vaadin-Hilla", "Vaadin Hilla", VaadinIcons.HILLA)
 
     override fun getEndpointGroups(project: Project, filter: EndpointsFilter): Iterable<VaadinRoute> {
         if (filter !is ModuleEndpointsFilter) return emptyList()
@@ -22,6 +22,6 @@ internal class VaadinHillaEndpointsProvider : VaadinEndpointsProvider() {
     }
 
     override fun getEndpointPresentation(group: VaadinRoute, endpoint: VaadinRoute): ItemPresentation {
-        return HttpUrlPresentation(group.urlMapping, group.locationString, VaadinIcons.VAADIN_BLUE)
+        return HttpUrlPresentation(group.urlMapping, group.locationString, VaadinIcons.HILLA)
     }
 }

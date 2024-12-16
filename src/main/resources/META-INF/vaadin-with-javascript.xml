@@ -1,7 +1,0 @@
-<idea-plugin>
-
-    <extensions defaultExtensionNs="com.intellij">
-        <psi.referenceContributor language="TypeScript" implementation="com.vaadin.plugin.endpoints.HillaReferenceContributor"/>
-    </extensions>
-
-</idea-plugin>
