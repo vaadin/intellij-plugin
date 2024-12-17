@@ -15,8 +15,9 @@ internal const val VAADIN_ROUTE = "com.vaadin.flow.router.Route"
 internal const val VAADIN_APP_SHELL_CONFIGURATOR = "com.vaadin.flow.component.page.AppShellConfigurator"
 internal const val VAADIN_ID = "com.vaadin.flow.component.template.Id"
 internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
+internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
 
-internal fun findVaadinRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val vaadinRouteClass =
         JavaPsiFacade.getInstance(project).findClass(VAADIN_ROUTE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -41,4 +42,28 @@ internal fun findVaadinRoutes(project: Project, scope: GlobalSearchScope): Colle
             })
 
     return routes.toList()
+}
+
+internal fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+    val hillaBrowserCallableClass =
+        JavaPsiFacade.getInstance(project).findClass(HILLA_BROWSER_CALLABLE, ProjectScope.getLibrariesScope(project))
+            ?: return emptyList()
+
+    val endpoints = ArrayList<VaadinRoute>()
+
+    AnnotatedElementsSearch.searchPsiClasses(hillaBrowserCallableClass, scope)
+        .forEach(
+            Processor { psiClass ->
+                val uClass = psiClass.toUElementOfType<UClass>()
+                val sourcePsi = uClass?.sourcePsi
+                val className = psiClass.name
+
+                if (sourcePsi == null || className == null) return@Processor true
+
+                endpoints.add(VaadinRoute(className, className, PsiAnchor.create(sourcePsi)))
+
+                true
+            })
+
+    return endpoints.toList()
 }

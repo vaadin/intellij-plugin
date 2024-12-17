@@ -43,7 +43,7 @@ internal class VaadinUrlResolver(private val project: Project) : UrlResolver {
 }
 
 internal val VAADIN_ROUTES_SEARCH: SourceLibSearchProvider<List<VaadinRoute>, Module> =
-    SourceLibSearchProvider("VAADIN_ROUTES") { p, _, scope -> findVaadinRoutes(p, scope).toList() }
+    SourceLibSearchProvider("VAADIN_ROUTES") { p, _, scope -> findFlowRoutes(p, scope).toList() }
 
 private fun getAllModuleVariants(project: Project): Sequence<VaadinUrlTargetInfo> {
     val modules = ModuleManager.getInstance(project).modules

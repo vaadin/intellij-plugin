@@ -17,6 +17,7 @@ internal class VaadinImplicitUsageProvider : ImplicitUsageProvider {
             !element.isAnnotationType &&
             (AnnotationUtil.isAnnotated(element, VAADIN_ROUTE, 0) ||
                 AnnotationUtil.isAnnotated(element, VAADIN_TAG, 0) ||
+                AnnotationUtil.isAnnotated(element, HILLA_BROWSER_CALLABLE, 0) ||
                 InheritanceUtil.isInheritor(element, VAADIN_APP_SHELL_CONFIGURATOR))
     }
 
