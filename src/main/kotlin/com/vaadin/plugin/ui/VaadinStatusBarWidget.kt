@@ -1,5 +1,6 @@
 package com.vaadin.plugin.ui
 
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.wm.StatusBarWidget
@@ -8,6 +9,7 @@ import com.intellij.ui.IconManager
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.Consumer
 import com.intellij.util.ui.JBUI.CurrentTheme.IconBadge
+import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
@@ -24,6 +26,24 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
         }
     }
 
+    private var clicked: Boolean = false
+
+    init {
+        project.messageBus
+            .connect()
+            .subscribe(
+                DumbService.DUMB_MODE,
+                object : DumbService.DumbModeListener {
+                    override fun enteredDumbMode() {
+                        update(project)
+                    }
+
+                    override fun exitDumbMode() {
+                        update(project)
+                    }
+                })
+    }
+
     override fun ID(): String {
         return ID
     }
@@ -33,7 +53,11 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     }
 
     override fun getClickConsumer(): Consumer<MouseEvent> {
-        return Consumer { showPopup(RelativePoint.fromScreen(it.locationOnScreen)) }
+        return Consumer {
+            clicked = true
+            showPopup(RelativePoint.fromScreen(it.locationOnScreen))
+            update(project)
+        }
     }
 
     private fun showPopup(relativePoint: RelativePoint) {
@@ -47,18 +71,30 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     }
 
     override fun getTooltipText(): String {
-        if (!CopilotPluginUtil.isActive(project) || !hasEndpoints()) {
-            return "There are issues while running Vaadin plugin, click to see details"
+        if (CopilotPluginUtil.isActive(project) && hasEndpoints()) {
+            return "Vaadin plugin is active, all features are available"
         }
 
-        return "Vaadin plugin is active"
+        if (DumbService.isDumb(project)) {
+            return "Indexing is in progress, please wait"
+        }
+
+        return "Not all features are available, click to see details"
     }
 
     override fun getIcon(): Icon {
-        if (!CopilotPluginUtil.isActive(project) || !hasEndpoints()) {
-            return IconManager.getInstance().withIconBadge(VaadinIcons.VAADIN, IconBadge.WARNING)
+        if (clicked) {
+            return VaadinIcons.VAADIN
         }
 
-        return VaadinIcons.VAADIN
+        if (CopilotPluginUtil.isActive(project) && hasEndpoints()) {
+            return VaadinIcons.VAADIN
+        }
+
+        if (DumbService.isDumb(project)) {
+            return IconManager.getInstance().withIconBadge(VaadinIcons.VAADIN, UIUtil.getLabelForeground())
+        }
+
+        return IconManager.getInstance().withIconBadge(VaadinIcons.VAADIN, IconBadge.WARNING)
     }
 }
