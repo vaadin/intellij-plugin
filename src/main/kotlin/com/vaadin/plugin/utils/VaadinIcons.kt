@@ -12,6 +12,8 @@ class VaadinIcons {
 
         val VAADIN = IconLoader.getIcon("$RESOURCE_PATH/vaadin.svg", VaadinIcons::class.java.classLoader)
 
+        val HILLA = IconLoader.getIcon("$RESOURCE_PATH/hilla.svg", VaadinIcons::class.java.classLoader)
+
         val DEBUG_HOTSWAP = IconLoader.getIcon("$RESOURCE_PATH/debug.svg", VaadinIcons::class.java.classLoader)
 
         val RERUN_HOTSWAP = IconLoader.getIcon("$RESOURCE_PATH/rerun.svg", VaadinIcons::class.java.classLoader)
