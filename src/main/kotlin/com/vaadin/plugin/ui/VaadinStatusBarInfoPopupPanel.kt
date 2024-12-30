@@ -53,19 +53,23 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
         wrapper.add(panel)
 
         if (!status) {
-            val restart = JButton(AllIcons.Actions.Restart)
-            restart.addActionListener {
-                CopilotPluginUtil.removeDotFile(project)
-                CopilotPluginUtil.saveDotFile(project)
-                DumbService.getInstance(project).smartInvokeLater {
-                    VaadinStatusBarWidget.update(project)
-                    afterRestart?.invoke()
+            if (DumbService.isDumb(project)) {
+                wrapper.add(createDescription("Service will be available after indexing is completed"))
+            } else {
+                val restart = JButton(AllIcons.Actions.Restart)
+                restart.addActionListener {
+                    CopilotPluginUtil.removeDotFile(project)
+                    CopilotPluginUtil.saveDotFile(project)
+                    DumbService.getInstance(project).smartInvokeLater {
+                        VaadinStatusBarWidget.update(project)
+                        afterRestart?.invoke()
+                    }
                 }
+                panel.add(restart)
+                wrapper.add(
+                    createDescription(
+                        "<html>Service will be started automatically.<br/>In case of issues you can restart it manually.</html>"))
             }
-            panel.add(restart)
-            wrapper.add(
-                createDescription(
-                    "<html>Service will be available after indexing is completed.<br/>In case of issues you can restart it manually.</html>"))
         }
         return wrapper
     }
