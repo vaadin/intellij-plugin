@@ -2,6 +2,7 @@ package com.vaadin.plugin.utils
 
 import com.intellij.ide.plugins.PluginManager
 import com.intellij.java.library.JavaLibraryUtil.hasLibraryClass
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.observable.properties.GraphProperty
@@ -85,3 +86,5 @@ internal fun hasVaadin(module: com.intellij.openapi.module.Module): Boolean = ha
 
 internal fun hasEndpoints(): Boolean =
     PluginId.findId(ENDPOINTS_PLUGIN_ID)?.let { PluginManager.isPluginInstalled(it) } ?: false
+
+internal fun isUltimate(): Boolean = ApplicationInfo.getInstance().apiVersion.startsWith("IU-")

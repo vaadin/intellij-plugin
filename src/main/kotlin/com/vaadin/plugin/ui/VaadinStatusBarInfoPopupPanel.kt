@@ -11,6 +11,7 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.hasEndpoints
+import com.vaadin.plugin.utils.trackManualCopilotRestart
 import java.awt.Component
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -60,6 +61,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
                 restart.addActionListener {
                     CopilotPluginUtil.removeDotFile(project)
                     CopilotPluginUtil.saveDotFile(project)
+                    trackManualCopilotRestart()
                     DumbService.getInstance(project).smartInvokeLater {
                         VaadinStatusBarWidget.update(project)
                         afterRestart?.invoke()
