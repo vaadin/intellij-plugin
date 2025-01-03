@@ -44,6 +44,10 @@ repositories {
 }
 
 dependencies {
+  implementation("com.amplitude:java-sdk:[1.8.0,2.0)")
+  implementation("org.json:json:20201115")
+  implementation("com.vaadin:license-checker:1.13.3")
+
   intellijPlatform {
     intellijIdeaUltimate(buildVersion)
     bundledPlugin("com.intellij.java")

@@ -1,5 +1,6 @@
 package com.vaadin.plugin.listeners
 
+import com.amplitude.ampli.ampli
 import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
@@ -12,6 +13,8 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vcs.VcsBundle
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
@@ -20,6 +23,7 @@ import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
+import com.vaadin.plugin.utils.trackPluginInitialized
 
 class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
 
@@ -46,6 +50,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
             checkReloadClassesSetting(project)
             checkVcsAddConfirmationSetting(project)
             checkCompileOnSave(project)
+            initAmplitude(project)
             RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
                 VaadinHomeUtil.updateOrInstallHotSwapJar()
             }
@@ -122,5 +127,18 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
                 notification.expire()
             }
         }
+    }
+
+    private fun initAmplitude(project: Project) {
+        trackPluginInitialized()
+        ProjectManager.getInstance()
+            .addProjectManagerListener(
+                project,
+                object : ProjectManagerListener {
+                    override fun projectClosing(project: Project) {
+                        ampli.flush()
+                    }
+                },
+            )
     }
 }

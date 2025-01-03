@@ -1,0 +1,14 @@
+{
+  "Zone": "us",
+  "OrgId": "62972",
+  "WorkspaceId": "418f2561-c6f7-4d6c-9e33-459672266311",
+  "SourceId": "755ed219-73a5-4bf7-bd2f-48cf12072780",
+  "Runtime": "jre:kotlin-ampli",
+  "Platform": "JRE",
+  "Language": "Kotlin",
+  "SDK": "com.amplitude:java-sdk:1.+",
+  "Path": "./src/main/kotlin/com/amplitude/ampli",
+  "Branch": "main",
+  "Version": "1.0.0",
+  "VersionId": "ac62c3f9-e92b-4502-8a50-3fd8f13c4103"
+}

@@ -53,6 +53,14 @@
         <backgroundPostStartupActivity
                 implementation="com.vaadin.plugin.VaadinProjectDetector"/>
 
+        <applicationService
+                serviceImplementation="com.vaadin.plugin.ui.settings.VaadinSettings"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.vaadin.plugin.ui.settings.VaadinSettingsConfigurable"
+                id="com.vaadin.plugin.ui.settings.VaadinSettingsConfigurable"
+                displayName="Vaadin"/>
+
         <!-- Vaadin Copilot -->
         <notificationGroup id="Vaadin Copilot" displayType="BALLOON"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
