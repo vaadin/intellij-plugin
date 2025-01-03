@@ -3,6 +3,7 @@ package com.vaadin.plugin.ui
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.ui.IconManager
@@ -13,6 +14,7 @@ import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
+import java.awt.Point
 import java.awt.event.MouseEvent
 import javax.swing.Icon
 
@@ -55,19 +57,23 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     override fun getClickConsumer(): Consumer<MouseEvent> {
         return Consumer {
             clicked = true
-            showPopup(RelativePoint.fromScreen(it.locationOnScreen))
+            showPopup(it)
             update(project)
         }
     }
 
-    private fun showPopup(relativePoint: RelativePoint) {
+    private fun showPopup(e: MouseEvent) {
         val panel = VaadinStatusBarInfoPopupPanel(project)
         val popup = JBPopupFactory.getInstance().createComponentPopupBuilder(panel, null).createPopup()
         panel.afterRestart = {
             popup.cancel()
-            showPopup(relativePoint)
+            showPopup(e)
         }
-        popup.show(relativePoint)
+        val dimension = popup.content.preferredSize
+        val at = Point(0, -dimension.height)
+        popup.show(RelativePoint(e.component, at))
+        // destroy popup on unexpected project close
+        Disposer.register(this, popup)
     }
 
     override fun getTooltipText(): String {
