@@ -51,6 +51,7 @@ dependencies {
     bundledPlugin("org.jetbrains.plugins.gradle")
     bundledPlugin("com.intellij.properties")
     bundledPlugin("com.intellij.microservices.jvm")
+    bundledPlugin("JavaScript")
 
     pluginVerifier()
     zipSigner()
