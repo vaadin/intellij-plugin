@@ -88,6 +88,47 @@ class EventOptions(
 
 class LoadClientOptions(val apiKey: String? = null, val instance: Amplitude? = null, val plan: Plan? = null)
 
+class ManualCopilotRestart private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
+    Event<ManualCopilotRestart>("ManualCopilotRestart", eventProperties, options, ::ManualCopilotRestart) {
+    /**
+     * ManualCopilotRestart
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/ManualCopilotRestart)
+     *
+     * Event has no description in tracking plan.
+     */
+    constructor() : this(null, null as EventOptions?)
+}
+
+class PluginInitialized private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
+    Event<PluginInitialized>("PluginInitialized", eventProperties, options, ::PluginInitialized) {
+    /**
+     * PluginInitialized
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/PluginInitialized)
+     *
+     * Event has no description in tracking plan.
+     */
+    constructor() : this(null, null as EventOptions?)
+}
+
+class ProjectCreated private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
+    Event<ProjectCreated>("ProjectCreated", eventProperties, options, ::ProjectCreated) {
+    /**
+     * ProjectCreated
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/ProjectCreated)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param downloadUrl Property has no description provided in tracking plan.
+     */
+    constructor(
+        downloadUrl: String? = null
+    ) : this(
+        mapOf(*(if (downloadUrl != null) arrayOf("downloadUrl" to downloadUrl) else arrayOf())), null as EventOptions?)
+}
+
 val ampli = Ampli()
 
 open class Ampli {
@@ -198,6 +239,57 @@ open class Ampli {
             return
         }
         this._client?.flushEvents()
+    }
+
+    /**
+     * ManualCopilotRestart
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/ManualCopilotRestart)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param userId The user's ID
+     * @param options Amplitude event options
+     * @param extra Extra untyped parameters for use in middleware
+     */
+    fun manualCopilotRestart(userId: String?, options: EventOptions? = null, extra: MiddlewareExtra? = null) {
+        this.track(userId, ManualCopilotRestart(), options, extra)
+    }
+
+    /**
+     * PluginInitialized
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/PluginInitialized)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param userId The user's ID
+     * @param options Amplitude event options
+     * @param extra Extra untyped parameters for use in middleware
+     */
+    fun pluginInitialized(userId: String?, options: EventOptions? = null, extra: MiddlewareExtra? = null) {
+        this.track(userId, PluginInitialized(), options, extra)
+    }
+
+    /**
+     * ProjectCreated
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/ProjectCreated)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param userId The user's ID
+     * @param event The event
+     * @param options Amplitude event options
+     * @param extra Extra untyped parameters for use in middleware
+     */
+    fun projectCreated(
+        userId: String?,
+        event: ProjectCreated? = null,
+        options: EventOptions? = null,
+        extra: MiddlewareExtra? = null
+    ) {
+        this.track(userId, event ?: ProjectCreated(), options, extra)
     }
 
     private fun createAmplitudeEvent(

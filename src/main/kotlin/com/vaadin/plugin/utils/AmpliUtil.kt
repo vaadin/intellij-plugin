@@ -1,9 +1,9 @@
 package com.vaadin.plugin.utils
 
 import com.amplitude.ampli.Ampli
-import com.amplitude.ampli.Event
 import com.amplitude.ampli.EventOptions
 import com.amplitude.ampli.LoadOptions
+import com.amplitude.ampli.ProjectCreated
 import com.amplitude.ampli.ampli
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.util.io.DigestUtil
@@ -25,13 +25,6 @@ private val eventOptions =
         osName = System.getProperty("os.name"),
         osVersion = System.getProperty("os.version"),
         appVersion = ApplicationInfo.getInstance().fullVersion)
-
-private class VaadinPluginEvent(eventType: String, eventProperties: Map<String, Any?>?) :
-    Event<VaadinPluginEvent>(
-        eventType,
-        eventProperties,
-        options = eventOptions,
-        eventFactory = { _, _ -> VaadinPluginEvent(eventType, eventProperties) })
 
 private var userId: String? = null
 
@@ -55,18 +48,18 @@ private val enabled: Boolean
 
 internal fun trackPluginInitialized() {
     if (enabled) {
-        ampli.track(getUserId(), VaadinPluginEvent("plugin-initialized", null))
+        ampli.pluginInitialized(getUserId())
     }
 }
 
 internal fun trackProjectCreated(downloadUrl: String) {
     if (enabled) {
-        ampli.track(getUserId(), VaadinPluginEvent("project-created", mapOf("downloadUrl" to downloadUrl)))
+        ampli.projectCreated(getUserId(), ProjectCreated(downloadUrl))
     }
 }
 
 internal fun trackManualCopilotRestart() {
     if (enabled) {
-        ampli.track(getUserId(), VaadinPluginEvent("manual-copilot-restart", null))
+        ampli.manualCopilotRestart(getUserId())
     }
 }
