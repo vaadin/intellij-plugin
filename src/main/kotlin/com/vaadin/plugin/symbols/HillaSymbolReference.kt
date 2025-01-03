@@ -1,6 +1,5 @@
 package com.vaadin.plugin.symbols
 
-import com.intellij.model.SingleTargetReference
 import com.intellij.model.Symbol
 import com.intellij.model.psi.PsiSymbolReference
 import com.intellij.openapi.util.Key
@@ -14,25 +13,25 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.vaadin.plugin.endpoints.HILLA_BROWSER_CALLABLE
 
-class HillaSymbolReference(private val element: PsiElement) : SingleTargetReference(), PsiSymbolReference {
+class HillaSymbolReference(private val element: PsiElement) : PsiSymbolReference {
 
-    override fun resolveSingleTarget(): Symbol? {
+    override fun resolveReference(): Collection<Symbol> {
         return CachedValuesManager.getCachedValue(element, Key.create(element.text)) {
             CachedValueProvider.Result.create(internalResolveSingleTarget(), element)
         }
     }
 
-    private fun internalResolveSingleTarget(): Symbol? {
+    private fun internalResolveSingleTarget(): Collection<Symbol> {
         val hillaBrowserCallableClass =
             JavaPsiFacade.getInstance(element.project)
-                .findClass(HILLA_BROWSER_CALLABLE, ProjectScope.getLibrariesScope(element.project)) ?: return null
+                .findClass(HILLA_BROWSER_CALLABLE, ProjectScope.getLibrariesScope(element.project)) ?: return emptySet()
 
         val scope = GlobalSearchScope.allScope(element.project)
 
         var className = element.text
         var methodName: String? = null
 
-        // method call
+        // both ClassName and ClassName.methodName are JSReferenceExpressions
         if (element.textContains('.')) {
             element.text.split('.').let {
                 className = it[0]
@@ -40,23 +39,22 @@ class HillaSymbolReference(private val element: PsiElement) : SingleTargetRefere
             }
         }
 
-        val psiClass =
-            AnnotatedElementsSearch.searchPsiClasses(hillaBrowserCallableClass, scope).firstOrNull {
+        val psiClasses =
+            AnnotatedElementsSearch.searchPsiClasses(hillaBrowserCallableClass, scope).filter {
                 it.name?.endsWith(className) == true
             }
 
-        if (psiClass == null) {
-            return null
+        if (psiClasses.isEmpty()) {
+            return emptySet()
         }
 
         if (methodName != null) {
-            // search also in super classes
-            val psiMethod = psiClass?.findMethodsByName(methodName, true)?.firstOrNull()
-            if (psiMethod != null) {
-                return HillaSymbol(psiMethod)
-            }
+            return psiClasses
+                .mapNotNull { it.findMethodsByName(methodName, true).firstOrNull() }
+                .map { HillaSymbol(it) }
         }
-        return HillaSymbol(psiClass)
+
+        return psiClasses.map { HillaSymbol(it) }
     }
 
     override fun getElement(): PsiElement {
