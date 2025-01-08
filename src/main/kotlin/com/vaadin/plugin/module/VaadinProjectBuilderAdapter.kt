@@ -11,6 +11,7 @@ import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.vaadin.plugin.utils.VaadinProjectUtil
+import com.vaadin.plugin.utils.trackProjectCreated
 import java.io.File
 
 class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
@@ -28,7 +29,9 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
         return super.createProject(name, path)?.let { project ->
             project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
             projectDownloadedProperty.afterChange { afterProjectCreated(project) }
-            VaadinProjectUtil.downloadAndExtract(project, vaadinWizard.projectModel!!.getDownloadLink(project))
+            val downloadLink = vaadinWizard.projectModel!!.getDownloadLink(project)
+            VaadinProjectUtil.downloadAndExtract(project, downloadLink)
+            trackProjectCreated(downloadLink)
             project
         }
     }
