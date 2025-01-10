@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.IdeaLoggingEvent
 import com.intellij.openapi.diagnostic.SubmittedReportInfo
 import com.intellij.util.Consumer
 import java.awt.Component
+import java.lang.management.ManagementFactory
 
 class CopilotErrorHandler : ErrorReportSubmitter() {
 
@@ -32,10 +33,12 @@ class CopilotErrorHandler : ErrorReportSubmitter() {
             throwableText = throwableText.substring(0, ghMaxBodyLength)
         }
 
+        val runtimeMXBean = ManagementFactory.getRuntimeMXBean()
         var body =
             "Plugin version: **${pluginDescriptor.version}**\n" +
                 "IDE version: **$appName**\n" +
-                "OS: **${System.getProperty("os.name")}**\n\n"
+                "VM: **${runtimeMXBean.vmName + " " + runtimeMXBean.vmVersion + " " + runtimeMXBean.vmVendor}**\n" +
+                "OS: **${System.getProperty("os.name") + " " + System.getProperty("os.version")}**\n\n"
 
         if (additionalInfo != null) {
             body += "Additional info:\n" + "> ${additionalInfo.replace("\\n+".toRegex(), "\n")}" + "\n\n"
