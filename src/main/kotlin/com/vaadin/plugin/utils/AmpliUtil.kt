@@ -16,15 +16,14 @@ import java.nio.charset.Charset
 
 private val eventOptions =
     EventOptions(
-        versionName = CopilotPluginUtil.getPluginVersion(),
-        platform = "intellij",
+        platform = ApplicationInfo.getInstance().fullApplicationName,
         deviceModel = if (isUltimate()) "ultimate" else "community",
         language = System.getProperty("user.language"),
         country = System.getProperty("user.country"),
         region = System.getProperty("user.region"),
         osName = System.getProperty("os.name"),
         osVersion = System.getProperty("os.version"),
-        appVersion = ApplicationInfo.getInstance().fullVersion)
+        appVersion = CopilotPluginUtil.getPluginVersion())
 
 private var userId: String? = null
 
