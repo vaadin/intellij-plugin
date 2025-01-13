@@ -1,5 +1,6 @@
 package com.vaadin.plugin.utils
 
+import ai.grazie.utils.mpp.UUID
 import com.amplitude.ampli.Ampli
 import com.amplitude.ampli.EventOptions
 import com.amplitude.ampli.LoadOptions
@@ -10,9 +11,9 @@ import com.intellij.util.io.DigestUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.ui.settings.VaadinSettings
 import com.vaadin.pro.licensechecker.LocalProKey
-import com.vaadin.pro.licensechecker.MachineId
 import com.vaadin.pro.licensechecker.ProKey
 import java.nio.charset.Charset
+import java.util.Objects
 
 private val eventOptions =
     EventOptions(
@@ -34,7 +35,11 @@ private fun getUserId(): String? {
             if (proKey != null) {
                 "pro-${DigestUtil.sha256Hex(proKey.proKey.toByteArray(Charset.defaultCharset()))}"
             } else {
-                MachineId.get()
+                val state: VaadinSettings.State = Objects.requireNonNull(VaadinSettings.instance.state)
+                if (state.userId == null) {
+                    state.userId = "user-${UUID.random().text}"
+                }
+                state.userId
             }
         ampli.load(LoadOptions(Ampli.Environment.IDEPLUGINS))
         ampli.identify(userId, eventOptions)

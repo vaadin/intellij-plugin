@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull
 @State(name = "com.vaadin.plugin.ui.settings.VaadinSettings", storages = [Storage("VaadinSettings.xml")])
 internal class VaadinSettings : PersistentStateComponent<VaadinSettings.State> {
     internal class State {
+        var userId: String? = null
         var sendUsageStatistics: Boolean = true
     }
 
