@@ -106,7 +106,7 @@
                 id="HotSwap.debug"
                 class="com.vaadin.plugin.actions.DebugUsingHotSwapAgentAction"
                 text="Debug using HotSwapAgent"
-                icon="vaadin/icons/swap.svg">
+                icon="/vaadin/icons/debug.svg">
             <add-to-group group-id="RunDashboardContentToolbar"
                           relative-to-action="RunDashboard.Debug"
                           anchor="after"/>
