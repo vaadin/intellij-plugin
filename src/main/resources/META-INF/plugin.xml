@@ -87,6 +87,10 @@
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
 
+    <extensions defaultExtensionNs="org.intellij.intelliLang">
+        <injectionConfig config="vaadin/flow-language-injections.xml"/>
+    </extensions>
+
     <actions>
         <action
                 id="HotSwap.installOrUpdate"
