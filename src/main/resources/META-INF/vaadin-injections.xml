@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="org.intellij.intelliLang">
+        <injectionConfig config="vaadin/flow-language-injections.xml"/>
+    </extensions>
+</idea-plugin>
