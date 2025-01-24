@@ -40,6 +40,8 @@
     <depends optional="true" config-file="vaadin-with-ultimate.xml">com.intellij.modules.ultimate</depends>
     <depends optional="true" config-file="vaadin-with-javascript.xml">JavaScript</depends>
 
+    <depends optional="true" config-file="vaadin-injections.xml">org.intellij.intelliLang</depends>
+
     <change-notes>
         <![CDATA[
         <p>Check <a href="https://github.com/vaadin/intellij-plugin/releases">release notes at GitHub</a> for more information.</p>
