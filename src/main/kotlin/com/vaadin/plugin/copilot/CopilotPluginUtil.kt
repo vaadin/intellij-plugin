@@ -22,6 +22,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDirectory
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findOrCreateDirectory
+import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
 import com.vaadin.plugin.copilot.handler.Handler
 import com.vaadin.plugin.copilot.handler.HandlerResponse
@@ -74,6 +75,7 @@ class CopilotPluginUtil {
             REFRESH("refresh"),
             SHOW_IN_IDE("showInIde"),
             GET_MODULE_PATHS("getModulePaths"),
+            COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
         }
 
@@ -101,6 +103,7 @@ class CopilotPluginUtil {
                 HANDLERS.SHOW_IN_IDE.command -> return ShowInIdeHandler(project, data)
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
                 HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
+                HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
