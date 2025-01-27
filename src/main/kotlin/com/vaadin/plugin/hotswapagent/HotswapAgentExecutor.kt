@@ -2,12 +2,11 @@ package com.vaadin.plugin.hotswapagent
 
 import com.intellij.execution.JavaRunConfigurationBase
 import com.intellij.execution.RunManager
+import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.execution.executors.DefaultDebugExecutor
 import com.intellij.openapi.project.Project
 import com.vaadin.plugin.utils.VaadinIcons
 import javax.swing.Icon
-import org.jetbrains.idea.maven.execution.MavenRunConfiguration
-import org.jetbrains.plugins.gradle.service.execution.GradleRunConfiguration
 
 class HotswapAgentExecutor : DefaultDebugExecutor() {
 
@@ -58,6 +57,14 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
     override fun isApplicable(project: Project): Boolean {
         val selectedConfiguration = RunManager.getInstance(project).selectedConfiguration?.configuration
         return selectedConfiguration is JavaRunConfigurationBase &&
-            (selectedConfiguration !is MavenRunConfiguration || selectedConfiguration !is GradleRunConfiguration)
+            (!isMaven(selectedConfiguration) || !isGradle(selectedConfiguration))
+    }
+
+    private fun isMaven(configuration: RunConfiguration): Boolean {
+        return configuration.javaClass.name.contains("MavenRunConfiguration")
+    }
+
+    private fun isGradle(configuration: RunConfiguration): Boolean {
+        return configuration.javaClass.name.contains("GradleRunConfiguration")
     }
 }

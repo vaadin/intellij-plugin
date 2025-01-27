@@ -55,7 +55,6 @@ dependencies {
     intellijIdeaUltimate(buildVersion)
     bundledPlugin("com.intellij.java")
     bundledPlugin("org.jetbrains.idea.maven")
-    bundledPlugin("org.jetbrains.plugins.gradle")
     bundledPlugin("com.intellij.properties")
     bundledPlugin("com.intellij.microservices.jvm")
     bundledPlugin("JavaScript")
