@@ -1,0 +1,18 @@
+<LanguageInjectionConfiguration>
+  <injection language="JavaScript" injector-id="java">
+    <display-name>Element.executeJs (com.vaadin.flow.dom)</display-name>
+    <single-file value="false" />
+    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("executeJs").withParameters("java.lang.String", "java.io.Serializable...").definedInClass("com.vaadin.flow.dom.Element"))]]></place>
+  </injection>
+  <injection language="HTML" injector-id="java">
+    <display-name>Html (com.vaadin.flow.component)</display-name>
+    <single-file value="false" />
+    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("Html").withParameters("java.lang.String").definedInClass("com.vaadin.flow.component.Html"))]]></place>
+    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("setHtmlContent").withParameters("java.lang.String").definedInClass("com.vaadin.flow.component.Html"))]]></place>
+  </injection>
+  <injection language="RegExp" injector-id="java">
+    <display-name>TextField.setPattern (com.vaadin.flow.component.textfield)</display-name>
+    <single-file value="false" />
+    <place><![CDATA[psiParameter().ofMethod(0, psiMethod().withName("setPattern").withParameters("java.lang.String").definedInClass("com.vaadin.flow.component.textfield.TextField"))]]></place>
+  </injection>
+</LanguageInjectionConfiguration>
