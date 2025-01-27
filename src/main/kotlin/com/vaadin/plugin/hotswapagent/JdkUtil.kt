@@ -2,20 +2,26 @@ package com.vaadin.plugin.hotswapagent
 
 import com.intellij.externalSystem.JavaModuleData
 import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.externalSystem.model.DataNode
 import com.intellij.openapi.externalSystem.model.Key
+import com.intellij.openapi.externalSystem.model.ProjectSystemId
+import com.intellij.openapi.externalSystem.model.project.ModuleData
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
 import java.io.File
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.jps.model.java.JdkVersionDetector
-import org.jetbrains.plugins.gradle.util.GradleUtil
 
 class JdkUtil {
 
     companion object {
+
+        val GRADLE_SYSTEM_ID: ProjectSystemId = ProjectSystemId("GRADLE")
+
         fun isJetbrainsRuntime(jdk: Sdk?): Boolean {
             val homePath = jdk?.homePath ?: throw IllegalStateException("JDK has no home path: $jdk")
             val jdkInfo = JdkVersionDetector.getInstance().detectJdkVersionInfo(homePath)
@@ -78,7 +84,7 @@ class JdkUtil {
         }
 
         private fun getGradleJavaVersion(module: Module): Int? {
-            val gradleModuleData = GradleUtil.findGradleModuleData(module) ?: return null
+            val gradleModuleData = findGradleModuleData(module) ?: return null
             val javaModuleData =
                 ExternalSystemApiUtil.find(gradleModuleData, Key.create<JavaModuleData>(JavaModuleData::class.java, 1))
                     ?.data ?: return null
@@ -94,6 +100,16 @@ class JdkUtil {
         fun getProjectSdkVersion(module: Module): Int? {
             val projectSdk = ProjectRootManager.getInstance(module.project)?.projectSdk ?: return null
             return getSdkMajorVersion(projectSdk)
+        }
+
+        private fun findGradleModuleData(module: Module): DataNode<ModuleData>? {
+            val projectPath = ExternalSystemApiUtil.getExternalProjectPath(module)
+            if (projectPath == null) {
+                return null
+            } else {
+                val project: Project = module.project
+                return ExternalSystemApiUtil.findModuleNode(project, GRADLE_SYSTEM_ID, projectPath)
+            }
         }
     }
 }
