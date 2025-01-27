@@ -12,7 +12,7 @@ class RestartApplicationHandler(project: Project) : AbstractHandler(project) {
             val contentManager = RunContentManager.getInstance(project)
             val selectedDescriptor = contentManager.selectedContent
             if (selectedDescriptor != null) {
-                LOG.debug("Restarting ${project.name}")
+                LOG.debug("Restarting ${selectedDescriptor.displayName} (${project.name})")
                 ExecutionUtil.restart(selectedDescriptor)
             } else {
                 LOG.debug("Restart of ${project.name} failed - content not found")
