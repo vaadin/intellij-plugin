@@ -28,6 +28,7 @@ import com.vaadin.plugin.copilot.handler.Handler
 import com.vaadin.plugin.copilot.handler.HandlerResponse
 import com.vaadin.plugin.copilot.handler.RedoHandler
 import com.vaadin.plugin.copilot.handler.RefreshHandler
+import com.vaadin.plugin.copilot.handler.RestartApplicationHandler
 import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
@@ -75,6 +76,7 @@ class CopilotPluginUtil {
             SHOW_IN_IDE("showInIde"),
             GET_MODULE_PATHS("getModulePaths"),
             COMPILE_FILES("compileFiles"),
+            RESTART_APPLICATION("restartApplication"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -102,6 +104,7 @@ class CopilotPluginUtil {
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
                 HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
                 HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
+                HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
