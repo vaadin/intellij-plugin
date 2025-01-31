@@ -17,6 +17,10 @@ class ShowInIdeHandler(project: Project, data: Map<String, Any>) : AbstractHandl
     private val column: Int = (data["column"] as Int?) ?: 0
 
     override fun run(): HandlerResponse {
+        if (line < 0 || column < 0) {
+            LOG.warn("Invalid line or column number ($line:$column)")
+            return RESPONSE_BAD_REQUEST
+        }
         if (isFileInsideProject(project, ioFile)) {
             val result =
                 VfsUtil.findFileByIoFile(ioFile, true)?.let { file ->
