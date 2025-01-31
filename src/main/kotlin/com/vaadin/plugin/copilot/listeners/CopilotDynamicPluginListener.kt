@@ -19,5 +19,4 @@ class CopilotDynamicPluginListener(private val project: Project) : DynamicPlugin
         CopilotPluginUtil.saveDotFile(project)
         LOG.debug("Plugin loaded, .copilot-plugin created")
     }
-
 }
