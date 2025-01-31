@@ -12,7 +12,7 @@ plugins {
 }
 
 // version for building plugin
-val buildVersion = "2023.3"
+val buildVersion = "2024.1"
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -106,7 +106,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 
 tasks {
   patchPluginXml {
-    sinceBuild.set("233")
+    sinceBuild.set("241")
     untilBuild.set("251.*")
   }
 
