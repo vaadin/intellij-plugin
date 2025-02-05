@@ -1,19 +1,23 @@
-package com.vaadin.plugin.endpoints
+package com.vaadin.plugin.psi
 
-import com.intellij.codeInsight.highlighting.HighlightedReference
-import com.intellij.lang.properties.references.PropertyReference
 import com.intellij.microservices.jvm.url.uastUrlPathReferenceInjectorForScheme
 import com.intellij.microservices.jvm.url.uastUrlReferenceProvider
 import com.intellij.microservices.url.HTTP_SCHEMES
 import com.intellij.patterns.PsiJavaPatterns.psiMethod
 import com.intellij.patterns.uast.callExpression
 import com.intellij.patterns.uast.injectionHostUExpression
-import com.intellij.psi.*
+import com.intellij.psi.PsiReference
+import com.intellij.psi.PsiReferenceContributor
+import com.intellij.psi.PsiReferenceRegistrar
+import com.intellij.psi.UastReferenceProvider
+import com.intellij.psi.registerUastReferenceProvider
 import com.intellij.util.ProcessingContext
+import com.vaadin.plugin.endpoints.VAADIN_ROUTE
+import com.vaadin.plugin.endpoints.vaadinUrlPksParser
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.expressions.UInjectionHost
 
-internal class VaadinReferenceContributor : PsiReferenceContributor() {
+internal class FlowReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
         registrar.registerUastReferenceProvider(
             injectionHostUExpression().annotationParam(VAADIN_ROUTE, "value"),
@@ -38,7 +42,7 @@ internal class VaadinReferenceContributor : PsiReferenceContributor() {
                     val key = element.evaluateToString() ?: return PsiReference.EMPTY_ARRAY
                     val sourcePsi = element.sourcePsi ?: return PsiReference.EMPTY_ARRAY
 
-                    return arrayOf(object : PropertyReference(key, sourcePsi, null, false), HighlightedReference {})
+                    return arrayOf(TranslationPropertyReference(key, sourcePsi))
                 }
             })
     }
