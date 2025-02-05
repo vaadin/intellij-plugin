@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootEvent
 import com.intellij.openapi.roots.ModuleRootListener
 import com.intellij.openapi.startup.ProjectActivity
-import com.vaadin.plugin.listeners.VaadinProjectListener
+import com.vaadin.plugin.utils.doNotifyAboutVaadinProject
 import com.vaadin.plugin.utils.hasVaadin
 
 class VaadinProjectDetector : ModuleRootListener, ProjectActivity {
@@ -29,10 +29,5 @@ class VaadinProjectDetector : ModuleRootListener, ProjectActivity {
                 LOG.info("Vaadin detected during startup of " + project.name)
             }
         }
-    }
-
-    private fun doNotifyAboutVaadinProject(project: Project) {
-        val publisher: VaadinProjectListener = project.messageBus.syncPublisher(VaadinProjectListener.TOPIC)
-        publisher.vaadinProjectDetected(project)
     }
 }

@@ -96,8 +96,10 @@ class ManualCopilotRestart private constructor(eventProperties: Map<String, Any?
      * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/ManualCopilotRestart)
      *
      * Event has no description in tracking plan.
+     *
+     * @param vaadiner Property has no description provided in tracking plan.
      */
-    constructor() : this(null, null as EventOptions?)
+    constructor(vaadiner: Boolean) : this(mapOf("Vaadiner" to vaadiner), null as EventOptions?)
 }
 
 class PluginInitialized private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
@@ -108,8 +110,16 @@ class PluginInitialized private constructor(eventProperties: Map<String, Any?>?,
      * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/PluginInitialized)
      *
      * Event has no description in tracking plan.
+     *
+     * @param vaadiner Property has no description provided in tracking plan.
+     * @param proKey Property has no description provided in tracking plan.
      */
-    constructor() : this(null, null as EventOptions?)
+    constructor(
+        vaadiner: Boolean,
+        proKey: String? = null
+    ) : this(
+        mapOf(*(if (proKey != null) arrayOf("ProKey" to proKey) else arrayOf()), "Vaadiner" to vaadiner),
+        null as EventOptions?)
 }
 
 class ProjectCreated private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
@@ -121,12 +131,15 @@ class ProjectCreated private constructor(eventProperties: Map<String, Any?>?, op
      *
      * Event has no description in tracking plan.
      *
+     * @param vaadiner Property has no description provided in tracking plan.
      * @param downloadUrl Property has no description provided in tracking plan.
      */
     constructor(
+        vaadiner: Boolean,
         downloadUrl: String? = null
     ) : this(
-        mapOf(*(if (downloadUrl != null) arrayOf("downloadUrl" to downloadUrl) else arrayOf())), null as EventOptions?)
+        mapOf(*(if (downloadUrl != null) arrayOf("downloadUrl" to downloadUrl) else arrayOf()), "Vaadiner" to vaadiner),
+        null as EventOptions?)
 }
 
 val ampli = Ampli()
@@ -249,11 +262,17 @@ open class Ampli {
      * Event has no description in tracking plan.
      *
      * @param userId The user's ID
+     * @param event The event
      * @param options Amplitude event options
      * @param extra Extra untyped parameters for use in middleware
      */
-    fun manualCopilotRestart(userId: String?, options: EventOptions? = null, extra: MiddlewareExtra? = null) {
-        this.track(userId, ManualCopilotRestart(), options, extra)
+    fun manualCopilotRestart(
+        userId: String?,
+        event: ManualCopilotRestart,
+        options: EventOptions? = null,
+        extra: MiddlewareExtra? = null
+    ) {
+        this.track(userId, event, options, extra)
     }
 
     /**
@@ -264,11 +283,17 @@ open class Ampli {
      * Event has no description in tracking plan.
      *
      * @param userId The user's ID
+     * @param event The event
      * @param options Amplitude event options
      * @param extra Extra untyped parameters for use in middleware
      */
-    fun pluginInitialized(userId: String?, options: EventOptions? = null, extra: MiddlewareExtra? = null) {
-        this.track(userId, PluginInitialized(), options, extra)
+    fun pluginInitialized(
+        userId: String?,
+        event: PluginInitialized,
+        options: EventOptions? = null,
+        extra: MiddlewareExtra? = null
+    ) {
+        this.track(userId, event, options, extra)
     }
 
     /**
@@ -285,11 +310,11 @@ open class Ampli {
      */
     fun projectCreated(
         userId: String?,
-        event: ProjectCreated? = null,
+        event: ProjectCreated,
         options: EventOptions? = null,
         extra: MiddlewareExtra? = null
     ) {
-        this.track(userId, event ?: ProjectCreated(), options, extra)
+        this.track(userId, event, options, extra)
     }
 
     private fun createAmplitudeEvent(
