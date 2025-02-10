@@ -24,7 +24,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
         const val ID = "VaadinStatusBarPanel"
 
         fun update(project: Project) {
-            WindowManager.getInstance().getStatusBar(project).updateWidget(ID)
+            WindowManager.getInstance().getStatusBar(project)?.updateWidget(ID)
         }
     }
 
