@@ -13,13 +13,17 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.task.ProjectTaskListener
 import com.intellij.task.ProjectTaskManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import java.util.concurrent.Executors
+import java.util.concurrent.Semaphore
 
 /** Action run after Document has been saved. Is not run for binary files. */
 class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
+    private val compileLock = Semaphore(1)
 
     override fun isEnabledForProject(project: Project): Boolean {
         return VaadinCompileOnSaveActionInfo.isEnabledForProject(project)
@@ -49,10 +53,31 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                     if (javaFiles.isNotEmpty()) {
                         val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                         if (session != null) {
-                            ReadAction.run<Throwable> {
-                                Thread.sleep(1)
-                                HotSwapUI.getInstance(project).compileAndReload(session, *javaFiles.toTypedArray())
+                            val executorService = Executors.newSingleThreadExecutor()
+
+                            executorService.submit {
+                                // Wait for compile lock  so only one compile task is running at a
+                                // time
+                                compileLock.acquire()
+                                LOG.info("Compile starting for $javaFiles")
+
+                                val myConn = myProject!!.messageBus.connect()
+                                val listener =
+                                    object : ProjectTaskListener {
+                                        override fun finished(result: ProjectTaskManager.Result) {
+                                            LOG.info("Compile stopped for $javaFiles")
+                                            compileLock.release()
+                                            myConn.disconnect()
+                                        }
+                                    }
+
+                                myConn.subscribe<ProjectTaskListener>(ProjectTaskListener.TOPIC, listener)
+
+                                ReadAction.run<Throwable> {
+                                    HotSwapUI.getInstance(project).compileAndReload(session, *javaFiles.toTypedArray())
+                                }
                             }
+                            executorService.shutdown()
                         }
                         return
                     }
