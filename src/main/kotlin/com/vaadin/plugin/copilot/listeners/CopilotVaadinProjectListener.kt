@@ -11,11 +11,10 @@ import com.vaadin.plugin.ui.VaadinStatusBarWidget
 
 class CopilotVaadinProjectListener : VaadinProjectListener {
 
-    private var triggered = false
+    private var listenerRegistered = false
 
     override fun vaadinProjectDetected(project: Project) {
-        if (!triggered && !project.isDisposed) {
-            triggered = true
+        if (!project.isDisposed) {
             saveDotFile(project)
             removeDotFileOnExit(project)
             DumbService.getInstance(project).smartInvokeLater { VaadinStatusBarWidget.update(project) }
@@ -23,14 +22,17 @@ class CopilotVaadinProjectListener : VaadinProjectListener {
     }
 
     private fun removeDotFileOnExit(project: Project) {
-        ProjectManager.getInstance()
-            .addProjectManagerListener(
-                project,
-                object : ProjectManagerListener {
-                    override fun projectClosing(project: Project) {
-                        CopilotPluginUtil.removeDotFile(project)
-                    }
-                },
-            )
+        if (!listenerRegistered) {
+            listenerRegistered = true
+            ProjectManager.getInstance()
+                .addProjectManagerListener(
+                    project,
+                    object : ProjectManagerListener {
+                        override fun projectClosing(project: Project) {
+                            CopilotPluginUtil.removeDotFile(project)
+                        }
+                    },
+                )
+        }
     }
 }
