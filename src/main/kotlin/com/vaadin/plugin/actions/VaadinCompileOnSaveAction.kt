@@ -61,17 +61,17 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                                 compileLock.acquire()
                                 LOG.debug("Compile starting for $javaFiles")
 
-                                val myConn = myProject!!.messageBus.connect()
+                                val messageBusConnection = getProject().messageBus.connect()
                                 val listener =
                                     object : ProjectTaskListener {
                                         override fun finished(result: ProjectTaskManager.Result) {
                                             LOG.debug("Compile completed for $javaFiles")
                                             compileLock.release()
-                                            myConn.disconnect()
+                                            messageBusConnection.disconnect()
                                         }
                                     }
 
-                                myConn.subscribe<ProjectTaskListener>(ProjectTaskListener.TOPIC, listener)
+                                messageBusConnection.subscribe<ProjectTaskListener>(ProjectTaskListener.TOPIC, listener)
 
                                 ReadAction.run<Throwable> {
                                     HotSwapUI.getInstance(project).compileAndReload(session, *javaFiles.toTypedArray())
