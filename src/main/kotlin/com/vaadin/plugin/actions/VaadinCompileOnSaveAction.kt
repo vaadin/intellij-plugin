@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore
 class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.ActionOnSave() {
 
     private val LOG: Logger = Logger.getInstance(CopilotPluginUtil::class.java)
-    private val compileLock = Semaphore(1)
+    private var compileLock = Semaphore(1)
 
     override fun isEnabledForProject(project: Project): Boolean {
         return VaadinCompileOnSaveActionInfo.isEnabledForProject(project)
@@ -54,11 +54,21 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                         val session = DebuggerManagerEx.getInstanceEx(project).context.debuggerSession
                         if (session != null) {
                             val executorService = Executors.newSingleThreadExecutor()
-
                             executorService.submit {
                                 // Wait for compile lock  so only one compile task is running at a
                                 // time
-                                compileLock.acquire()
+                                val timeout: Long = 30
+                                if (!compileLock.tryAcquire(timeout, java.util.concurrent.TimeUnit.SECONDS)) {
+                                    // We did not get the compile lock. Assume something is wrong
+                                    // and create a new lock so we won't block all further compiles
+                                    LOG.warn(
+                                        "Unable to acquire the compile lock in $timeout seconds. Creating a new lock and proceeding.")
+                                    compileLock = Semaphore(1)
+                                    compileLock.acquire()
+                                }
+
+                                val thisLock = compileLock
+
                                 LOG.debug("Compile starting for $javaFiles")
 
                                 val messageBusConnection = getProject().messageBus.connect()
@@ -66,7 +76,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                                     object : ProjectTaskListener {
                                         override fun finished(result: ProjectTaskManager.Result) {
                                             LOG.debug("Compile completed for $javaFiles")
-                                            compileLock.release()
+                                            thisLock.release()
                                             messageBusConnection.disconnect()
                                         }
                                     }
