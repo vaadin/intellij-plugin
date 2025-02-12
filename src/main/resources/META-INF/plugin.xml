@@ -126,6 +126,9 @@
         <listener
             class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
             topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
+        <listener
+                class="com.vaadin.plugin.copilot.listeners.CopilotDynamicPluginListener"
+                topic="com.intellij.ide.plugins.DynamicPluginListener"/>
     </projectListeners>
 
 </idea-plugin>

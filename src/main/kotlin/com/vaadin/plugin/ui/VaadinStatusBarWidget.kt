@@ -14,6 +14,7 @@ import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
+import com.vaadin.plugin.utils.trackManualCopilotRestart
 import java.awt.Point
 import java.awt.event.MouseEvent
 import javax.swing.Icon
@@ -24,7 +25,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
         const val ID = "VaadinStatusBarPanel"
 
         fun update(project: Project) {
-            WindowManager.getInstance().getStatusBar(project).updateWidget(ID)
+            WindowManager.getInstance().getStatusBar(project)?.updateWidget(ID)
         }
     }
 
@@ -68,6 +69,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
         panel.afterRestart = {
             popup.cancel()
             showPopup(e)
+            trackManualCopilotRestart()
         }
         val dimension = popup.content.preferredSize
         val at = Point(0, -dimension.height)
