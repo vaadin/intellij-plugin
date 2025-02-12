@@ -33,6 +33,7 @@ import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
+import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
@@ -69,6 +70,7 @@ class CopilotPluginUtil {
 
         private enum class HANDLERS(val command: String) {
             WRITE("write"),
+            WRITE_BASE64("writeBase64"),
             DELETE("delete"),
             UNDO("undo"),
             REDO("redo"),
