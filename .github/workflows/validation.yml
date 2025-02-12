@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          cat ${{ matrix.dir }}/report.md | head -n 3 > ${{ matrix.dir }}/report.short.md
+          cat ${{ matrix.dir }}/report.md | head -n 3 | sed s/#/###/ > ${{ matrix.dir }}/report.short.md
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
