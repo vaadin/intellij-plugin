@@ -23,6 +23,7 @@ import com.intellij.openapi.vfs.findDirectory
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findOrCreateDirectory
 import com.vaadin.plugin.copilot.handler.CompileFilesHandler
+import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
 import com.vaadin.plugin.copilot.handler.Handler
 import com.vaadin.plugin.copilot.handler.HandlerResponse
@@ -33,7 +34,6 @@ import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
-import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter

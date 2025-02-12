@@ -22,7 +22,7 @@ class DeleteFileHandler(project: Project, data: Map<String, Any>) : AbstractHand
         val vfsFile = VfsUtil.findFileByIoFile(ioFile, true) ?: return RESPONSE_ERROR
         if (!vfsFile.exists()) {
             LOG.warn("File $ioFile does not exist")
-             return RESPONSE_ERROR
+            return RESPONSE_ERROR
         }
 
         runInEdt {
@@ -31,22 +31,22 @@ class DeleteFileHandler(project: Project, data: Map<String, Any>) : AbstractHand
                 return@runInEdt
             }
 
-            CommandProcessor.getInstance().executeCommand(
-                project,
-                {
-                    WriteCommandAction.runWriteCommandAction(project) {
-                        try {
-                            vfsFile.delete(this)
-                            LOG.info("File $ioFile deleted")
-                        } catch (e: Exception) {
-                            LOG.error("Failed to delete file $ioFile", e)
+            CommandProcessor.getInstance()
+                .executeCommand(
+                    project,
+                    {
+                        WriteCommandAction.runWriteCommandAction(project) {
+                            try {
+                                vfsFile.delete(this)
+                                LOG.info("File $ioFile deleted")
+                            } catch (e: Exception) {
+                                LOG.error("Failed to delete file $ioFile", e)
+                            }
                         }
-                    }
-                },
-                "Vaadin Copilot Delete File",
-                null,
-                UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION
-            )
+                    },
+                    "Vaadin Copilot Delete File",
+                    null,
+                    UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION)
         }
 
         return RESPONSE_OK
