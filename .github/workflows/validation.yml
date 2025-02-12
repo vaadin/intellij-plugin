@@ -91,14 +91,20 @@ jobs:
         dir: ${{fromJson(needs.waitForResults.outputs.directories)}}
     steps:
       - uses: actions/download-artifact@v4
-      - run: ls
+      - run: |
+          cat ${{ matrix.dir }}/report.md | head -n 3 | sed s/#/###/ > ${{ matrix.dir }}/report.short.md
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
           message-id: verify-plugin-comment-${{ matrix.dir }}
           refresh-message-position: true
           message-path: |
-            ${{ matrix.dir }}/report.md
-      - uses: int128/hide-comment-action@v1
-        with:
-          contains: "Compatible."
+            ${{ matrix.dir }}/report.short.md
+      - name: Fail on not compatible
+        run: |
+          if grep -q "Compatible." ${{ matrix.dir }}/report.short.md; then
+            echo "✅ Compatible."
+          else
+            echo "❌ Not compatible!"
+            exit 1
+          fi

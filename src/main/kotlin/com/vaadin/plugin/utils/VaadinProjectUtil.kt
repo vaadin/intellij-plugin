@@ -12,6 +12,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
+import com.vaadin.plugin.listeners.VaadinProjectListener
 import com.vaadin.plugin.starter.DownloadableModel
 import java.io.File
 import java.io.IOException
@@ -78,6 +79,11 @@ class VaadinProjectUtil {
             }
         }
     }
+}
+
+internal fun doNotifyAboutVaadinProject(project: Project) {
+    val publisher: VaadinProjectListener = project.messageBus.syncPublisher(VaadinProjectListener.TOPIC)
+    publisher.vaadinProjectDetected(project)
 }
 
 internal fun hasVaadin(project: Project): Boolean = hasLibraryClass(project, VAADIN_SERVICE)

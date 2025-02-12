@@ -2,8 +2,11 @@ package com.vaadin.plugin.utils
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.io.FileUtil
+import elemental.json.Json
 import java.io.File
 import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.file.Files
 import java.util.*
 import java.util.jar.JarFile
 
@@ -21,6 +24,20 @@ object VaadinHomeUtil {
     private fun resolveVaadinHomeDirectory(): File {
         val userHome = System.getProperty(PROPERTY_USER_HOME)
         return File(userHome, VAADIN_FOLDER_NAME)
+    }
+
+    @Throws(IOException::class)
+    fun getUserKey(): String {
+        val vaadinHome = resolveVaadinHomeDirectory()
+        val userKeyFile = File(vaadinHome, "userKey")
+        if (userKeyFile.exists()) {
+            val content = Files.readString(userKeyFile.toPath())
+            return Json.parse(content).getString("key")
+        } else {
+            val key = "user-${UUID.randomUUID()}"
+            Files.write(userKeyFile.toPath(), key.toByteArray(Charset.defaultCharset()))
+            return key
+        }
     }
 
     /**
