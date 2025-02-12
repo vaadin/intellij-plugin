@@ -59,13 +59,13 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                                 // Wait for compile lock  so only one compile task is running at a
                                 // time
                                 compileLock.acquire()
-                                LOG.info("Compile starting for $javaFiles")
+                                LOG.debug("Compile starting for $javaFiles")
 
                                 val myConn = myProject!!.messageBus.connect()
                                 val listener =
                                     object : ProjectTaskListener {
                                         override fun finished(result: ProjectTaskManager.Result) {
-                                            LOG.info("Compile stopped for $javaFiles")
+                                            LOG.debug("Compile completed for $javaFiles")
                                             compileLock.release()
                                             myConn.disconnect()
                                         }
