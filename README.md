@@ -11,3 +11,7 @@ Improves developer experience while working with [Vaadin](https://vaadin.com) fr
 Available at [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23758-vaadin).
 
 Thanks to [HotSwapHelper](https://github.com/gejun123456/HotSwapHelper) for inspiration and ideas on the Hotswap Agent integration.
+
+## API test application
+
+`plugin-api-test-client` is a simple Spring boot app with tests allowing to easily debug plugin endpoint API calls.
