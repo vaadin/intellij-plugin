@@ -1,8 +1,2 @@
-pluginManagement {
-  repositories {
-    mavenCentral()
-    gradlePluginPortal()
-  }
-}
-
-rootProject.name = "intellij-plugin"
+rootProject.name = "intellij-plugin-parent"
+include("plugin", "plugin-api-test-client")
