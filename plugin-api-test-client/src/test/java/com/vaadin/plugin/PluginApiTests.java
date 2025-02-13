@@ -18,20 +18,24 @@ import java.util.Properties;
 @SpringBootTest(classes = {SpringBootApplication.class})
 public class PluginApiTests {
 
-    private static final String PROJECT_BASE_PATH = "/Users/vaadin/src/intellij-plugin";
-
-    private static final String TEST_RESOURCES_PATH = PROJECT_BASE_PATH + "/plugin-api-test-client/src/test/resources";
+    private static String projectBasePath;
 
     private static Client client;
 
+    protected Path getTestResourcePath(String childPath) {
+        return Path.of(projectBasePath).resolve("plugin-api-test-client/src/test/resources")
+                .resolve(childPath);
+    }
+
     @BeforeAll
     public static void beforeAll() throws IOException {
-        if (System.getProperty("ghActions") != null) {
+        if (Boolean.parseBoolean(System.getProperty("ghActions"))) {
             return;
         }
+        projectBasePath = Path.of(System.getProperty("user.dir")).getParent().toString();
         var props = new Properties();
-        props.load(new FileReader(PROJECT_BASE_PATH + "/.idea/.copilot-plugin"));
-        client = new Client(props.getProperty("endpoint"), PROJECT_BASE_PATH);
+        props.load(new FileReader(projectBasePath + "/.idea/.copilot-plugin"));
+        client = new Client(props.getProperty("endpoint"), projectBasePath);
     }
 
     @Test
@@ -39,10 +43,10 @@ public class PluginApiTests {
         if (client == null) {
             return;
         }
-        var filePath = Path.of(TEST_RESOURCES_PATH + "/test.txt");
+        var filePath = getTestResourcePath("test.txt");
         var response = client.write(filePath, "Hello World");
         assertHttpOk(response);
-        Assertions.assertTrue(Files.exists(filePath));
+        assertNewFileCreated(filePath);
         Files.delete(filePath);
     }
 
@@ -51,14 +55,14 @@ public class PluginApiTests {
         if (client == null) {
             return;
         }
-        var samplePath = Path.of(TEST_RESOURCES_PATH + "/samples/image.png");
+        var samplePath = getTestResourcePath("samples/image.png");
         var binaryContent = Files.readAllBytes(samplePath);
         var base64 = Base64.getEncoder().encodeToString(binaryContent);
 
-        var filePath = Path.of(TEST_RESOURCES_PATH + "/image.png");
+        var filePath = getTestResourcePath("image.png");
         var response = client.writeBinary(filePath, base64);
         assertHttpOk(response);
-        Assertions.assertTrue(Files.exists(filePath));
+        assertNewFileCreated(filePath);
 
         var fileContent = Files.readAllBytes(filePath);
         Assertions.assertEquals(binaryContent.length, fileContent.length);
@@ -70,10 +74,10 @@ public class PluginApiTests {
         if (client == null) {
             return;
         }
-        var filePath = Path.of(TEST_RESOURCES_PATH + "/test.txt");
+        var filePath = getTestResourcePath("test.txt");
         var response = client.write(filePath, "Hello World");
         assertHttpOk(response);
-        Assertions.assertTrue(Files.exists(filePath));
+        assertNewFileCreated(filePath);
 
         response = client.delete(filePath);
         assertHttpOk(response);
@@ -81,6 +85,20 @@ public class PluginApiTests {
     }
 
     // add more tests when needed
+
+    private void assertNewFileCreated(Path path) {
+        for (int i = 0 ; i < 100 ; ++i) {
+            try {
+                if (Files.exists(path)) {
+                    return;
+                }
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Assertions.fail("File does not exist " + path);
+    }
 
     private void assertHttpOk(RestClient.ResponseSpec response) {
         Assertions.assertEquals(HttpStatusCode.valueOf(200), response.toBodilessEntity().getStatusCode());
