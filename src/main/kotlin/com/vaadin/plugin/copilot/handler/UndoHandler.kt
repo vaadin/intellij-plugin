@@ -26,10 +26,12 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 } else {
                     // if we want to undo file removal we need to create empty virtual file to write
                     // content
-                    WriteAction.run<Throwable> {
-                        val parent = VfsUtil.createDirectories(file.parent)
-                        vfsFile = parent.createChildData(this, file.name)
-                        vfsFiles.add(vfsFile!!)
+                    runInEdt {
+                        WriteAction.run<Throwable> {
+                            val parent = VfsUtil.createDirectories(file.parent)
+                            vfsFile = parent.createChildData(this, file.name)
+                            vfsFiles.add(vfsFile!!)
+                        }
                     }
                 }
             } else {
