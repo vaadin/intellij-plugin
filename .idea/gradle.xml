@@ -9,7 +9,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/plugin" />
-            <option value="$PROJECT_DIR$/plugin-api-test-client" />
           </set>
         </option>
       </GradleProjectSettings>

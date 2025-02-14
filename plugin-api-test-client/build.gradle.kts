@@ -18,10 +18,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:3.4.2")
 }
 
-tasks.register("prepareKotlinBuildScriptModel"){}
-
 tasks.test {
-    systemProperties["ghActions"] = project.properties["ghActions"]
     useJUnitPlatform()
     testLogging {
         events("PASSED", "FAILED", "SKIPPED")

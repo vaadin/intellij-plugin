@@ -19,34 +19,26 @@ import java.util.function.Predicate;
 @SpringBootTest(classes = {SpringBootApplication.class})
 public class PluginApiTests {
 
-    private final static String PROJECT_NAME = "plugin-api-test-client";
-
     private static String projectBasePath;
 
     private static Client client;
 
     protected Path getTestResourcePath(String childPath) {
-        return Path.of(projectBasePath).resolve(PROJECT_NAME)
+        return Path.of(projectBasePath)
                 .resolve("src/test/resources")
                 .resolve(childPath);
     }
 
     @BeforeAll
     public static void beforeAll() throws IOException {
-        if (Boolean.parseBoolean(System.getProperty("ghActions"))) {
-            return;
-        }
-        projectBasePath = Path.of(System.getProperty("user.dir")).getParent().toString();
+        projectBasePath = Path.of(System.getProperty("user.dir")).toString();
         var props = new Properties();
         props.load(new FileReader(projectBasePath + "/.idea/.copilot-plugin"));
-        client = new Client(props.getProperty("endpoint"), projectBasePath + "/" + PROJECT_NAME);
+        client = new Client(props.getProperty("endpoint"), projectBasePath);
     }
 
     @Test
     public void testWrite() throws IOException {
-        if (client == null) {
-            return;
-        }
         var filePath = getTestResourcePath("test.txt");
         var response = client.write(filePath, "Hello World");
         assertHttpOk(response);
@@ -56,9 +48,6 @@ public class PluginApiTests {
 
     @Test
     public void testWriteBinary() throws IOException {
-        if (client == null) {
-            return;
-        }
         var samplePath = getTestResourcePath("samples/image.png");
         var binaryContent = Files.readAllBytes(samplePath);
         var base64 = Base64.getEncoder().encodeToString(binaryContent);
@@ -81,9 +70,6 @@ public class PluginApiTests {
 
     @Test
     public void testDelete() throws IOException {
-        if (client == null) {
-            return;
-        }
         var filePath = getTestResourcePath("test.txt");
         var response = client.write(filePath, "Hello World");
         assertHttpOk(response);
