@@ -35,7 +35,9 @@ object VaadinHomeUtil {
             return Json.parse(content).getString("key")
         } else {
             val key = "user-${UUID.randomUUID()}"
-            Files.write(userKeyFile.toPath(), key.toByteArray(Charset.defaultCharset()))
+            val keyObject = Json.createObject()
+            keyObject.put("key", key)
+            Files.write(userKeyFile.toPath(), keyObject.toJson().toByteArray(Charset.defaultCharset()))
             return key
         }
     }
