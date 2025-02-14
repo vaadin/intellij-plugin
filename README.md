@@ -15,3 +15,5 @@ Thanks to [HotSwapHelper](https://github.com/gejun123456/HotSwapHelper) for insp
 ## API test application
 
 `plugin-api-test-client` is a simple Spring boot app with tests allowing to easily debug plugin endpoint API calls.
+
+Please remember to run development IDE (Run Plugin) before running the tests.

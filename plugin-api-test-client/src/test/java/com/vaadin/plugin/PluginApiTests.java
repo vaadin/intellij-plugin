@@ -14,16 +14,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 @SpringBootTest(classes = {SpringBootApplication.class})
 public class PluginApiTests {
+
+    private final static String PROJECT_NAME = "plugin-api-test-client";
 
     private static String projectBasePath;
 
     private static Client client;
 
     protected Path getTestResourcePath(String childPath) {
-        return Path.of(projectBasePath).resolve("plugin-api-test-client/src/test/resources")
+        return Path.of(projectBasePath).resolve(PROJECT_NAME)
+                .resolve("src/test/resources")
                 .resolve(childPath);
     }
 
@@ -35,7 +39,7 @@ public class PluginApiTests {
         projectBasePath = Path.of(System.getProperty("user.dir")).getParent().toString();
         var props = new Properties();
         props.load(new FileReader(projectBasePath + "/.idea/.copilot-plugin"));
-        client = new Client(props.getProperty("endpoint"), projectBasePath);
+        client = new Client(props.getProperty("endpoint"), projectBasePath + "/" + PROJECT_NAME);
     }
 
     @Test
@@ -64,8 +68,14 @@ public class PluginApiTests {
         assertHttpOk(response);
         assertNewFileCreated(filePath);
 
-        var fileContent = Files.readAllBytes(filePath);
-        Assertions.assertEquals(binaryContent.length, fileContent.length);
+        assertWithTimeout((originalContent) -> {
+            try {
+                byte[] fileContent = Files.readAllBytes(filePath);
+                return originalContent.length == fileContent.length;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }, binaryContent);
         Files.delete(filePath);
     }
 
@@ -81,15 +91,23 @@ public class PluginApiTests {
 
         response = client.delete(filePath);
         assertHttpOk(response);
-        Assertions.assertFalse(Files.exists(filePath));
+        assertFileDeleted(filePath);
     }
 
     // add more tests when needed
 
-    private void assertNewFileCreated(Path path) {
+    private void assertNewFileCreated(Path file) {
+        assertWithTimeout(Files::exists, file);
+    }
+
+    private void assertFileDeleted(Path file) {
+        assertWithTimeout(Files::notExists, file);
+    }
+
+    private <T> void assertWithTimeout(Predicate<T> predicate, T parameter) {
         for (int i = 0 ; i < 100 ; ++i) {
             try {
-                if (Files.exists(path)) {
+                if (predicate.test(parameter)) {
                     return;
                 }
                 Thread.sleep(10);
@@ -97,7 +115,7 @@ public class PluginApiTests {
                 throw new RuntimeException(e);
             }
         }
-        Assertions.fail("File does not exist " + path);
+        Assertions.fail("Assertion failed for " + parameter);
     }
 
     private void assertHttpOk(RestClient.ResponseSpec response) {
