@@ -5,5 +5,4 @@ pluginManagement {
   }
 }
 
-rootProject.name = "intellij-plugin-parent"
-include("plugin")
+rootProject.name = "intellij-plugin"

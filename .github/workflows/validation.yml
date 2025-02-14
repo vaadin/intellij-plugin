@@ -41,7 +41,7 @@ jobs:
         id: artifact
         with:
           name: distributions
-          path: build/distributions
+          path: plugin/build/distributions
       - uses: mshick/add-pr-comment@v2
         with:
           message-id: download-artifact-comment
@@ -69,7 +69,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: pluginVerifierReports-${{ matrix.version }}
-          path: build/reports/pluginVerifier
+          path: plugin/build/reports/pluginVerifier
 
   waitForResults:
     runs-on: ubuntu-latest
