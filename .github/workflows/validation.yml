@@ -20,9 +20,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Check Spotless
-        run: ./plugin/gradlew spotlessCheck
+        run: ./gradlew spotlessCheck
       - name: Run Unit Tests
-        run: ./plugin/gradlew test
+        run: ./gradlew test
 
   buildPlugin:
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Build plugin
-        run: ./plugin/gradlew --no-configuration-cache buildPlugin
+        run: ./gradlew --no-configuration-cache buildPlugin
       - uses: actions/upload-artifact@v4.3.3
         id: artifact
         with:
@@ -65,7 +65,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
       - name: Verify plugin
-        run: ./plugin/gradlew --no-configuration-cache -PverifyVersion=${{ matrix.version }} verifyPlugin
+        run: ./gradlew --no-configuration-cache -PverifyVersion=${{ matrix.version }} verifyPlugin
       - uses: actions/upload-artifact@v4
         with:
           name: pluginVerifierReports-${{ matrix.version }}
