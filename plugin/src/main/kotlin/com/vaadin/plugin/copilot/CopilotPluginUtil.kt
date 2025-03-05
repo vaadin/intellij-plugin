@@ -22,18 +22,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDirectory
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findOrCreateDirectory
-import com.vaadin.plugin.copilot.handler.CompileFilesHandler
-import com.vaadin.plugin.copilot.handler.DeleteFileHandler
-import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
-import com.vaadin.plugin.copilot.handler.Handler
-import com.vaadin.plugin.copilot.handler.HandlerResponse
-import com.vaadin.plugin.copilot.handler.RedoHandler
-import com.vaadin.plugin.copilot.handler.RefreshHandler
-import com.vaadin.plugin.copilot.handler.RestartApplicationHandler
-import com.vaadin.plugin.copilot.handler.ShowInIdeHandler
-import com.vaadin.plugin.copilot.handler.UndoHandler
-import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
-import com.vaadin.plugin.copilot.handler.WriteFileHandler
+import com.vaadin.plugin.copilot.handler.*
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
@@ -79,6 +68,8 @@ class CopilotPluginUtil {
             GET_MODULE_PATHS("getModulePaths"),
             COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
+            RESTART_SERVICE("restartService"),
+            RELOAD_MAVEN_MODULE("reloadMavenModule"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -108,6 +99,8 @@ class CopilotPluginUtil {
                 HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
                 HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project)
+                HANDLERS.RESTART_SERVICE.command -> return RestartServiceHandler(project, data["serviceName"] as String)
+                HANDLERS.RELOAD_MAVEN_MODULE.command -> return ReloadMavenModuleHandler(project, data["moduleName"] as String)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
