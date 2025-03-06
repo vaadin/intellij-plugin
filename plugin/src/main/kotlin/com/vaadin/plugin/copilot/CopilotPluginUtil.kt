@@ -100,7 +100,8 @@ class CopilotPluginUtil {
                 HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project)
                 HANDLERS.RESTART_SERVICE.command -> return RestartServiceHandler(project, data["serviceName"] as String)
-                HANDLERS.RELOAD_MAVEN_MODULE.command -> return ReloadMavenModuleHandler(project, data["moduleName"] as String)
+                HANDLERS.RELOAD_MAVEN_MODULE.command ->
+                    return ReloadMavenModuleHandler(project, data["moduleName"] as String)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
