@@ -68,7 +68,6 @@ class CopilotPluginUtil {
             GET_MODULE_PATHS("getModulePaths"),
             COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
-            RESTART_SERVICE("restartService"),
             RELOAD_MAVEN_MODULE("reloadMavenModule"),
         }
 
