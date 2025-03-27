@@ -98,8 +98,7 @@ class CopilotPluginUtil {
                 HANDLERS.REFRESH.command -> return RefreshHandler(project)
                 HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
                 HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
-                HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project)
-                HANDLERS.RESTART_SERVICE.command -> return RestartServiceHandler(project, data)
+                HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
                 else -> {
