@@ -8,8 +8,8 @@ import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 
 /**
- * Handler for restarting the application.
- * If the main class is provided, the handler will restart the application with the provided main class.
+ * Handler for restarting the application. If the main class is provided, the handler will restart the application with
+ * the provided main class.
  */
 class RestartApplicationHandler(project: Project, data: Map<String, Any>?) : AbstractHandler(project) {
 
@@ -20,9 +20,7 @@ class RestartApplicationHandler(project: Project, data: Map<String, Any>?) : Abs
 
         val descriptor = findMatchingDescriptor(contentManager) ?: return RESPONSE_BAD_REQUEST
 
-        runInEdt {
-            ExecutionUtil.restart(descriptor)
-        }
+        runInEdt { ExecutionUtil.restart(descriptor) }
 
         return RESPONSE_OK
     }
