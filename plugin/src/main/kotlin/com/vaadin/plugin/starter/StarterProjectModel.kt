@@ -29,7 +29,7 @@ class StarterProjectModel : BaseState(), DownloadableModel {
                 "empty"
             }
 
-        var platformVersion = if (usePrerelease) "pre" else "stable"
+        var platformVersion = if (usePrerelease) "pre" else "latest"
 
         val params =
             mapOf(
