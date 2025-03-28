@@ -6,6 +6,8 @@
                                      referenceClass="com.vaadin.plugin.symbols.HillaSymbolReference"
                                      targetClass="com.vaadin.plugin.symbols.HillaSymbol"
                                      implementationClass="com.vaadin.plugin.symbols.HillaSymbolReferenceProvider"/>
+
+        <methodReferencesSearch implementation="com.vaadin.plugin.psi.HillaReferenceSearcher"/>
     </extensions>
 
 </idea-plugin>
