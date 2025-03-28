@@ -3,7 +3,7 @@ package com.vaadin.plugin.starter
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 
-class SkeletonStarterModel : DownloadableModel {
+class HelloWorldModel : DownloadableModel {
 
     private val graph = PropertyGraph()
     val frameworkProperty = graph.property(StarterSupport.frameworks.keys.first())

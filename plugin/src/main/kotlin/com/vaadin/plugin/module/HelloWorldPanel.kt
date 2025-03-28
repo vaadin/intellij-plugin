@@ -7,15 +7,15 @@ import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.SegmentedButton
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
-import com.vaadin.plugin.starter.SkeletonStarterModel
+import com.vaadin.plugin.starter.HelloWorldModel
 import com.vaadin.plugin.starter.StarterSupport
 
-class SkeletonStarterPanel(private val model: SkeletonStarterModel) {
+class HelloWorldPanel(private val model: HelloWorldModel) {
 
     private class SegmentModel(
         val values: LinkedHashMap<String, String>,
         val property: GraphProperty<String>,
-        val supported: ((SkeletonStarterModel, String) -> Boolean)
+        val supported: ((HelloWorldModel, String) -> Boolean)
     ) {
         var component: SegmentedButton<String>? = null
 
@@ -40,7 +40,7 @@ class SkeletonStarterPanel(private val model: SkeletonStarterModel) {
         }
     }
 
-    private class ViewModel(val model: SkeletonStarterModel) {
+    private class ViewModel(val model: HelloWorldModel) {
         val framework =
             SegmentModel(StarterSupport.frameworks, model.frameworkProperty, StarterSupport::isSupportedFramework)
         val language =

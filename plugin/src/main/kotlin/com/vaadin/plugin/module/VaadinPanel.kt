@@ -16,26 +16,28 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.UIBundle
 import com.intellij.ui.dsl.builder.*
-import com.vaadin.plugin.starter.QuickStarterModel
-import com.vaadin.plugin.starter.SkeletonStarterModel
+import com.vaadin.plugin.starter.HelloWorldModel
+import com.vaadin.plugin.starter.StarterProjectModel
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KEY
 import java.io.File
 import org.jetbrains.annotations.Nls
 
 class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: WizardContext, builder: Panel) {
 
+    private val MAX_LINE_LENGTH = 60
+
     private val entityNameProperty = propertyGraph.lazyProperty(::suggestName)
     private val locationProperty = propertyGraph.lazyProperty(::suggestLocationByName)
     private val canonicalPathProperty = locationProperty.joinCanonicalPath(entityNameProperty)
 
-    private var quickStarterGroup: CollapsibleRow? = null
-    private var skeletonStarterGroup: CollapsibleRow? = null
+    private var starterProjectGroup: CollapsibleRow? = null
+    private var helloWorldGroup: CollapsibleRow? = null
 
-    private val quickStarterModel = QuickStarterModel()
-    private val quickStarterPanel = QuickStarterPanel(quickStarterModel)
+    private val starterProjectModel = StarterProjectModel()
+    private val starterProjectPanel = StarterProjectPanel(starterProjectModel)
 
-    private val skeletonStarterModel = SkeletonStarterModel()
-    private val skeletonStarterPanel = SkeletonStarterPanel(skeletonStarterModel)
+    private val helloWorldModel = HelloWorldModel()
+    private val helloWorldPanel = HelloWorldPanel(helloWorldModel)
 
     init {
         builder.panel {
@@ -57,32 +59,42 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
                 }
             }
 
-            quickStarterGroup = collapsibleGroup("Project Settings") { row {}.cell(quickStarterPanel.root) }
+            starterProjectGroup = collapsibleGroup("Starter Project") { row {}.cell(starterProjectPanel.root) }
 
-            skeletonStarterGroup = collapsibleGroup("Hello World Projects") { row {}.cell(skeletonStarterPanel.root) }
+            helloWorldGroup = collapsibleGroup("Hello World Projects") { row {}.cell(helloWorldPanel.root) }
+            row { text("Getting Started").bold() }
+            row {
+                text(
+                    "The <a href=\"https://vaadin.com/docs/latest/getting-started\">Getting Started</a> guide will " +
+                        "quickly familiarize you with your new Walking Skeleton " +
+                        "implementation. You'll learn how to set up your development environment, " +
+                        "understand the project structure, and find resources to help you add " +
+                        "muscles to your skeleton—transforming it into a fully-featured application.",
+                    MAX_LINE_LENGTH)
+            }
+            row { text("Flow and Hilla").bold() }
             row {
                 text(
                     "<a href=\"https://vaadin.com/flow\">Flow framework</a> is the most productive" +
-                        " choice, allowing 100% of the user<br>interface to be coded in server-side Java.")
+                        " choice, allowing 100% of the user interface to be coded in server-side Java.",
+                    MAX_LINE_LENGTH)
             }
             row {
                 text(
                     "<a href=\"https://hilla.dev/\">Hilla framework</a>, on the other hand, enables" +
-                        " implementation of your user<br>interface with React while automatically connecting it to your" +
-                        " Java backend.")
-            }
-            row {
-                text("For more configuration options, visit <a href=\"https://start.vaadin.com\">start.vaadin.com</a>")
+                        " implementation of your user interface with React while automatically connecting it to your" +
+                        " Java backend.",
+                    MAX_LINE_LENGTH)
             }
         }
 
-        quickStarterGroup!!.expanded = true
-        quickStarterGroup!!.addExpandedListener {
-            if (it) skeletonStarterGroup!!.expanded = false
+        starterProjectGroup!!.expanded = true
+        starterProjectGroup!!.addExpandedListener {
+            if (it) helloWorldGroup!!.expanded = false
             updateModel()
         }
-        skeletonStarterGroup!!.addExpandedListener {
-            if (it) quickStarterGroup!!.expanded = false
+        helloWorldGroup!!.addExpandedListener {
+            if (it) starterProjectGroup!!.expanded = false
             updateModel()
         }
 
@@ -115,7 +127,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         wizardContext.setProjectFileDirectory(canonicalPathProperty.get())
         wizardContext.projectName = entityNameProperty.get()
         wizardContext.defaultModuleName = entityNameProperty.get()
-        val projectModel = if (quickStarterGroup!!.expanded) quickStarterModel else skeletonStarterModel
+        val projectModel = if (starterProjectGroup!!.expanded) starterProjectModel else helloWorldModel
         wizardContext.getUserData(PROJECT_MODEL_PROP_KEY)?.set(projectModel)
     }
 
