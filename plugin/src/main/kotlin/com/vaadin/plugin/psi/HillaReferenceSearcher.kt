@@ -3,6 +3,7 @@ package com.vaadin.plugin.psi
 import com.intellij.lang.javascript.JSElementTypes
 import com.intellij.lang.javascript.TypeScriptJSXFileType
 import com.intellij.openapi.application.QueryExecutorBase
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
@@ -22,30 +23,33 @@ class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesS
         consumer: Processor<in PsiReference>
     ) {
         val psiMethod = queryParameters.method
-        if (psiMethod.containingClass?.hasAnnotation(HILLA_BROWSER_CALLABLE) != true) {
-            return
+
+        ReadAction.run<Throwable> {
+            if (psiMethod.containingClass?.hasAnnotation(HILLA_BROWSER_CALLABLE) != true) {
+                return@run
+            }
+
+            val searchHelper = PsiSearchHelper.getInstance(queryParameters.project)
+            val scope = GlobalSearchScope.projectScope(queryParameters.project)
+            val typeScriptFileType = TypeScriptJSXFileType.INSTANCE
+
+            val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, typeScriptFileType)
+            searchHelper.processElementsWithWord(
+                { psiElement, offset ->
+                    if (psiElement.elementType == JSElementTypes.REFERENCE_EXPRESSION) {
+                        val range = TextRange(offset, offset + psiMethod.name.length)
+                        val reference =
+                            object : PsiReferenceBase<PsiElement>(psiElement, range) {
+                                override fun resolve(): PsiElement = psiElement
+                            }
+                        consumer.process(reference)
+                    }
+                    true // return false to stop the search early
+                },
+                filteredScope,
+                psiMethod.name,
+                UsageSearchContext.IN_CODE,
+                true)
         }
-
-        val searchHelper = PsiSearchHelper.getInstance(queryParameters.project)
-        val scope = GlobalSearchScope.projectScope(queryParameters.project)
-        val typeScriptFileType = TypeScriptJSXFileType.INSTANCE
-
-        val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, typeScriptFileType)
-        searchHelper.processElementsWithWord(
-            { psiElement, offset ->
-                if (psiElement.elementType == JSElementTypes.REFERENCE_EXPRESSION) {
-                    val range = TextRange(offset, offset + psiMethod.name.length)
-                    val reference =
-                        object : PsiReferenceBase<PsiElement>(psiElement, range) {
-                            override fun resolve(): PsiElement = psiElement
-                        }
-                    consumer.process(reference)
-                }
-                true // return false to stop the search early
-            },
-            filteredScope,
-            psiMethod.name,
-            UsageSearchContext.IN_CODE,
-            true)
     }
 }
