@@ -20,6 +20,8 @@ class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesS
 
     private val tsFileType = FileTypeManager.getInstance().getFileTypeByExtension("ts")
     private val tsxFileType = FileTypeManager.getInstance().getFileTypeByExtension("tsx")
+    private val jsFileType = FileTypeManager.getInstance().getFileTypeByExtension("js")
+    private val jsxFileType = FileTypeManager.getInstance().getFileTypeByExtension("jsx")
 
     override fun processQuery(
         queryParameters: MethodReferencesSearch.SearchParameters,
@@ -35,7 +37,8 @@ class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesS
             val searchHelper = PsiSearchHelper.getInstance(queryParameters.project)
             val scope = GlobalSearchScope.projectScope(queryParameters.project)
 
-            val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, tsFileType, tsxFileType)
+            val filteredScope =
+                GlobalSearchScope.getScopeRestrictedByFileTypes(scope, tsFileType, tsxFileType, jsFileType, jsxFileType)
             searchHelper.processElementsWithWord(
                 { psiElement, offset ->
                     if (psiElement.elementType == JSElementTypes.REFERENCE_EXPRESSION) {
