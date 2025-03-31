@@ -18,7 +18,8 @@ import com.vaadin.plugin.endpoints.HILLA_BROWSER_CALLABLE
 
 class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesSearch.SearchParameters>() {
 
-    private val typeScriptFileType = FileTypeManager.getInstance().getFileTypeByExtension("tsx")
+    private val tsFileType = FileTypeManager.getInstance().getFileTypeByExtension("ts")
+    private val tsxFileType = FileTypeManager.getInstance().getFileTypeByExtension("tsx")
 
     override fun processQuery(
         queryParameters: MethodReferencesSearch.SearchParameters,
@@ -34,7 +35,7 @@ class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesS
             val searchHelper = PsiSearchHelper.getInstance(queryParameters.project)
             val scope = GlobalSearchScope.projectScope(queryParameters.project)
 
-            val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, typeScriptFileType)
+            val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, tsFileType, tsxFileType)
             searchHelper.processElementsWithWord(
                 { psiElement, offset ->
                     if (psiElement.elementType == JSElementTypes.REFERENCE_EXPRESSION) {
