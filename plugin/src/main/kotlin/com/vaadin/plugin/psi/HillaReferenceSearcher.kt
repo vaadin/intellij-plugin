@@ -1,9 +1,9 @@
 package com.vaadin.plugin.psi
 
 import com.intellij.lang.javascript.JSElementTypes
-import com.intellij.lang.javascript.TypeScriptJSXFileType
 import com.intellij.openapi.application.QueryExecutorBase
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
@@ -18,6 +18,8 @@ import com.vaadin.plugin.endpoints.HILLA_BROWSER_CALLABLE
 
 class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesSearch.SearchParameters>() {
 
+    private val typeScriptFileType = FileTypeManager.getInstance().getFileTypeByExtension("tsx")
+
     override fun processQuery(
         queryParameters: MethodReferencesSearch.SearchParameters,
         consumer: Processor<in PsiReference>
@@ -31,7 +33,6 @@ class HillaReferenceSearcher : QueryExecutorBase<PsiReference, MethodReferencesS
 
             val searchHelper = PsiSearchHelper.getInstance(queryParameters.project)
             val scope = GlobalSearchScope.projectScope(queryParameters.project)
-            val typeScriptFileType = TypeScriptJSXFileType.INSTANCE
 
             val filteredScope = GlobalSearchScope.getScopeRestrictedByFileTypes(scope, typeScriptFileType)
             searchHelper.processElementsWithWord(
