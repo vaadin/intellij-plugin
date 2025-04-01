@@ -18,7 +18,7 @@ class StarterProjectPanel(private val model: StarterProjectModel) {
             text(
                 "A walking skeleton is a minimal application that includes a fully-functional " +
                     "end-to-end workflow. All major building blocks are included, but it does not " +
-                    "yet perform aby meaningful tasks.",
+                    "yet perform any meaningful tasks.",
                 MAX_LINE_LENGTH)
         }
         row("Pure Java with Vaadin Flow") { checkBox("").bindSelected(model.includeFlowProperty) }
