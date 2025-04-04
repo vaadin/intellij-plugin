@@ -17,7 +17,7 @@ class DefaultProgramPatcher : JavaProgramPatcher() {
         val paramsList = javaParameters.vmParametersList
 
         if (runProfile is RunConfiguration) {
-            runProfile.project.getService(CopilotDotfileService::class.java).getDotfile()?.let {
+            runProfile.project.getService(CopilotDotfileService::class.java).getDotfilePath()?.let {
                 paramsList.add("-Dvaadin.copilot.pluginDotFilePath=${it}")
             }
         }

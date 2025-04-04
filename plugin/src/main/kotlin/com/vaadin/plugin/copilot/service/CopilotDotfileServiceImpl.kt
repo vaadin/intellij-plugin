@@ -36,16 +36,16 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
                     for (event in events) {
                         when (event) {
                             is VFileCreateEvent ->
-                                if (Path.of(event.path).equals(getDotfile())) _fileExists.value = true
+                                if (Path.of(event.path).equals(getDotfilePath())) _fileExists.value = true
                             is VFileDeleteEvent ->
-                                if (Path.of(event.path).equals(getDotfile())) _fileExists.value = false
+                                if (Path.of(event.path).equals(getDotfilePath())) _fileExists.value = false
                         }
                     }
                 }
             })
 
         // Initial state
-        _fileExists.value = getDotfile()?.let { Files.exists(it) } ?: false
+        _fileExists.value = getDotfilePath()?.let { Files.exists(it) } ?: false
 
         ProjectManager.getInstance()
             .addProjectManagerListener(
@@ -62,24 +62,25 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
         return fileExists.value
     }
 
-    override fun getDotfileDirectory(): Path? {
+    override fun getDotfileDirectoryPath(): Path? {
         return project.guessProjectDir()?.toNioPath()?.resolve(IDEA_DIR)
     }
 
-    override fun getDotfile(): Path? {
-        return getDotfileDirectory()?.resolve(DOTFILE)
+    override fun getDotfilePath(): Path? {
+        return getDotfileDirectoryPath()?.resolve(DOTFILE)
     }
 
     @Throws(IOException::class)
     override fun removeDotfile() {
-        runInEdt { WriteAction.run<Throwable> { getDotfile()?.let { VfsUtil.findFile(it, false)?.delete(this) } } }
+        runInEdt { WriteAction.run<Throwable> { getDotfilePath()?.let { VfsUtil.findFile(it, false)?.delete(this) } } }
     }
 
     @Throws(IOException::class)
     override fun createDotfile(content: String) {
         runInEdt {
             WriteAction.run<Throwable> {
-                val dotfileDirectory = getDotfileDirectory() ?: throw IOException("Could not find the .idea directory")
+                val dotfileDirectory =
+                    getDotfileDirectoryPath() ?: throw IOException("Could not find the .idea directory")
                 val vfsDotfileDirectory =
                     VfsUtil.findFile(dotfileDirectory, true) ?: throw IOException("Could not find the .idea directory")
                 val dotfile = vfsDotfileDirectory.createChildData(this, DOTFILE)

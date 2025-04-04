@@ -11,7 +11,7 @@ interface CopilotDotfileService {
 
     @Throws(IOException::class) fun createDotfile(content: String)
 
-    fun getDotfileDirectory(): Path?
+    fun getDotfileDirectoryPath(): Path?
 
-    fun getDotfile(): Path?
+    fun getDotfilePath(): Path?
 }

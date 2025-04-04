@@ -126,7 +126,7 @@ class CopilotPluginUtil {
 
         private fun saveDotFileInternal(project: Project) {
             val dotfileService = project.getService(CopilotDotfileService::class.java)
-            val dotFileDirectory = dotfileService.getDotfileDirectory()
+            val dotFileDirectory = dotfileService.getDotfileDirectoryPath()
             if (dotFileDirectory != null && Files.exists(dotFileDirectory)) {
                 val props = Properties()
                 props.setProperty("endpoint", RestUtil.getEndpoint())
