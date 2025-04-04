@@ -5,6 +5,7 @@ import com.intellij.execution.configurations.JavaParameters
 import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.JavaProgramPatcher
+import com.vaadin.plugin.copilot.service.CopilotDotfileService
 
 class DefaultProgramPatcher : JavaProgramPatcher() {
 
@@ -16,8 +17,8 @@ class DefaultProgramPatcher : JavaProgramPatcher() {
         val paramsList = javaParameters.vmParametersList
 
         if (runProfile is RunConfiguration) {
-            CopilotPluginUtil.getDotFile(runProfile.project)?.let {
-                paramsList.add("-Dvaadin.copilot.pluginDotFilePath=${it.path}")
+            runProfile.project.getService(CopilotDotfileService::class.java).getDotfilePath()?.let {
+                paramsList.add("-Dvaadin.copilot.pluginDotFilePath=${it}")
             }
         }
     }

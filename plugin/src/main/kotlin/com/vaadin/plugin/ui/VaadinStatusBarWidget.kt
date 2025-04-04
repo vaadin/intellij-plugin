@@ -11,7 +11,7 @@ import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.Consumer
 import com.intellij.util.ui.JBUI.CurrentTheme.IconBadge
 import com.intellij.util.ui.UIUtil
-import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
 import com.vaadin.plugin.utils.trackManualCopilotRestart
@@ -79,7 +79,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     }
 
     override fun getTooltipText(): String {
-        if (CopilotPluginUtil.isActive(project) && hasEndpoints()) {
+        if (isActive() && hasEndpoints()) {
             return "Vaadin plugin is active, all features are available"
         }
 
@@ -95,7 +95,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
             return VaadinIcons.VAADIN
         }
 
-        if (CopilotPluginUtil.isActive(project) && hasEndpoints()) {
+        if (isActive() && hasEndpoints()) {
             return VaadinIcons.VAADIN
         }
 
@@ -104,5 +104,9 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
         }
 
         return IconManager.getInstance().withIconBadge(VaadinIcons.VAADIN, IconBadge.WARNING)
+    }
+
+    private fun isActive(): Boolean {
+        return project.getService(CopilotDotfileService::class.java).isActive()
     }
 }

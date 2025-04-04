@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBEmptyBorder
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
-import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.utils.doNotifyAboutVaadinProject
 import com.vaadin.plugin.utils.hasEndpoints
 import java.awt.Component
@@ -38,7 +38,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
     var afterRestart: (() -> Unit)? = null
 
     private fun copilotStatusRow(): JPanel {
-        val status = CopilotPluginUtil.isActive(project)
+        val status = project.getService(CopilotDotfileService::class.java).isActive()
         val wrapper = JPanel(VerticalLayout())
 
         val panel = JPanel(HorizontalLayout(UIUtil.DEFAULT_HGAP))
