@@ -88,6 +88,20 @@ class EventOptions(
 
 class LoadClientOptions(val apiKey: String? = null, val instance: Amplitude? = null, val plan: Plan? = null)
 
+class DebugWithHotswap private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
+    Event<DebugWithHotswap>("DebugWithHotswap", eventProperties, options, ::DebugWithHotswap) {
+    /**
+     * DebugWithHotswap
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/DebugWithHotswap)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param vaadiner Property has no description provided in tracking plan.
+     */
+    constructor(vaadiner: Boolean) : this(mapOf("Vaadiner" to vaadiner), null as EventOptions?)
+}
+
 class ManualCopilotRestart private constructor(eventProperties: Map<String, Any?>?, options: EventOptions? = null) :
     Event<ManualCopilotRestart>("ManualCopilotRestart", eventProperties, options, ::ManualCopilotRestart) {
     /**
@@ -252,6 +266,27 @@ open class Ampli {
             return
         }
         this._client?.flushEvents()
+    }
+
+    /**
+     * DebugWithHotswap
+     *
+     * [View in Tracking Plan](https://data.amplitude.com/vaadin/IDE%20Plugins/events/main/latest/DebugWithHotswap)
+     *
+     * Event has no description in tracking plan.
+     *
+     * @param userId The user's ID
+     * @param event The event
+     * @param options Amplitude event options
+     * @param extra Extra untyped parameters for use in middleware
+     */
+    fun debugWithHotswap(
+        userId: String?,
+        event: DebugWithHotswap,
+        options: EventOptions? = null,
+        extra: MiddlewareExtra? = null
+    ) {
+        this.track(userId, event, options, extra)
     }
 
     /**
