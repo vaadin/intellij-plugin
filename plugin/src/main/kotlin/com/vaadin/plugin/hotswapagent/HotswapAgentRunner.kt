@@ -9,6 +9,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.NOTIFICATION_GROUP
+import com.vaadin.plugin.utils.trackDebugWithHotswap
 
 class HotswapAgentRunner : GenericDebuggerRunner() {
 
@@ -44,6 +45,7 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                 JdkUtil.isJetbrainsRuntime(javaParameters.jdk) || JdkUtil.getCompatibleJetbrainsJdk(module) != null
 
             if (jdkOk) {
+                trackDebugWithHotswap()
                 super.execute(environment)
             } else {
                 val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
