@@ -62,6 +62,9 @@
                 displayName="Vaadin"/>
 
         <!-- Vaadin Copilot -->
+        <projectService id="CopilotDotfileService"
+            serviceImplementation="com.vaadin.plugin.copilot.service.CopilotDotfileServiceImpl"
+            serviceInterface="com.vaadin.plugin.copilot.service.CopilotDotfileService" />
         <notificationGroup id="Vaadin Copilot" displayType="BALLOON"/>
         <errorHandler implementation="com.vaadin.plugin.copilot.CopilotErrorHandler"/>
         <statusBarWidgetFactory implementation="com.vaadin.plugin.ui.VaadinStatusBarWidgetFactory"

@@ -2,6 +2,7 @@ package com.vaadin.plugin.utils
 
 import ai.grazie.utils.mpp.UUID
 import com.amplitude.ampli.Ampli
+import com.amplitude.ampli.DebugWithHotswap
 import com.amplitude.ampli.EventOptions
 import com.amplitude.ampli.LoadOptions
 import com.amplitude.ampli.ManualCopilotRestart
@@ -86,5 +87,11 @@ internal fun trackProjectCreated(downloadUrl: String) {
 internal fun trackManualCopilotRestart() {
     if (enabled) {
         ampli.manualCopilotRestart(getUserId(), ManualCopilotRestart(isVaadiner()))
+    }
+}
+
+internal fun trackDebugWithHotswap() {
+    if (enabled) {
+        ampli.debugWithHotswap(getUserId(), DebugWithHotswap(isVaadiner()))
     }
 }
