@@ -4,15 +4,15 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.21"
   id("org.jetbrains.intellij.platform") version "2.2.1"
-  id("com.diffplug.spotless") version "7.0.2"
+  kotlin("jvm") version "2.0.0"
 
+  id("com.diffplug.spotless") version "7.0.2"
   id("com.adarshr.test-logger") version "4.0.0"
 }
 
 // version for building plugin
-val buildVersion = "2023.3"
+val buildVersion = "2024.3"
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -107,7 +107,7 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 tasks {
   patchPluginXml {
     sinceBuild.set("233")
-    untilBuild.set("251.*")
+    untilBuild.set("251")
   }
 
   signPlugin {
