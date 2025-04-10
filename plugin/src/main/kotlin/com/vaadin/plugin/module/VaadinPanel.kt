@@ -2,7 +2,7 @@ package com.vaadin.plugin.module
 
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.projectWizard.WizardContext
-import com.intellij.openapi.observable.properties.GraphProperty
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.observable.util.joinCanonicalPath
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
@@ -38,7 +38,8 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
             row("Name:") { textField().bindText(entityNameProperty) }
             row("Location:") {
                 val commentLabel =
-                    projectLocationField(locationProperty, wizardContext)
+                    projectLocationField(wizardContext)
+                        .bindText(locationProperty)
                         .align(AlignX.FILL)
                         .comment(getLocationComment(), 100)
                         .comment!!
@@ -126,13 +127,12 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun Row.projectLocationField(
-        locationProperty: GraphProperty<String>,
         wizardContext: WizardContext,
     ): Cell<TextFieldWithBrowseButton> {
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
-        return textFieldWithBrowseButton(title, wizardContext.project) {
-            locationProperty.set(it.path)
-            it.path
-        }
+        val fileChooserDescriptor =
+            FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
+                .withFileFilter { it.isDirectory }
+                .withTitle(IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName))
+        return textFieldWithBrowseButton(fileChooserDescriptor, wizardContext.project)
     }
 }
