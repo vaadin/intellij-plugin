@@ -124,6 +124,9 @@
                 class="com.vaadin.plugin.VaadinProjectDetector"
                 topic="com.intellij.openapi.roots.ModuleRootListener"/>
         <listener
+                class="com.vaadin.plugin.VaadinProjectDetector"
+                topic="com.intellij.openapi.project.DumbService$DumbModeListener"/>
+        <listener
                 class="com.vaadin.plugin.copilot.listeners.CopilotVaadinProjectListener"
                 topic="com.vaadin.plugin.listeners.VaadinProjectListener"/>
         <listener
