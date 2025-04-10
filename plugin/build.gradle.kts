@@ -12,7 +12,11 @@ plugins {
 }
 
 // version for building plugin
-val buildVersion = "2024.3"
+val buildVersion = "2024.2"
+
+// compatibility declarations
+val sinceBuild = "242"
+val untilBuild = "251.*"
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -32,11 +36,11 @@ val publishChannel =
     }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
-kotlin { jvmToolchain(17) }
+kotlin { jvmToolchain(21) }
 
 repositories {
   mavenCentral()
@@ -106,8 +110,8 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 
 tasks {
   patchPluginXml {
-    sinceBuild.set("233")
-    untilBuild.set("251.*")
+    sinceBuild.set(sinceBuild)
+    untilBuild.set(untilBuild)
   }
 
   signPlugin {
