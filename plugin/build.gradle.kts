@@ -66,11 +66,17 @@ dependencies {
     pluginVerifier()
     zipSigner()
 
+    testFramework(TestFrameworkType.Starter)
     testFramework(TestFrameworkType.Platform)
   }
 
   testImplementation(kotlin("test"))
   testImplementation("junit:junit:4.13.2")
+
+  // JUnit 5
+  testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+  // Dependency Injection for Starter configuration
+  testImplementation("org.kodein.di:kodein-di-jvm:7.20.2")
 }
 
 intellijPlatform {
@@ -125,5 +131,9 @@ tasks {
     token.set(System.getenv("PUBLISH_TOKEN"))
   }
 
-  test { useJUnitPlatform() }
+  test {
+    dependsOn("buildPlugin")
+    systemProperty("path.to.build.plugin", buildPlugin.get().archiveFile.get().asFile.absolutePath)
+    useJUnitPlatform()
+  }
 }
