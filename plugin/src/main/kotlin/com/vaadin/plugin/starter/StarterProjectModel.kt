@@ -18,24 +18,22 @@ class StarterProjectModel : BaseState(), DownloadableModel {
     private val includeHilla by includeHillaProperty
 
     override fun getDownloadLink(project: Project): String {
-        var frameworks =
-            if (includeFlow && includeHilla) {
-                "flow,hilla"
-            } else if (includeFlow) {
-                "flow"
-            } else if (includeHilla) {
-                "hilla"
-            } else {
-                "empty"
+        val frameworks =
+            when {
+                includeFlow && includeHilla -> "flow,hilla"
+                includeFlow -> "flow"
+                includeHilla -> "hilla"
+                else -> "empty"
             }
 
-        var platformVersion = if (usePrerelease) "pre" else "latest"
+        val platformVersion = if (usePrerelease) "pre" else "latest"
 
         val params =
             mapOf(
                 "frameworks" to frameworks,
                 "platformVersion" to platformVersion,
-                "artifactId" to toArtifactId(project.name))
+                "artifactId" to toArtifactId(project.name),
+                "ref" to "intellij-plugin")
         val query =
             params.entries.joinToString("&") { (key, value) ->
                 "${URLEncoder.encode(key, StandardCharsets.UTF_8)}=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
