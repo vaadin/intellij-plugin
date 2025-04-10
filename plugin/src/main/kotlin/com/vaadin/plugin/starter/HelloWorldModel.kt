@@ -2,6 +2,8 @@ package com.vaadin.plugin.starter
 
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class HelloWorldModel : DownloadableModel {
 
@@ -17,7 +19,19 @@ class HelloWorldModel : DownloadableModel {
     val architecture by architectureProperty
 
     override fun getDownloadLink(project: Project): String {
-        return "https://start.vaadin.com/helloworld?framework=$framework&language=$language&buildtool=$buildTool&stack=$architecture"
+        val params =
+            mapOf(
+                "framework" to framework,
+                "language" to language,
+                "buildtool" to buildTool,
+                "stack" to architecture,
+                "ref" to "intellij-plugin")
+        val query =
+            params.entries.joinToString("&") { (key, value) ->
+                "${URLEncoder.encode(key, StandardCharsets.UTF_8)}=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
+            }
+
+        return "https://start.vaadin.com/helloworld?${query}"
     }
 
     override fun getProjectType(): String {
