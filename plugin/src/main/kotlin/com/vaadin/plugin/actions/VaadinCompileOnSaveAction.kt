@@ -29,7 +29,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
         return VaadinCompileOnSaveActionInfo.isEnabledForProject(project)
     }
 
-    override fun processDocuments(project: Project, documents: Array<Document?>) {
+    override fun processDocuments(project: Project, documents: Array<Document>) {
         val task =
             object : Task.Backgroundable(project, "Vaadin: compiling...") {
                 override fun run(indicator: ProgressIndicator) {
@@ -40,7 +40,6 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                     val vfsFiles =
                         ReadAction.compute<List<VirtualFile>, Exception> {
                             documents
-                                .filterNotNull()
                                 .mapNotNull { FileDocumentManager.getInstance().getFile(it) }
                                 .filter { fileIndex.isInSourceContent(it) }
                         }
