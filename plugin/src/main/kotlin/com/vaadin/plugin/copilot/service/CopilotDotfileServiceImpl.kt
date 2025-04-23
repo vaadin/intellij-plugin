@@ -82,7 +82,8 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
                 val dotfileDirectory =
                     getDotfileDirectoryPath() ?: throw IOException("Could not find the .idea directory")
                 val vfsDotfileDirectory =
-                    VfsUtil.findFile(dotfileDirectory, true) ?: throw IOException("Could not find the .idea directory")
+                    VfsUtil.createDirectoryIfMissing(dotfileDirectory.toString())
+                        ?: throw IOException("Could not create .idea directory")
                 val dotfile = vfsDotfileDirectory.createChildData(this, DOTFILE)
                 VfsUtil.saveText(dotfile, content)
             }

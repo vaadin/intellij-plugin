@@ -33,7 +33,6 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
 import java.io.IOException
 import java.io.StringWriter
-import java.nio.file.Files
 import java.util.Properties
 import org.jetbrains.jps.model.java.JavaResourceRootType
 import org.jetbrains.jps.model.java.JavaSourceRootType
@@ -125,29 +124,26 @@ class CopilotPluginUtil {
         }
 
         private fun saveDotFileInternal(project: Project) {
-            val dotfileService = project.getService(CopilotDotfileService::class.java)
-            val dotFileDirectory = dotfileService.getDotfileDirectoryPath()
-            if (dotFileDirectory != null && Files.exists(dotFileDirectory)) {
-                val props = Properties()
-                props.setProperty("endpoint", RestUtil.getEndpoint())
-                props.setProperty("ide", "intellij")
-                props.setProperty("version", pluginVersion)
-                props.setProperty("supportedActions", HANDLERS.entries.joinToString(",") { a -> a.command })
+            val props = Properties()
+            props.setProperty("endpoint", RestUtil.getEndpoint())
+            props.setProperty("ide", "intellij")
+            props.setProperty("version", pluginVersion)
+            props.setProperty("supportedActions", HANDLERS.entries.joinToString(",") { a -> a.command })
 
-                val stringWriter = StringWriter()
-                val bufferedWriter =
-                    object : BufferedWriter(stringWriter) {
-                        override fun newLine() {
-                            write(NORMALIZED_LINE_SEPARATOR)
-                        }
+            val stringWriter = StringWriter()
+            val bufferedWriter =
+                object : BufferedWriter(stringWriter) {
+                    override fun newLine() {
+                        write(NORMALIZED_LINE_SEPARATOR)
                     }
-                props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
-                try {
-                    dotfileService.removeDotfile()
-                    dotfileService.createDotfile(stringWriter.toString())
-                } catch (e: IOException) {
-                    LOG.error("Failed to save dotfile: ${e.message}")
                 }
+            props.store(bufferedWriter, "Vaadin Copilot Integration Runtime Properties")
+            try {
+                val dotfileService = project.getService(CopilotDotfileService::class.java)
+                dotfileService.removeDotfile()
+                dotfileService.createDotfile(stringWriter.toString())
+            } catch (e: IOException) {
+                LOG.error("Failed to save dotfile: ${e.message}")
             }
         }
 
