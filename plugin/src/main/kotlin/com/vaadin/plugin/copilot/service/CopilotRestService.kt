@@ -45,7 +45,9 @@ class CopilotRestService : RestService() {
             }
 
         if (project == null) {
-            LOG.error("Project location does not match any open project")
+            LOG.error(
+                "Requested project location $projectBasePath does not match any of opened projects: " +
+                    ProjectManager.getInstance().openProjects.mapNotNull { it.basePath }.joinToString { it })
             sendStatus(HttpResponseStatus.BAD_REQUEST, false, context.channel())
             return null
         }
