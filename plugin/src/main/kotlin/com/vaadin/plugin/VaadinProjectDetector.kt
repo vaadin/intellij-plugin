@@ -43,5 +43,4 @@ class VaadinProjectDetector : ModuleRootListener, ProjectActivity, DumbService.D
             }
         }
     }
-
 }
