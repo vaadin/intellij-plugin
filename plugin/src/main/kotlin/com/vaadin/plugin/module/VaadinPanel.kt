@@ -3,14 +3,9 @@ package com.vaadin.plugin.module
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.observable.util.joinCanonicalPath
-import com.intellij.openapi.observable.util.transform
-import com.intellij.openapi.ui.BrowseFolderDescriptor.Companion.withPathToTextConvertor
-import com.intellij.openapi.ui.BrowseFolderDescriptor.Companion.withTextToPathConvertor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.openapi.ui.getCanonicalPath
 import com.intellij.openapi.ui.getPresentablePath
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
@@ -20,7 +15,6 @@ import com.vaadin.plugin.starter.HelloWorldModel
 import com.vaadin.plugin.starter.StarterProjectModel
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KEY
 import java.io.File
-import org.jetbrains.annotations.Nls
 
 class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: WizardContext, builder: Panel) {
 
@@ -44,7 +38,8 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
             row("Name:") { textField().bindText(entityNameProperty) }
             row("Location:") {
                 val commentLabel =
-                    projectLocationField(locationProperty, wizardContext)
+                    projectLocationField(wizardContext)
+                        .bindText(locationProperty)
                         .align(AlignX.FILL)
                         .comment(getLocationComment(), 100)
                         .comment!!
@@ -114,7 +109,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         return wizardContext.projectFileDirectory
     }
 
-    private fun getLocationComment(): @Nls String {
+    private fun getLocationComment(): String {
         val shortPath = StringUtil.shortenPathWithEllipsis(getPresentablePath(canonicalPathProperty.get()), 60)
         return UIBundle.message(
             "label.project.wizard.new.project.path.description",
@@ -132,16 +127,12 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun Row.projectLocationField(
-        locationProperty: GraphProperty<String>,
         wizardContext: WizardContext,
     ): Cell<TextFieldWithBrowseButton> {
         val fileChooserDescriptor =
             FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
                 .withFileFilter { it.isDirectory }
-                .withPathToTextConvertor(::getPresentablePath)
-                .withTextToPathConvertor(::getCanonicalPath)
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
-        val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor).bindText(property)
+                .withTitle(IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName))
+        return textFieldWithBrowseButton(fileChooserDescriptor, wizardContext.project)
     }
 }

@@ -25,7 +25,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
         return vaadinWizard.createStep(context)
     }
 
-    override fun createProject(name: String?, path: String?): Project? {
+    override fun createProject(name: String, path: String): Project? {
         return super.createProject(name, path)?.let { project ->
             project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
             projectDownloadedProperty.afterChange { afterProjectCreated(project) }
