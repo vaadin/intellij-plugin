@@ -3,6 +3,7 @@ package com.vaadin.plugin.utils
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.io.FileUtil
 import elemental.json.Json
+import elemental.json.JsonException
 import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
@@ -31,15 +32,20 @@ object VaadinHomeUtil {
         val vaadinHome = resolveVaadinHomeDirectory()
         val userKeyFile = File(vaadinHome, "userKey")
         if (userKeyFile.exists()) {
-            val content = Files.readString(userKeyFile.toPath())
-            return Json.parse(content).getString("key")
-        } else {
-            val key = "user-${UUID.randomUUID()}"
-            val keyObject = Json.createObject()
-            keyObject.put("key", key)
-            Files.write(userKeyFile.toPath(), keyObject.toJson().toByteArray(Charset.defaultCharset()))
-            return key
+            try {
+                val content = Files.readString(userKeyFile.toPath())
+                return Json.parse(content).getString("key")
+            } catch (ex: JsonException) {
+                // fix for invalid JSON regression
+                userKeyFile.delete()
+            }
         }
+
+        val key = "user-${UUID.randomUUID()}"
+        val keyObject = Json.createObject()
+        keyObject.put("key", key)
+        Files.write(userKeyFile.toPath(), keyObject.toJson().toByteArray(Charset.defaultCharset()))
+        return key
     }
 
     /**
