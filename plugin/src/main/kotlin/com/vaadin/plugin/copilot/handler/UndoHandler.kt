@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
+import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.File
 
 open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
@@ -30,7 +31,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                         WriteAction.run<Throwable> {
                             val parent = VfsUtil.createDirectories(file.parent)
                             vfsFile = parent.createChildData(this, file.name)
-                            vfsFiles.add(vfsFile!!)
+                            vfsFiles.add(vfsFile)
                         }
                     }
                 }
@@ -41,11 +42,14 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
     }
 
     override fun run(): HandlerResponse {
+        var performed = false
         for (vfsFile in vfsFiles) {
             val count = getOpsCount(vfsFile)
             if (count == 0) {
                 continue
             }
+
+            performed = true
 
             runInEdt {
                 getEditorWrapper(vfsFile).use { wrapper ->
@@ -66,7 +70,9 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                 }
             }
         }
-        return RESPONSE_OK
+
+        val data = mapOf("performed" to performed)
+        return HandlerResponse(HttpResponseStatus.OK, data)
     }
 
     open fun getOpsCount(vfsFile: VirtualFile): Int {
