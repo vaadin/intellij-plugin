@@ -31,7 +31,7 @@ open class UndoHandler(project: Project, data: Map<String, Any>) : AbstractHandl
                         WriteAction.run<Throwable> {
                             val parent = VfsUtil.createDirectories(file.parent)
                             vfsFile = parent.createChildData(this, file.name)
-                            vfsFiles.add(vfsFile)
+                            vfsFiles.add(vfsFile!!)
                         }
                     }
                 }
