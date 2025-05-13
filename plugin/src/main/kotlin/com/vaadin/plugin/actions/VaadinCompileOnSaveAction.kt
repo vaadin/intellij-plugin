@@ -77,7 +77,6 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                                 val listener =
                                     object : ProjectTaskListener {
                                         override fun finished(result: ProjectTaskManager.Result) {
-                                            CompilationStatusManager.setHasCompilationError(project, result.hasErrors())
                                             LOG.debug("Compile completed for $javaFiles")
                                             thisLock.release()
                                             messageBusConnection.disconnect()
