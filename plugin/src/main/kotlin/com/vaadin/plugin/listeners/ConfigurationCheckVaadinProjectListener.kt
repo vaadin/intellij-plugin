@@ -64,30 +64,34 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     }
 
     /**
-     * Subscribes [Project.getMessageBus] to emit [CompilerTopics.COMPILATION_STATUS] and stores result so it can be accessed later from a Rest service
+     * Subscribes [Project.getMessageBus] to emit [CompilerTopics.COMPILATION_STATUS] and stores result so it can be
+     * accessed later from a Rest service
      */
     private fun watchCompilationResults(project: Project) {
-        project.messageBus.connect().subscribe(CompilerTopics.COMPILATION_STATUS, object : CompilationStatusListener {
-            override fun compilationFinished(
-                aborted: Boolean,
-                errors: Int,
-                warnings: Int,
-                compileContext: CompileContext
-            ) {
-                val filePaths =  mutableSetOf<String>();
-                if(errors > 0){
-                    val messages = compileContext.getMessages(CompilerMessageCategory.ERROR)
-                    for(message in messages){
-                        message.virtualFile?.let {
-                            virtualFile -> filePaths.add(virtualFile.path)
+        project.messageBus
+            .connect()
+            .subscribe(
+                CompilerTopics.COMPILATION_STATUS,
+                object : CompilationStatusListener {
+                    override fun compilationFinished(
+                        aborted: Boolean,
+                        errors: Int,
+                        warnings: Int,
+                        compileContext: CompileContext
+                    ) {
+                        val filePaths = mutableSetOf<String>()
+                        if (errors > 0) {
+                            val messages = compileContext.getMessages(CompilerMessageCategory.ERROR)
+                            for (message in messages) {
+                                message.virtualFile?.let { virtualFile -> filePaths.add(virtualFile.path) }
+                            }
                         }
+                        CompilationStatusManager.setHasCompilationError(project, errors > 0, filePaths)
+                        super.compilationFinished(aborted, errors, warnings, compileContext)
                     }
-                }
-                CompilationStatusManager.setHasCompilationError(project, errors > 0, filePaths)
-                super.compilationFinished(aborted, errors, warnings, compileContext)
-            }
-        })
+                })
     }
+
     private fun checkReloadClassesSetting(project: Project) {
         val dm = DebuggerSettings.getInstance()
         if (dm.RUN_HOTSWAP_AFTER_COMPILE == DebuggerSettings.RUN_HOTSWAP_ASK) {

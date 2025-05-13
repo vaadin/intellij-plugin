@@ -34,6 +34,7 @@ object CompilationStatusManager {
         info.errorFiles.clear()
         info.errorFiles.addAll(files)
     }
+
     /**
      * Checks if the given [project] currently has compilation errors.
      *
@@ -43,6 +44,7 @@ object CompilationStatusManager {
     fun hasCompilationError(project: Project): Boolean {
         return projectStatusMap[project]?.hasCompilationError ?: false
     }
+
     /**
      * Retrieves the set of file names that caused compilation errors for the given [project].
      *

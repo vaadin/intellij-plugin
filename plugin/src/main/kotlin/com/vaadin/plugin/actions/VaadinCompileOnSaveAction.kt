@@ -15,7 +15,6 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.task.ProjectTaskListener
 import com.intellij.task.ProjectTaskManager
-import com.vaadin.plugin.copilot.CompilationStatusManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
