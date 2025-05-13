@@ -11,7 +11,7 @@ import javax.swing.Icon
 class HotswapAgentExecutor : DefaultDebugExecutor() {
 
     companion object {
-        val ID = "Vaadin.HotswapAgentExecutor"
+        const val ID = "Vaadin.HotswapAgentExecutor"
     }
 
     override fun getDescription(): String {
@@ -56,8 +56,13 @@ class HotswapAgentExecutor : DefaultDebugExecutor() {
 
     override fun isApplicable(project: Project): Boolean {
         val selectedConfiguration = RunManager.getInstance(project).selectedConfiguration?.configuration
-        return selectedConfiguration is JavaRunConfigurationBase &&
-            (!isMaven(selectedConfiguration) || !isGradle(selectedConfiguration))
+        return isCurrentFile(selectedConfiguration) ||
+            (selectedConfiguration is JavaRunConfigurationBase &&
+                (!isMaven(selectedConfiguration) || !isGradle(selectedConfiguration)))
+    }
+
+    private fun isCurrentFile(configuration: RunConfiguration?): Boolean {
+        return configuration == null
     }
 
     private fun isMaven(configuration: RunConfiguration): Boolean {
