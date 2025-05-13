@@ -19,6 +19,7 @@ import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
 import com.vaadin.plugin.copilot.handler.Handler
 import com.vaadin.plugin.copilot.handler.HandlerResponse
+import com.vaadin.plugin.copilot.handler.HeartbeatHandler
 import com.vaadin.plugin.copilot.handler.RedoHandler
 import com.vaadin.plugin.copilot.handler.RefreshHandler
 import com.vaadin.plugin.copilot.handler.ReloadMavenModuleHandler
@@ -70,6 +71,7 @@ class CopilotPluginUtil {
             COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
             RELOAD_MAVEN_MODULE("reloadMavenModule"),
+            HEART_BEAT("heartBeat"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -101,7 +103,7 @@ class CopilotPluginUtil {
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
-
+                HANDLERS.HEART_BEAT.command -> return HeartbeatHandler(project, data)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {

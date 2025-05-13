@@ -15,6 +15,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.task.ProjectTaskListener
 import com.intellij.task.ProjectTaskManager
+import com.vaadin.plugin.copilot.CompilationStatusManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import java.util.concurrent.Executors
 import java.util.concurrent.Semaphore
@@ -30,6 +31,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
     }
 
     override fun processDocuments(project: Project, documents: Array<Document?>) {
+        project.locationHash
         val task =
             object : Task.Backgroundable(project, "Vaadin: compiling...") {
                 override fun run(indicator: ProgressIndicator) {
@@ -75,6 +77,7 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
                                 val listener =
                                     object : ProjectTaskListener {
                                         override fun finished(result: ProjectTaskManager.Result) {
+                                            CompilationStatusManager.setCompilationFailure(project, result.hasErrors())
                                             LOG.debug("Compile completed for $javaFiles")
                                             thisLock.release()
                                             messageBusConnection.disconnect()
