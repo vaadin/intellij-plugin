@@ -6,11 +6,11 @@ import java.util.concurrent.ConcurrentHashMap
 object CompilationStatusManager {
     private val projectStatusMap: MutableMap<Project, Boolean> = ConcurrentHashMap()
 
-    fun setCompilationFailure(project: Project, hasFailure: Boolean) {
-        projectStatusMap[project] = hasFailure
+    fun setHasCompilationError(project: Project, hasError: Boolean) {
+        projectStatusMap[project] = hasError
     }
 
-    fun hasCompilationFailure(project: Project): Boolean {
+    fun hasCompilationError(project: Project): Boolean {
         return projectStatusMap[project] ?: false
     }
 }

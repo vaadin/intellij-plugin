@@ -6,12 +6,12 @@ import io.netty.handler.codec.http.HttpResponseStatus
 
 class HeartbeatHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
     companion object {
-        const val HAS_COMPILATION_FAILURE = "hasCompilationFailure"
+        const val HAS_COMPILATION_ERROR = "hasCompilationError"
     }
 
     override fun run(): HandlerResponse {
         val data: MutableMap<String, Any> = mutableMapOf()
-        data[HAS_COMPILATION_FAILURE] = CompilationStatusManager.hasCompilationFailure(project)
+        data[HAS_COMPILATION_ERROR] = CompilationStatusManager.hasCompilationError(project)
         return HandlerResponse(HttpResponseStatus.OK, data)
     }
 }

@@ -71,7 +71,7 @@ class CopilotPluginUtil {
             COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
             RELOAD_MAVEN_MODULE("reloadMavenModule"),
-            HEART_BEAT("heartBeat"),
+            HEARTBEAT("heartbeat"),
         }
 
         private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
@@ -103,7 +103,7 @@ class CopilotPluginUtil {
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
-                HANDLERS.HEART_BEAT.command -> return HeartbeatHandler(project, data)
+                HANDLERS.HEARTBEAT.command -> return HeartbeatHandler(project, data)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
