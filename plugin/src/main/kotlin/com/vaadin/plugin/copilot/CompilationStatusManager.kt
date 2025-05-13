@@ -9,6 +9,7 @@ object CompilationStatusManager {
     fun setCompilationFailure(project: Project, hasFailure: Boolean) {
         projectStatusMap[project] = hasFailure
     }
+
     fun hasCompilationFailure(project: Project): Boolean {
         return projectStatusMap[project] ?: false
     }
