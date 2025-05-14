@@ -8,12 +8,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 @SpringBootTest(classes = {SpringBootApplication.class})
@@ -78,6 +82,43 @@ public class PluginApiTests {
         response = client.delete(filePath);
         assertHttpOk(response);
         assertFileDeleted(filePath);
+    }
+
+    @Test
+    public void testUndoRedo() throws IOException, InterruptedException {
+
+        var filePath = getTestResourcePath(UUID.randomUUID().toString());
+        filePath.toFile().deleteOnExit();
+
+        // nothing to undo at the beginning
+        var response = client.undo(filePath);
+        var performed = (Boolean) response.body(Map.class).get("performed");
+        Assertions.assertFalse(performed);
+
+        // write content
+        response = client.write(filePath, "Hello");
+        assertHttpOk(response);
+
+        Thread.sleep(1000);
+
+        // check undo has been performed
+        response = client.undo(filePath);
+        performed = (Boolean) response.body(Map.class).get("performed");
+        Assertions.assertTrue(performed);
+
+        Thread.sleep(1000);
+
+        // do redo
+        response = client.redo(filePath);
+        performed = (Boolean) response.body(Map.class).get("performed");
+        Assertions.assertTrue(performed);
+
+        Thread.sleep(1000);
+
+        // nothing more to redo
+        response = client.redo(filePath);
+        performed = (Boolean) response.body(Map.class).get("performed");
+        Assertions.assertFalse(performed);
     }
 
     // add more tests when needed
