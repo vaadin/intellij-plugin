@@ -2,10 +2,9 @@ package com.vaadin.plugin.copilot.service
 
 interface CompilationStatusManagerService {
 
-    /**
-     * Subscribes to project message bus to listen compilation results
-     */
+    /** Subscribes to project message bus to listen compilation results */
     fun init()
+
     /**
      * Retrieves the set of file names that caused compilation errors for the project
      *

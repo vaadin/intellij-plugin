@@ -8,7 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 
 @Service(Service.Level.PROJECT)
-class CompilationStatusManagerServiceImpl(private val project: Project): CompilationStatusManagerService {
+class CompilationStatusManagerServiceImpl(private val project: Project) : CompilationStatusManagerService {
 
     /**
      * Holds compilation error state for a given project, including:
@@ -22,7 +22,7 @@ class CompilationStatusManagerServiceImpl(private val project: Project): Compila
 
     private var compilationErrorInfo: CompilationErrorInfo? = null
 
-    override fun init(){
+    override fun init() {
         project.messageBus
             .connect()
             .subscribe(
@@ -46,7 +46,6 @@ class CompilationStatusManagerServiceImpl(private val project: Project): Compila
                     }
                 })
     }
-
 
     /**
      * Checks if the given [project] currently has compilation errors.
