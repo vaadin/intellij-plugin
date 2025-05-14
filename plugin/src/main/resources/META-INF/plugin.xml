@@ -73,9 +73,6 @@
         <projectService
                 serviceInterface="com.vaadin.plugin.copilot.service.CopilotUndoManager"
                 serviceImplementation="com.vaadin.plugin.copilot.service.CopilotUndoManagerImpl"/>
-        <projectService
-                serviceInterface="com.vaadin.plugin.copilot.service.CompilationStatusManagerService"
-                serviceImplementation="com.vaadin.plugin.copilot.service.CompilationStatusManagerServiceImpl"/>
 
         <!-- Vaadin Project Wizard -->
         <moduleBuilder id="VaadinModuleBuilder" builderClass="com.vaadin.plugin.module.VaadinProjectBuilderAdapter"/>

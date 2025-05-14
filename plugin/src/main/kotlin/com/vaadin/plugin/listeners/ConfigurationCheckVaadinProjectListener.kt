@@ -21,10 +21,10 @@ import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
 import com.vaadin.plugin.copilot.CopilotPluginUtil
-import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.trackPluginInitialized
+import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 
 class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
 
@@ -56,7 +56,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
                 VaadinHomeUtil.updateOrInstallHotSwapJar()
             }
             val compilationStatusManagerService = project.getService(CompilationStatusManagerService::class.java)
-            compilationStatusManagerService.init()
+            compilationStatusManagerService.subscribeToListenCompilationStatus()
         }
     }
 

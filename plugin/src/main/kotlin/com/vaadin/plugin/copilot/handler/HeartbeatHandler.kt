@@ -1,8 +1,8 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.openapi.project.Project
-import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 import io.netty.handler.codec.http.HttpResponseStatus
+import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 
 class HeartbeatHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
     companion object {

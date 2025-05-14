@@ -8,7 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 
 @Service(Service.Level.PROJECT)
-class CompilationStatusManagerServiceImpl(private val project: Project) : CompilationStatusManagerService {
+class CompilationStatusManagerService(private val project: Project) {
 
     /**
      * Holds compilation error state for a given project, including:
@@ -22,7 +22,8 @@ class CompilationStatusManagerServiceImpl(private val project: Project) : Compil
 
     private var compilationErrorInfo: CompilationErrorInfo? = null
 
-    override fun init() {
+    /** Subscribes to project message bus to listen compilation results */
+    fun subscribeToListenCompilationStatus() {
         project.messageBus
             .connect()
             .subscribe(
@@ -52,7 +53,7 @@ class CompilationStatusManagerServiceImpl(private val project: Project) : Compil
      *
      * @return `true` if the project has errors, otherwise `false`.
      */
-    override fun hasCompilationError(): Boolean {
+    fun hasCompilationError(): Boolean {
         return compilationErrorInfo?.hasCompilationError ?: false
     }
 
@@ -61,7 +62,7 @@ class CompilationStatusManagerServiceImpl(private val project: Project) : Compil
      *
      * @return A [Set] of file paths that had errors, or an empty set if none are recorded.
      */
-    override fun getErrorFiles(): Set<String> {
+    fun getErrorFiles(): Set<String> {
         return compilationErrorInfo?.errorFiles ?: emptySet()
     }
 
