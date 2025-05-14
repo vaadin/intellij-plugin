@@ -76,5 +76,6 @@ class CompilationStatusManagerServiceImpl(private val project: Project) : Compil
         info.hasCompilationError = hasError
         info.errorFiles.clear()
         info.errorFiles.addAll(files)
+        this.compilationErrorInfo = info
     }
 }
