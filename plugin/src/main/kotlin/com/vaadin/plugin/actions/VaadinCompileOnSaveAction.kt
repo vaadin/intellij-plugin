@@ -30,7 +30,6 @@ class VaadinCompileOnSaveAction : ActionsOnSaveFileDocumentManagerListener.Actio
     }
 
     override fun processDocuments(project: Project, documents: Array<Document?>) {
-        project.locationHash
         val task =
             object : Task.Backgroundable(project, "Vaadin: compiling...") {
                 override fun run(indicator: ProgressIndicator) {
