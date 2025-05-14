@@ -11,10 +11,6 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.compiler.CompilationStatusListener
-import com.intellij.openapi.compiler.CompileContext
-import com.intellij.openapi.compiler.CompilerMessageCategory
-import com.intellij.openapi.compiler.CompilerTopics
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -24,8 +20,8 @@ import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
-import com.vaadin.plugin.copilot.CompilationStatusManager
 import com.vaadin.plugin.copilot.CopilotPluginUtil
+import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.trackPluginInitialized
@@ -59,37 +55,9 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
             RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
                 VaadinHomeUtil.updateOrInstallHotSwapJar()
             }
-            watchCompilationResults(project)
+            val compilationStatusManagerService = project.getService(CompilationStatusManagerService::class.java)
+            compilationStatusManagerService.init()
         }
-    }
-
-    /**
-     * Subscribes [Project.getMessageBus] to emit [CompilerTopics.COMPILATION_STATUS] and stores result so it can be
-     * accessed later from a Rest service
-     */
-    private fun watchCompilationResults(project: Project) {
-        project.messageBus
-            .connect()
-            .subscribe(
-                CompilerTopics.COMPILATION_STATUS,
-                object : CompilationStatusListener {
-                    override fun compilationFinished(
-                        aborted: Boolean,
-                        errors: Int,
-                        warnings: Int,
-                        compileContext: CompileContext
-                    ) {
-                        val filePaths = mutableSetOf<String>()
-                        if (errors > 0) {
-                            val messages = compileContext.getMessages(CompilerMessageCategory.ERROR)
-                            for (message in messages) {
-                                message.virtualFile?.let { virtualFile -> filePaths.add(virtualFile.path) }
-                            }
-                        }
-                        CompilationStatusManager.setHasCompilationError(project, errors > 0, filePaths)
-                        super.compilationFinished(aborted, errors, warnings, compileContext)
-                    }
-                })
     }
 
     private fun checkReloadClassesSetting(project: Project) {
