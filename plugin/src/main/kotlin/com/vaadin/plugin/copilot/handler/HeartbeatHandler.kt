@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 import io.netty.handler.codec.http.HttpResponseStatus
 
-class HeartbeatHandler(project: Project, data: Map<String, Any>) : AbstractHandler(project) {
+class HeartbeatHandler(project: Project) : AbstractHandler(project) {
     companion object {
         const val HAS_COMPILATION_ERROR = "hasCompilationError"
         const val FILES_CONTAIN_COMPILATION_ERROR = "filesContainCompilationError"

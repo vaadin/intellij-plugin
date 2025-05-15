@@ -103,7 +103,7 @@ class CopilotPluginUtil {
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
-                HANDLERS.HEARTBEAT.command -> return HeartbeatHandler(project, data)
+                HANDLERS.HEARTBEAT.command -> return HeartbeatHandler(project)
                 else -> {
                     LOG.warn("Command $command not supported by plugin")
                     return object : Handler {
