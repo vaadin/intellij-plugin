@@ -8,7 +8,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 
 @Service(Service.Level.PROJECT)
-class CompilationStatusManagerService(private val project: Project) {
+class CompilationStatusManagerService(private val project: Project) : CompilationStatusListener {
 
     /**
      * Holds compilation error state for a given project, including:
@@ -23,45 +23,26 @@ class CompilationStatusManagerService(private val project: Project) {
     private var compilationErrorInfo: CompilationErrorInfo? = null
 
     /** Subscribes to project message bus to listen compilation results */
-    fun subscribeToListenCompilationStatus() {
-        project.messageBus
-            .connect()
-            .subscribe(
-                CompilerTopics.COMPILATION_STATUS,
-                object : CompilationStatusListener {
-                    override fun compilationFinished(
-                        aborted: Boolean,
-                        errors: Int,
-                        warnings: Int,
-                        compileContext: CompileContext
-                    ) {
-                        val filePaths = mutableSetOf<String>()
-                        if (errors > 0) {
-                            val messages = compileContext.getMessages(CompilerMessageCategory.ERROR)
-                            for (message in messages) {
-                                message.virtualFile?.let { virtualFile -> filePaths.add(virtualFile.path) }
-                            }
-                        }
-                        setHasCompilationError(errors > 0, filePaths)
-                        super.compilationFinished(aborted, errors, warnings, compileContext)
-                    }
-                })
+    fun subscribeToCompilationStatus() {
+        project.messageBus.connect().subscribe(CompilerTopics.COMPILATION_STATUS, this)
     }
 
-    /**
-     * Checks if the given [project] currently has compilation errors.
-     *
-     * @return `true` if the project has errors, otherwise `false`.
-     */
+    override fun compilationFinished(aborted: Boolean, errors: Int, warnings: Int, compileContext: CompileContext) {
+        val filePaths = mutableSetOf<String>()
+        if (errors > 0) {
+            val messages = compileContext.getMessages(CompilerMessageCategory.ERROR)
+            for (message in messages) {
+                message.virtualFile?.let { virtualFile -> filePaths.add(virtualFile.path) }
+            }
+        }
+        setHasCompilationError(errors > 0, filePaths)
+        super.compilationFinished(aborted, errors, warnings, compileContext)
+    }
+
     fun hasCompilationError(): Boolean {
         return compilationErrorInfo?.hasCompilationError ?: false
     }
 
-    /**
-     * Retrieves the set of file names that caused compilation errors for the given [project].
-     *
-     * @return A [Set] of file paths that had errors, or an empty set if none are recorded.
-     */
     fun getErrorFiles(): Set<String> {
         return compilationErrorInfo?.errorFiles ?: emptySet()
     }
