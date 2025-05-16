@@ -1,6 +1,7 @@
 package com.vaadin.plugin;
 
 import java.util.List;
+import java.util.Set;
 
 public class Message {
 
@@ -29,6 +30,12 @@ public class Message {
     }
 
     record DeleteMessage(String file) {
+    }
+
+    record HeartbeatMessage() {
+    }
+
+    record HeartbeatResponse(Boolean hasCompilationError, Set<String> filesContainCompilationError) {
     }
 
 }

@@ -52,13 +52,16 @@ public class Client {
         return send("delete", new Message.DeleteMessage(path.toString()));
     }
 
+    public RestClient.ResponseSpec heartbeat() throws IOException {
+        return send("heartbeat", new Message.HeartbeatMessage());
+    }
+
     private RestClient.ResponseSpec send(String command, Object data) throws JsonProcessingException {
         Message.CopilotRestRequest message = new Message.CopilotRestRequest(command, projectBasePath, data);
         String body = new ObjectMapper().writeValueAsString(message);
-        org.springframework.web.client.RestClient.ResponseSpec response = org.springframework.web.client.RestClient.create().post()
+        return org.springframework.web.client.RestClient.create().post()
                 .uri(endpoint).contentType(MediaType.APPLICATION_JSON)
                 .body(body).retrieve();
-        return response;
     }
 
 }

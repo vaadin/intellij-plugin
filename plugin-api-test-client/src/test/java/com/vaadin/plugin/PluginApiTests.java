@@ -14,10 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
-import java.util.Base64;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 
 @SpringBootTest(classes = {SpringBootApplication.class})
@@ -30,6 +27,12 @@ public class PluginApiTests {
     protected Path getTestResourcePath(String childPath) {
         return Path.of(projectBasePath)
                 .resolve("src/test/resources")
+                .resolve(childPath);
+    }
+
+    protected Path getSourcePath(String childPath) {
+        return Path.of(projectBasePath)
+                .resolve("src/main/java")
                 .resolve(childPath);
     }
 
@@ -119,6 +122,38 @@ public class PluginApiTests {
         response = client.redo(filePath);
         performed = (Boolean) response.body(Map.class).get("performed");
         Assertions.assertFalse(performed);
+    }
+
+    // Run using Debug to trigger compile on save
+    @Test
+    public void testHeartbeat() throws IOException, InterruptedException {
+        var response = client.heartbeat();
+        var body = response.body(Message.HeartbeatResponse.class);
+        Assertions.assertFalse(body.hasCompilationError());
+        Assertions.assertEquals(Collections.EMPTY_SET, body.filesContainCompilationError());
+
+        var filePath = getSourcePath("com/vaadin/plugin/Test.java");
+        filePath.toFile().deleteOnExit();
+
+        response = client.write(filePath, "package com.vaadin.plugin;\n" +
+                "\n" +
+                "public class Test {\n" +
+                "asdasdasd" +
+                "}");
+        assertHttpOk(response);
+        Thread.sleep(2000);
+
+        for (int i = 0 ; i < 10 ; ++i) {
+            response = client.heartbeat();
+            body = response.body(Message.HeartbeatResponse.class);
+            if (body.hasCompilationError()) {
+                Assertions.assertEquals(Collections.EMPTY_SET, body.filesContainCompilationError());
+                return;
+            }
+            Thread.sleep(2000);
+        }
+
+        Assertions.fail("No compilation error received");
     }
 
     // add more tests when needed
