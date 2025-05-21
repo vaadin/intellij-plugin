@@ -17,7 +17,7 @@ class CompileFilesHandler(project: Project, data: Map<String, Any>) : AbstractHa
                 .map { File(it) }
                 .filter { isFileInsideProject(project, it) }
                 .mapNotNull { VfsUtil.findFileByIoFile(it, true) }
-                .map { it.findDocument() }
+                .mapNotNull { it.findDocument() }
                 .toTypedArray()
 
         if (documents.isNotEmpty()) {
