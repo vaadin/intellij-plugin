@@ -13,8 +13,9 @@ plugins {
 
 // version for building plugin
 val buildVersion = "2024.1"
+
+// compatibility range since, until not set
 val sinceBuildVersion = "241"
-val untilBuildVersion = "252.*" // for verification only
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -84,10 +85,6 @@ intellijPlatform {
     ides {
       ide(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
       ide(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
-      select {
-        sinceBuild = sinceBuildVersion
-        untilBuild = untilBuildVersion
-      }
     }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
