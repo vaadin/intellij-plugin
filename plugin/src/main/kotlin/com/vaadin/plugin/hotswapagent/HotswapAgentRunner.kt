@@ -51,10 +51,7 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                     trackDebugWithHotswap()
                     invokeLater { super.execute(environment) }
                 } else {
-                    val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
-                    val projectSdkMajor = JdkUtil.getProjectSdkVersion(module)
-
-                    invokeLater { NoJBRFoundDialog(bundledJetbrainsJdk, projectSdkMajor).show() }
+                    JetbrainsRuntimeUtil.downloadLatestJBR(environment.project)
                 }
             } catch (e: BrokenJbrException) {
                 invokeLater { BadJBRFoundDialog().show() }

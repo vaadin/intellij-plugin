@@ -30,7 +30,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
             project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
             projectDownloadedProperty.afterChange { afterProjectCreated(project) }
             val downloadLink = vaadinWizard.projectModel!!.getDownloadLink(project)
-            VaadinProjectUtil.downloadAndExtract(project, downloadLink)
+            VaadinProjectUtil.downloadAndExtractProject(project, downloadLink)
             trackProjectCreated(downloadLink)
             project
         }
