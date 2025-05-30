@@ -5,7 +5,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij.platform") version "2.2.1"
+  id("org.jetbrains.intellij.platform") version "2.6.0"
   id("com.diffplug.spotless") version "7.0.2"
 
   id("com.adarshr.test-logger") version "4.0.0"
@@ -14,10 +14,9 @@ plugins {
 // version for building plugin
 val buildVersion = "2024.1"
 
-// compatibility range since, until not set
-val sinceBuildVersion = "241"
-// An empty value for the until-build will include all future builds
-val untilBuildVersion = ""
+// compatibility range
+val sinceBuildProperty = "241"
+val untilBuildProperty = "252.*"
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -111,8 +110,8 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 
 tasks {
   patchPluginXml {
-    sinceBuild.set(sinceBuildVersion)
-    untilBuild.set(untilBuildVersion)
+    sinceBuild.set(sinceBuildProperty)
+    untilBuild.set(untilBuildProperty)
   }
 
   signPlugin {
