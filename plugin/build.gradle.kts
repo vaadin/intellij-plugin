@@ -16,6 +16,8 @@ val buildVersion = "2024.1"
 
 // compatibility range since, until not set
 val sinceBuildVersion = "241"
+// An empty value for the until-build will include all future builds
+val untilBuildVersion = ""
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =
@@ -108,7 +110,10 @@ configure<com.diffplug.gradle.spotless.SpotlessExtension> {
 }
 
 tasks {
-  patchPluginXml { sinceBuild.set(sinceBuildVersion) }
+  patchPluginXml {
+    sinceBuild.set(sinceBuildVersion)
+    untilBuild.set(untilBuildVersion)
+  }
 
   signPlugin {
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
