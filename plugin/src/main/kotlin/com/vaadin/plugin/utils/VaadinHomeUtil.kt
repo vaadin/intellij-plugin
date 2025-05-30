@@ -22,7 +22,7 @@ object VaadinHomeUtil {
      *
      * @return File instance for Vaadin home folder. Does not check if the folder exists.
      */
-    private fun resolveVaadinHomeDirectory(): File {
+    fun resolveVaadinHomeDirectory(): File {
         val userHome = System.getProperty(PROPERTY_USER_HOME)
         return File(userHome, VAADIN_FOLDER_NAME)
     }
