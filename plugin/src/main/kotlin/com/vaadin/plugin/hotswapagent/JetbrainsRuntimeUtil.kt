@@ -88,9 +88,8 @@ object JetbrainsRuntimeUtil {
             return
         }
 
-        DownloadUtil.download(project, url, target.toPath(), "JetBrains Runtime", true) {
-            LOG.info("Downloading JetBrains Runtime into ${target.absolutePath}")
-        }
+        LOG.info("Downloading JetBrains Runtime into ${target.absolutePath}")
+        DownloadUtil.downloadAndExtract(project, url, target.toPath(), "JetBrains Runtime", true)
     }
 
     private fun getFilename(url: URL): String = url.file.replace(".*/".toRegex(), "")
@@ -98,7 +97,7 @@ object JetbrainsRuntimeUtil {
     private fun findJBRDownloadUrl(latest: GitHubRelease): Optional<URL> {
         return try {
             val text =
-                DownloadUtil.openUrlWithIntelliJProxy(
+                DownloadUtil.openUrlWithProxy(
                     "https://api.github.com/repos/JetBrains/JetBrainsRuntime/releases/${latest.id}")
             val release = jacksonObjectMapper().readValue(text, GitHubReleaseWithBody::class.java)
             val sdk = findCorrectReleaseForArchitecture(release.body)
@@ -113,7 +112,7 @@ object JetbrainsRuntimeUtil {
     private fun findLatestJBRRelease(): GitHubRelease {
         val typeRef = object : TypeReference<List<GitHubRelease>>() {}
         return try {
-            val text = DownloadUtil.openUrlWithIntelliJProxy(JETBRAINS_GITHUB_RELEASES_PAGE)
+            val text = DownloadUtil.openUrlWithProxy(JETBRAINS_GITHUB_RELEASES_PAGE)
             val releases = jacksonObjectMapper().readValue(text, typeRef)
             releases.filter { !it.prerelease }.sorted().last()
         } catch (e: Exception) {

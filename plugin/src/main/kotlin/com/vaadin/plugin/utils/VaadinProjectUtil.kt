@@ -9,7 +9,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.vaadin.plugin.listeners.VaadinProjectListener
 import com.vaadin.plugin.starter.DownloadableModel
-import java.nio.file.Path
 
 internal const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
 
@@ -19,16 +18,7 @@ class VaadinProjectUtil {
 
     companion object {
 
-        val PROJECT_DOWNLOADED_PROP_KEY = Key<GraphProperty<Boolean>>("vaadin_project_downloaded")
-
         val PROJECT_MODEL_PROP_KEY = Key<GraphProperty<DownloadableModel?>>("vaadin_project_model")
-
-        fun downloadAndExtractProject(project: Project, url: String) {
-            DownloadUtil.download(
-                project, url, Path.of(project.basePath!!).resolve("project.zip"), "Vaadin Project", true) {
-                    (project.getUserData(PROJECT_DOWNLOADED_PROP_KEY) as GraphProperty<Boolean>).set(true)
-                }
-        }
     }
 }
 
