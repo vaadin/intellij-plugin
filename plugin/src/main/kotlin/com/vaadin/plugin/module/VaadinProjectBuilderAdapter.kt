@@ -7,19 +7,15 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
-import com.vaadin.plugin.utils.VaadinProjectUtil
+import com.vaadin.plugin.utils.DownloadUtil
 import com.vaadin.plugin.utils.trackProjectCreated
 import java.io.File
+import java.nio.file.Path
 
 class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
     GeneratorNewProjectWizardBuilderAdapter(vaadinWizard) {
-
-    private val propertyGraph = PropertyGraph()
-
-    private val projectDownloadedProperty = propertyGraph.property(false)
 
     override fun createStep(context: WizardContext): NewProjectWizardStep {
         return vaadinWizard.createStep(context)
@@ -27,11 +23,13 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
 
     override fun createProject(name: String?, path: String?): Project? {
         return super.createProject(name, path)?.let { project ->
-            project.putUserData(VaadinProjectUtil.PROJECT_DOWNLOADED_PROP_KEY, projectDownloadedProperty)
-            projectDownloadedProperty.afterChange { afterProjectCreated(project) }
-            val downloadLink = vaadinWizard.projectModel!!.getDownloadLink(project)
-            VaadinProjectUtil.downloadAndExtract(project, downloadLink)
-            trackProjectCreated(downloadLink)
+            val downloadUrl = vaadinWizard.projectModel!!.getDownloadLink(project)
+            DownloadUtil.downloadAndExtract(
+                    project, downloadUrl, Path.of(path!!).resolve("project.zip"), "Vaadin Project", true)
+                .thenRun {
+                    afterProjectCreated(project)
+                    trackProjectCreated(downloadUrl)
+                }
             project
         }
     }
@@ -45,7 +43,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
     private fun afterProjectCreated(project: Project) {
         VfsUtil.findFileByIoFile(File(project.basePath, "README.md"), true)?.let {
             val descriptor = OpenFileDescriptor(project, it)
-            descriptor.setUsePreviewTab(true)
+            descriptor.isUsePreviewTab = true
             FileEditorManager.getInstance(project).openEditor(descriptor, true)
         }
     }
