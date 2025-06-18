@@ -14,7 +14,6 @@ import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasEndpoints
-import com.vaadin.plugin.utils.trackManualCopilotRestart
 import java.awt.Point
 import java.awt.event.MouseEvent
 import javax.swing.Icon
@@ -66,10 +65,9 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     private fun showPopup(e: MouseEvent) {
         val panel = VaadinStatusBarInfoPopupPanel(project)
         val popup = JBPopupFactory.getInstance().createComponentPopupBuilder(panel, null).createPopup()
-        panel.afterRestart = {
+        panel.refreshPopup = {
             popup.cancel()
             showPopup(e)
-            trackManualCopilotRestart()
         }
         val dimension = popup.content.preferredSize
         val at = Point(0, -dimension.height)
