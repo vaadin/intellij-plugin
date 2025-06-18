@@ -57,7 +57,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
                 "Download and setup latest JetBrains Runtime")
         }
 
-        return wrapMessage("Jetbrains Runtime in use", UIUtil.getLabelSuccessForeground())
+        return wrapMessage("JetBrains Runtime in use", UIUtil.getLabelSuccessForeground())
     }
 
     private fun copilotStatusRow(): JPanel {
