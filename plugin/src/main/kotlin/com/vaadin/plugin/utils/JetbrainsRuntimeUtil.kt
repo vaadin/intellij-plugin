@@ -84,7 +84,7 @@ object JetbrainsRuntimeUtil {
             val url = downloadUrl.get()
             val filename = getFilename(url)
             val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("jdk/$filename")
-            val outputPath = Path.of(target.path.substring(0, target.path.length - TAR_GZ.length))
+            val outputPath = Path.of(target.path.removeSuffix(TAR_GZ))
             if (outputPath.exists()) {
                 return CompletableFuture.completedFuture(
                     JBRInstallResult(status = JBRInstallStatus.ALREADY_EXISTS, path = outputPath))
