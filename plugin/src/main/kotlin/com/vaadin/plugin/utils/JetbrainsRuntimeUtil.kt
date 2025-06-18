@@ -14,10 +14,12 @@ import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
 import java.net.URL
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.Optional
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.exists
+import kotlin.io.path.isRegularFile
 
 const val JETBRAINS_RELEASES_URL = "https://api.github.com/repos/JetBrains/JetBrainsRuntime/releases"
 
@@ -48,12 +50,12 @@ object JetbrainsRuntimeUtil {
 
     private fun getArchitecture(): String = System.getProperty("os.arch")
 
+    private fun getJavaHome(jdkFolder: Path): Path {
+        return if (OSUtils.isMac()) jdkFolder.resolve("Contents").resolve("Home") else jdkFolder
+    }
+
     private fun getJavaHome(jdkFolder: File): File {
-        return if (OSUtils.isMac()) {
-            jdkFolder.toPath().resolve("Contents").resolve("Home").toFile()
-        } else {
-            jdkFolder
-        }
+        return getJavaHome(jdkFolder.toPath()).toFile()
     }
 
     fun getHotswapAgentLocation(jdkFolder: File): File {
@@ -95,7 +97,10 @@ object JetbrainsRuntimeUtil {
             LOG.info("Downloading JetBrains Runtime into ${target.absolutePath}")
             return DownloadUtil.downloadAndExtract(
                     project, url.toExternalForm(), target.toPath(), "JetBrains Runtime", false)
-                .thenApply { JBRInstallResult(status = JBRInstallStatus.INSTALLED, path = outputPath) }
+                .thenApply {
+                    markAllExecutable(getJavaHome(outputPath).resolve("bin"))
+                    JBRInstallResult(status = JBRInstallStatus.INSTALLED, path = outputPath)
+                }
         }
 
         return CompletableFuture.completedFuture(JBRInstallResult(status = JBRInstallStatus.ERROR, path = null))
@@ -110,9 +115,7 @@ object JetbrainsRuntimeUtil {
         val existingSdk = jdkTable.allJdks.find { it.homePath == sdkHomePath && it.sdkType == sdkType }
         if (existingSdk == null) {
             val sdk = SdkConfigurationUtil.createAndAddSDK(sdkHomePath, sdkType)
-            runWriteAction {
-                ProjectRootManager.getInstance(project).projectSdk = sdk
-            }
+            runWriteAction { ProjectRootManager.getInstance(project).projectSdk = sdk }
             return
         }
 
@@ -176,5 +179,9 @@ object JetbrainsRuntimeUtil {
             }
             .filter { it.sdkType == "JBRSDK" && it.url.endsWith(TAR_GZ) && !it.url.contains("_diz") }
             .associateBy { it.arch }
+    }
+
+    fun markAllExecutable(dir: Path) {
+        Files.list(dir).filter { path -> path.isRegularFile() }.forEach { path -> path.toFile().setExecutable(true) }
     }
 }
