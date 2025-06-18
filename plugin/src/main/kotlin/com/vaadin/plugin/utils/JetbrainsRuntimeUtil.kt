@@ -109,16 +109,14 @@ object JetbrainsRuntimeUtil {
         // Check if SDK with same home path already exists
         val existingSdk = jdkTable.allJdks.find { it.homePath == sdkHomePath && it.sdkType == sdkType }
         if (existingSdk == null) {
-            SdkConfigurationUtil.createAndAddSDK(sdkHomePath, sdkType)?.let {
-                runWriteAction {
-                    jdkTable.addJdk(it)
-                    ProjectRootManager.getInstance(project).projectSdk = it
-                }
+            val sdk = SdkConfigurationUtil.createAndAddSDK(sdkHomePath, sdkType)
+            runWriteAction {
+                ProjectRootManager.getInstance(project).projectSdk = sdk
             }
             return
         }
 
-        // Check if existing SDK is latest JBR
+        // Check if current SDK is latest JBR
         val projectSdk = ProjectRootManager.getInstance(project).projectSdk
         if (existingSdk.homePath != projectSdk?.homePath) {
             runWriteAction { ProjectRootManager.getInstance(project).projectSdk = existingSdk }
