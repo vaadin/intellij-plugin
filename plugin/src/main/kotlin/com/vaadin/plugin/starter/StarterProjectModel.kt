@@ -33,7 +33,7 @@ class StarterProjectModel : BaseState(), DownloadableModel {
                 "frameworks" to frameworks,
                 "platformVersion" to platformVersion,
                 "artifactId" to toArtifactId(project.name),
-                "ref" to "intellij-plugin")
+                "ref" to "test")
         val query =
             params.entries.joinToString("&") { (key, value) ->
                 "${URLEncoder.encode(key, StandardCharsets.UTF_8)}=${URLEncoder.encode(value, StandardCharsets.UTF_8)}"
