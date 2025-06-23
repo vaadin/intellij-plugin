@@ -22,10 +22,14 @@ class JdkUtil {
 
         val GRADLE_SYSTEM_ID: ProjectSystemId = ProjectSystemId("GRADLE")
 
+        fun getProjectSdk(project: Project): Sdk? {
+            return ProjectRootManager.getInstance(project).projectSdk
+        }
+
         fun isJetbrainsRuntime(jdk: Sdk?): Boolean {
             val homePath = jdk?.homePath ?: throw IllegalStateException("JDK has no home path: $jdk")
             val jdkInfo = JdkVersionDetector.getInstance().detectJdkVersionInfo(homePath)
-            return "jbr" == jdkInfo?.variant?.prefix?.lowercase()
+            return JdkVersionDetector.Variant.JBR == jdkInfo?.variant
         }
 
         fun getBundledJetbrainsJdk(): Sdk {

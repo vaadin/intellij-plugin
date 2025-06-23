@@ -114,6 +114,11 @@
                           relative-to-action="Rerun"
                           anchor="after" />
         </action>
+        <action id="vaadin.jbr.install"
+                class="com.vaadin.plugin.actions.InstallJetbrainsRuntimeAction"
+                text="JetBrains Runtime: Install Latest Version"
+                description="Installs latest version of JetBrains Runtime"
+                icon="/vaadin/icons/vaadin.svg"/>
     </actions>
 
     <projectListeners>
