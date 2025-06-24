@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.21"
+  id("org.jetbrains.kotlin.jvm") version "2.2.0"
   id("org.jetbrains.intellij.platform") version "2.6.0"
   id("com.diffplug.spotless") version "7.0.2"
 
@@ -12,10 +12,10 @@ plugins {
 }
 
 // version for building plugin
-val buildVersion = "2024.1"
+val buildVersion = "2024.3"
 
 // compatibility range
-val sinceBuildProperty = "241"
+val sinceBuildProperty = "243"
 val untilBuildProperty = "252.*"
 
 // version for verifying plugin, check validation.yml

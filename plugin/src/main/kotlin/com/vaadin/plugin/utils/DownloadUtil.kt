@@ -9,13 +9,8 @@ import com.intellij.util.containers.getIfSingle
 import com.intellij.util.download.DownloadableFileDescription
 import com.intellij.util.download.DownloadableFileService
 import com.intellij.util.io.ZipUtil
-import com.intellij.util.net.HttpConfigurable
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.InetSocketAddress
-import java.net.PasswordAuthentication
-import java.net.Proxy
-import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
@@ -28,38 +23,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 object DownloadUtil {
 
     private val LOG: Logger = Logger.getInstance(DownloadUtil::class.java)
-
-    /**
-     * Open connection to given url using IDE proxy if configured
-     *
-     * @param urlStr resource URL
-     * @return content as String
-     */
-    fun openUrlWithProxy(urlStr: String): String {
-        val config = HttpConfigurable.getInstance()
-        val url = URL(urlStr)
-
-        val connection =
-            if (config.USE_HTTP_PROXY && !config.isProxyException(url.toURI())) {
-                val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress(config.PROXY_HOST, config.PROXY_PORT))
-
-                if (config.PROXY_AUTHENTICATION) {
-                    java.net.Authenticator.setDefault(
-                        object : java.net.Authenticator() {
-                            override fun getPasswordAuthentication(): PasswordAuthentication {
-                                return PasswordAuthentication(
-                                    config.proxyLogin, config.plainProxyPassword?.toCharArray())
-                            }
-                        })
-                }
-
-                url.openConnection(proxy)
-            } else {
-                url.openConnection()
-            }
-
-        return connection.getInputStream().bufferedReader().use { it.readText() }
-    }
 
     /**
      * Downloads and extracts zip or tar.gz resource from given url.
