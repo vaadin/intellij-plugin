@@ -1,6 +1,5 @@
 package com.vaadin.plugin.module
 
-import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.properties.GraphProperty
@@ -15,7 +14,12 @@ import com.intellij.openapi.ui.getPresentablePath
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.UIBundle
-import com.intellij.ui.dsl.builder.*
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.dsl.builder.CollapsibleRow
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.Row
+import com.intellij.ui.dsl.builder.bindText
 import com.vaadin.plugin.starter.HelloWorldModel
 import com.vaadin.plugin.starter.StarterProjectModel
 import com.vaadin.plugin.utils.VaadinProjectUtil.Companion.PROJECT_MODEL_PROP_KEY
@@ -140,8 +144,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
                 .withFileFilter { it.isDirectory }
                 .withPathToTextConvertor(::getPresentablePath)
                 .withTextToPathConvertor(::getCanonicalPath)
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
         val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor).bindText(property)
+        return textFieldWithBrowseButton(fileChooserDescriptor, wizardContext.project).bindText(property)
     }
 }
