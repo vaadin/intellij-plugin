@@ -21,6 +21,7 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
+import kotlin.io.path.isHidden
 import kotlin.io.path.name
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
@@ -136,7 +137,7 @@ object DownloadUtil {
         // move contents from single zip directory
         if (moveSingleDir) {
             Files.list(outputPath)
-                .filter { paths -> paths.isDirectory() }
+                .filter { paths -> !paths.isHidden() && paths.isDirectory() }
                 .getIfSingle()
                 ?.let {
                     LOG.info("Archive contains single directory $it, moving to $outputPath")
