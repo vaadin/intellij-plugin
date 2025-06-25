@@ -5,23 +5,20 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.containers.getIfSingle
 import com.intellij.util.download.DownloadableFileDescription
 import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.io.ZipUtil
 import com.intellij.util.net.HttpConfigurable
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.PasswordAuthentication
 import java.net.Proxy
 import java.net.URL
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
-import kotlin.io.path.name
+import java.util.zip.ZipFile
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 
@@ -62,33 +59,6 @@ object DownloadUtil {
     }
 
     /**
-     * Downloads and extracts zip or tar.gz resource from given url.
-     *
-     * @param project current project
-     * @param url resource url
-     * @param targetFile download target file
-     * @param downloaderLabel label for download indicator progress widget
-     * @param moveSingleDir moves contents of single extracted directory
-     */
-    fun downloadAndExtract(
-        project: Project,
-        url: String,
-        targetFile: Path,
-        downloaderLabel: String,
-        moveSingleDir: Boolean
-    ): CompletableFuture<Void> {
-        return download(project, url, targetFile, downloaderLabel).thenAccept {
-            if (it == null || it.isEmpty()) {
-                LOG.warn("Cannot download ${url}, please try again")
-                return@thenAccept
-            }
-            LOG.info("Downloaded $url to $targetFile, extracting...")
-            extract(targetFile, targetFile.parent, moveSingleDir)
-            FileUtil.delete(targetFile)
-        }
-    }
-
-    /**
      * Downloads resource from given url in background with progress indicator
      *
      * @param project current project
@@ -111,54 +81,23 @@ object DownloadUtil {
     }
 
     /**
-     * Extracts zip and tar.gz files. If extracted file contains single directory, moves content to parent and removes
-     * it
+     * Extracts tar gz archive
      *
-     * @param file archive file
-     * @param outputPath output directory
-     * @param moveSingleDir moves contents of single extracted directory to outputPath
-     * @return true if completed successfully, false otherwise
+     * @param tarGzPath archive file
+     * @param outputDirPath output dir
      */
-    fun extract(file: Path, outputPath: Path, moveSingleDir: Boolean): Boolean {
-        LOG.info("Extracting $file")
-
-        if (file.extension == "zip") {
-            ZipUtil.extract(file, outputPath, null)
-            LOG.info("Zip $file extracted")
-        } else if (file.name.endsWith("tar.gz")) {
-            extractTarGz(file, outputPath)
-            LOG.info("Tar.gz $file extracted")
-        } else {
-            LOG.warn("Unsupported file extension $file")
-            return false
-        }
-
-        // move contents from single zip directory
-        if (moveSingleDir) {
-            Files.list(outputPath)
-                .filter { paths -> paths.isDirectory() }
-                .getIfSingle()
-                ?.let {
-                    LOG.info("Archive contains single directory $it, moving to $outputPath")
-                    FileUtil.moveDirWithContent(it.toFile(), outputPath.toFile())
-                }
-        }
-
-        return true
-    }
-
-    private fun extractTarGz(tarGzPath: Path, outputDirPath: Path) {
+    fun extractTarGz(tarGzPath: File, outputDirPath: File) {
         val buffer = ByteArray(4096)
-        val input = TarArchiveInputStream(GzipCompressorInputStream(FileInputStream(tarGzPath.toFile())))
+        val input = TarArchiveInputStream(GzipCompressorInputStream(FileInputStream(tarGzPath)))
 
         var entry = input.nextEntry
         while (entry != null) {
             val outFile = outputDirPath.resolve(entry.name)
             if (entry.isDirectory) {
-                FileUtil.createDirectory(outFile.toFile())
+                FileUtil.createDirectory(outFile)
             } else {
-                FileUtil.createDirectory(outFile.parent.toFile())
-                FileOutputStream(outFile.toFile()).use { out ->
+                FileUtil.createDirectory(outFile.parentFile)
+                FileOutputStream(outFile).use { out ->
                     var len: Int
                     while (input.read(buffer).also { len = it } != -1) {
                         out.write(buffer, 0, len)
@@ -168,5 +107,30 @@ object DownloadUtil {
             entry = input.nextEntry
         }
         input.close()
+    }
+
+    /**
+     * Finds root directory in zip archive if present
+     *
+     * @param zip input file
+     * @return root directory name if present
+     */
+    @Throws(IOException::class)
+    fun getZipRootFolder(zip: File): String? {
+        ZipFile(zip).use { zipFile ->
+            val en = zipFile.entries()
+            while (en.hasMoreElements()) {
+                val zipEntry = en.nextElement()
+                // we do not necessarily get a separate entry for the subdirectory when the file
+                // in the ZIP archive is placed in a subdirectory, so we need to check if the
+                // slash
+                // is found anywhere in the path
+                val indexOf = zipEntry.name.indexOf('/')
+                if (indexOf >= 0) {
+                    return zipEntry.name.substring(0, indexOf)
+                }
+            }
+            return null
+        }
     }
 }

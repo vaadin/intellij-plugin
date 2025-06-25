@@ -8,7 +8,9 @@ import com.intellij.openapi.actionSystem.impl.ActionManagerImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.util.io.ZipUtil
 import com.vaadin.plugin.utils.DownloadUtil
 import com.vaadin.plugin.utils.trackProjectCreated
 import java.io.File
@@ -23,9 +25,18 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
 
     override fun createProject(name: String?, path: String?): Project? {
         return super.createProject(name, path)?.let { project ->
+            val outputPath = Path.of(path!!)
             val downloadUrl = vaadinWizard.projectModel!!.getDownloadLink(project)
-            DownloadUtil.downloadAndExtract(
-                    project, downloadUrl, Path.of(path!!).resolve("project.zip"), "Vaadin Project", true)
+            val tempFile = FileUtil.generateRandomTemporaryPath("project", ".zip")
+            DownloadUtil.download(project, downloadUrl, tempFile.toPath(), "Vaadin Project")
+                .thenRun {
+                    // project zip contains single root directory, move contents to parent after
+                    // extracting
+                    val zipRoot = DownloadUtil.getZipRootFolder(tempFile)!!
+                    ZipUtil.extract(tempFile.toPath(), outputPath, null, true)
+                    FileUtil.moveDirWithContent(outputPath.resolve(zipRoot).toFile(), outputPath.toFile())
+                    FileUtil.delete(tempFile)
+                }
                 .thenRun {
                     afterProjectCreated(project)
                     trackProjectCreated(downloadUrl)

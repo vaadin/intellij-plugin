@@ -9,6 +9,7 @@ import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.io.FileUtil
 import com.vaadin.open.OSUtils
 import java.io.File
 import java.io.IOException
@@ -95,8 +96,11 @@ object JetbrainsRuntimeUtil {
                 throw IOException("Unable to create ${folder.absolutePath}")
             }
             LOG.info("Downloading JetBrains Runtime into ${target.absolutePath}")
-            return DownloadUtil.downloadAndExtract(
-                    project, url.toExternalForm(), target.toPath(), "JetBrains Runtime", false)
+            return DownloadUtil.download(project, url.toExternalForm(), target.toPath(), "JetBrains Runtime")
+                .thenRun {
+                    DownloadUtil.extractTarGz(target, folder)
+                    FileUtil.delete(target)
+                }
                 .thenApply {
                     markAllExecutable(getJavaHome(outputPath).resolve("bin"))
                     JBRInstallResult(status = JBRInstallStatus.INSTALLED, path = outputPath)
