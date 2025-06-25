@@ -1,10 +1,6 @@
 package com.vaadin.plugin.ui
 
 import com.intellij.icons.AllIcons
-import com.intellij.ide.DataManager
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.ActionPlaces
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
@@ -15,6 +11,7 @@ import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.hotswapagent.JdkUtil
+import com.vaadin.plugin.utils.JetbrainsRuntimeUtil
 import com.vaadin.plugin.utils.doNotifyAboutVaadinProject
 import com.vaadin.plugin.utils.hasEndpoints
 import com.vaadin.plugin.utils.trackManualCopilotRestart
@@ -106,12 +103,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
     private fun createJbrDownloadButton(): JButton {
         val downloadButton = JButton(AllIcons.Actions.Download)
         downloadButton.addActionListener {
-            val action = ActionManager.getInstance().getAction("vaadin.jbr.install")
-            val event =
-                AnActionEvent.createFromAnAction(
-                    action, null, ActionPlaces.UNKNOWN, DataManager.getInstance().getDataContext(this))
-            action.actionPerformed(event)
-            refreshPopup?.invoke()
+            JetbrainsRuntimeUtil.downloadAndSetupLatestJBR(project).thenRun { refreshPopup?.invoke() }
         }
         return downloadButton
     }

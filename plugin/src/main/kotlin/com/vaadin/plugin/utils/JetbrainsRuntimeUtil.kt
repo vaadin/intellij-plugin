@@ -2,6 +2,11 @@ package com.vaadin.plugin.utils
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.intellij.ide.actions.RevealFileAction
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -11,6 +16,7 @@ import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtil
 import com.vaadin.open.OSUtils
+import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.NOTIFICATION_GROUP
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
@@ -21,10 +27,17 @@ import java.util.Optional
 import java.util.concurrent.CompletableFuture
 import kotlin.io.path.exists
 import kotlin.io.path.isRegularFile
+import kotlin.io.path.nameWithoutExtension
 
 const val JETBRAINS_RELEASES_URL = "https://api.github.com/repos/JetBrains/JetBrainsRuntime/releases"
 
 object JetbrainsRuntimeUtil {
+
+    internal class RevealJBRFileAction(val path: Path) : RevealFileAction() {
+        override fun actionPerformed(e: AnActionEvent) {
+            openFile(path)
+        }
+    }
 
     private val LOG: Logger = Logger.getInstance(JetbrainsRuntimeUtil::class.java)
 
@@ -66,6 +79,15 @@ object JetbrainsRuntimeUtil {
     fun getJavaExecutable(jdkFolder: File): File {
         val bin = if (OSUtils.isWindows()) "java.exe" else "java"
         return File(File(getJavaHome(jdkFolder), "bin"), bin)
+    }
+
+    /**
+     * Download and setup latest JBR
+     *
+     * @param project current project
+     */
+    fun downloadAndSetupLatestJBR(project: Project): CompletableFuture<Unit> {
+        return downloadLatestJBR(project).thenApply { afterDownload(it, project) }
     }
 
     /**
@@ -187,5 +209,46 @@ object JetbrainsRuntimeUtil {
 
     fun markAllExecutable(dir: Path) {
         Files.list(dir).filter { path -> path.isRegularFile() }.forEach { path -> path.toFile().setExecutable(true) }
+    }
+
+    private fun afterDownload(result: JBRInstallResult, project: Project) {
+        if (result.status == JBRInstallStatus.INSTALLED) {
+            val version = result.path!!.nameWithoutExtension
+            Notifications.Bus.notify(
+                Notification(
+                        NOTIFICATION_GROUP,
+                        "JetBrains Runtime $version installed successfully",
+                        NotificationType.INFORMATION)
+                    .setIcon(VaadinIcons.VAADIN)
+                    .addAction(RevealJBRFileAction(result.path)),
+                project,
+            )
+            addAndSetProjectSdk(project, result.path.toString())
+            return
+        }
+
+        if (result.status == JBRInstallStatus.ALREADY_EXISTS) {
+            val version = result.path!!.nameWithoutExtension
+            Notifications.Bus.notify(
+                Notification(
+                        NOTIFICATION_GROUP,
+                        "Latest JetBrains Runtime $version is already installed",
+                        NotificationType.INFORMATION)
+                    .setIcon(VaadinIcons.VAADIN)
+                    .addAction(RevealJBRFileAction(result.path)),
+                project,
+            )
+            addAndSetProjectSdk(project, result.path.toString())
+            return
+        }
+
+        Notifications.Bus.notify(
+            Notification(
+                    NOTIFICATION_GROUP,
+                    "JetBrains Runtime installation failed, see logs for details",
+                    NotificationType.WARNING)
+                .setIcon(VaadinIcons.VAADIN),
+            project,
+        )
     }
 }
