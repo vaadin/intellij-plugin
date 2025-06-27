@@ -86,8 +86,11 @@ object JetbrainsRuntimeUtil {
      *
      * @param project current project
      */
-    fun downloadAndSetupLatestJBR(project: Project): CompletableFuture<Unit> {
-        return downloadLatestJBR(project).thenApply { afterDownload(it, project) }
+    fun downloadAndSetupLatestJBR(project: Project): CompletableFuture<JBRInstallResult> {
+        return downloadLatestJBR(project).thenApply {
+            afterDownload(it, project)
+            it
+        }
     }
 
     /**
