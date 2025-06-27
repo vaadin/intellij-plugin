@@ -9,7 +9,10 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.project.DumbService
+import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.NOTIFICATION_GROUP
+import com.vaadin.plugin.utils.JetbrainsRuntimeUtil
 import com.vaadin.plugin.utils.trackDebugWithHotswap
 
 class HotswapAgentRunner : GenericDebuggerRunner() {
@@ -51,12 +54,23 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                     trackDebugWithHotswap()
                     invokeLater { super.execute(environment) }
                 } else {
-                    val bundledJetbrainsJdk = JdkUtil.getSdkMajorVersion(JdkUtil.getBundledJetbrainsJdk())
-                    val projectSdkMajor = JdkUtil.getProjectSdkVersion(module)
-
-                    invokeLater { NoJBRFoundDialog(bundledJetbrainsJdk, projectSdkMajor).show() }
+                    invokeLater {
+                        CopilotPluginUtil.notify(
+                            "JetBrains Runtime not found, downloading and setting up...",
+                            NotificationType.INFORMATION,
+                            environment.project)
+                        JetbrainsRuntimeUtil.downloadAndSetupLatestJBR(environment.project).thenRun {
+                            DumbService.getInstance(environment.project).smartInvokeLater {
+                                CopilotPluginUtil.notify(
+                                    "JetBrains Runtime installed and configured, running Debug using Hotswap Agent",
+                                    NotificationType.INFORMATION,
+                                    environment.project)
+                                super.execute(environment)
+                            }
+                        }
+                    }
                 }
-            } catch (e: BrokenJbrException) {
+            } catch (_: BrokenJbrException) {
                 invokeLater { BadJBRFoundDialog().show() }
             }
         }
