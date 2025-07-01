@@ -29,6 +29,7 @@ import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
+import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
@@ -219,6 +220,65 @@ class CopilotPluginUtil {
             }
             moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
             return moduleBaseDirectories
+        }
+
+        private var springBootProcess: Process? = null
+
+        fun startChatApp(project: Project) {
+            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/chat.jar").path
+
+            if (springBootProcess?.isAlive == true || isChatAppRunning()) {
+                notify("Chat App is already running.", NotificationType.WARNING, project)
+                return
+            }
+
+            try {
+                val processBuilder = ProcessBuilder("java", "-jar", target)
+                processBuilder.redirectErrorStream(true)
+                springBootProcess = processBuilder.start()
+
+                notify("Chat App started successfully.", NotificationType.INFORMATION, project)
+
+                Thread {
+                        springBootProcess?.inputStream?.bufferedReader()?.use { reader ->
+                            reader.lines().forEach { LOG.info("[ChatApp] $it") }
+                        }
+                    }
+                    .start()
+            } catch (e: IOException) {
+                LOG.error("Failed to start Chat App: ${e.message}", e)
+                notify("Failed to start Chat App: ${e.message}", NotificationType.ERROR, project)
+            }
+        }
+
+        private fun isChatAppRunning(): Boolean {
+            return try {
+                val url = java.net.URL("http://localhost:9090")
+                with(url.openConnection() as java.net.HttpURLConnection) {
+                    connectTimeout = 1000
+                    readTimeout = 1000
+                    requestMethod = "GET"
+                    connect()
+                    responseCode in 200..399
+                }
+            } catch (e: IOException) {
+                false
+            }
+        }
+
+        fun stopChatApp(project: Project) {
+            try {
+                if (springBootProcess?.isAlive == true) {
+                    springBootProcess?.destroy()
+                    springBootProcess?.waitFor()
+                    notify("Chat App stopped successfully.", NotificationType.INFORMATION, project)
+                } else {
+                    notify("Chat App is not running.", NotificationType.WARNING, project)
+                }
+            } catch (e: Exception) {
+                LOG.error("Failed to stop Chat App: ${e.message}", e)
+                notify("Failed to stop Chat App: ${e.message}", NotificationType.ERROR, project)
+            }
         }
     }
 }
