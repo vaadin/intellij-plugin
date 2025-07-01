@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
+import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.stopChatApp
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -51,6 +52,7 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
                 project,
                 object : ProjectManagerListener {
                     override fun projectClosing(project: Project) {
+                        stopChatApp(project)
                         removeDotfile()
                     }
                 },
