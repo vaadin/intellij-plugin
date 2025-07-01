@@ -13,6 +13,7 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
+import java.util.MissingResourceException
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vcs.VcsBundle
@@ -124,7 +125,19 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     private fun createGoToConfigurationAction(project: Project, configurable: String): AnAction {
         return NotificationAction.create("Go to settings...") { _, notification ->
             notification.hideBalloon()
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable)
+            try {
+                ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable)
+            } catch (e: MissingResourceException) {
+                // Handle missing resource bundles for other plugins (e.g., Grazie) in certain locales
+                // Log the error but still attempt to open the settings dialog without the specific configurable
+                CopilotPluginUtil.notify(
+                    "Unable to open specific settings page due to missing localization resources. " +
+                        "Opening general settings instead.",
+                    NotificationType.WARNING,
+                    project
+                )
+                ShowSettingsUtil.getInstance().showSettingsDialog(project)
+            }
         }
     }
 
