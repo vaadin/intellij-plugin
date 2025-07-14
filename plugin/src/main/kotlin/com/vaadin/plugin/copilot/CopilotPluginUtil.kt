@@ -314,8 +314,10 @@ class CopilotPluginUtil {
          * directory under "ai/copilot-chat.jar".
          *
          * TODO actually check the version of the downloaded file
+         *
          * @param project The current project context.
-         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and DownloadableFileDescription.
+         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and
+         *   DownloadableFileDescription.
          */
         fun downloadLatestCopilotChatJar(
             project: Project
@@ -338,8 +340,10 @@ class CopilotPluginUtil {
          * home directory under "ai/copilot-local-mcp-server.jar".
          *
          * TODO actually check the version of the downloaded file
+         *
          * @param project The current project context.
-         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and DownloadableFileDescription.
+         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and
+         *   DownloadableFileDescription.
          */
         fun downloadLatestCopilotLocalMcpServerJar(
             project: Project
