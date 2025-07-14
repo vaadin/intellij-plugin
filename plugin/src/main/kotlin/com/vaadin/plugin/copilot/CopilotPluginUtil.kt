@@ -14,6 +14,9 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.util.Pair
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.download.DownloadableFileDescription
 import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
@@ -29,6 +32,7 @@ import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
+import com.vaadin.plugin.utils.DownloadUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -36,6 +40,7 @@ import java.io.BufferedWriter
 import java.io.IOException
 import java.io.StringWriter
 import java.util.Properties
+import java.util.concurrent.CompletableFuture
 import org.jetbrains.jps.model.java.JavaResourceRootType
 import org.jetbrains.jps.model.java.JavaSourceRootType
 
@@ -225,7 +230,7 @@ class CopilotPluginUtil {
         private var springBootProcess: Process? = null
 
         fun startChatApp(project: Project) {
-            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/chat.jar").path
+            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-chat.jar").path
 
             if (springBootProcess?.isAlive == true || isChatAppRunning()) {
                 notify("Chat App is already running.", NotificationType.WARNING, project)
@@ -279,6 +284,72 @@ class CopilotPluginUtil {
                 LOG.error("Failed to stop Chat App: ${e.message}", e)
                 notify("Failed to stop Chat App: ${e.message}", NotificationType.ERROR, project)
             }
+        }
+
+        /**
+         * Checks if the latest version of the Copilot Chat JAR file exists in the Vaadin home directory. So far version
+         * is not checked, only the file existence.
+         */
+        fun existsLatestCopilotChatJar(): Boolean {
+            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-chat.jar")
+            return target.exists() && target.isFile
+        }
+
+        /**
+         * Checks if the latest version of the Copilot Local MCP Server JAR file exists in the Vaadin home directory. So
+         * far version is not checked, only the file existence.
+         */
+        fun existsLatestCopilotLocalMcpServerJar(): Boolean {
+            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-local-mcp-server.jar")
+            return target.exists() && target.isFile
+        }
+
+        /**
+         * Downloads the latest version of the Copilot Chat JAR file from the CDN and saves it to the Vaadin home
+         * directory under "ai/copilot-chat.jar".
+         *
+         * TODO actually check the version of the downloaded file
+         * @param project The current project context.
+         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and DownloadableFileDescription.
+         */
+        fun downloadLatestCopilotChatJar(
+            project: Project
+        ): CompletableFuture<List<Pair<VirtualFile?, DownloadableFileDescription?>?>?> {
+
+            val url = java.net.URL("https://cdn.vaadin.com/copilot-chat/copilot-chat-1.0.jar")
+            val targetFolder = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/")
+            if (!targetFolder.exists() && !targetFolder.mkdirs()) {
+                throw IOException("Unable to create ${targetFolder.absolutePath}")
+            }
+
+            val targetFile = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-chat.jar")
+
+            LOG.info("Downloading Copilot Chat into ${targetFile.absolutePath}")
+            return DownloadUtil.download(project, url.toExternalForm(), targetFile.toPath(), "Copilot Chat")
+        }
+
+        /**
+         * Downloads the latest version of the Copilot Local MCP Server JAR file from the CDN and saves it to the Vaadin
+         * home directory under "ai/copilot-local-mcp-server.jar".
+         *
+         * TODO actually check the version of the downloaded file
+         * @param project The current project context.
+         * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and DownloadableFileDescription.
+         */
+        fun downloadLatestCopilotLocalMcpServerJar(
+            project: Project
+        ): CompletableFuture<List<Pair<VirtualFile?, DownloadableFileDescription?>?>?> {
+
+            val url = java.net.URL("https://cdn.vaadin.com/copilot-chat/copilot-local-mcp-server-1.0.jar")
+            val targetFolder = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/")
+            if (!targetFolder.exists() && !targetFolder.mkdirs()) {
+                throw IOException("Unable to create ${targetFolder.absolutePath}")
+            }
+
+            val targetFile = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-local-mcp-server.jar")
+
+            LOG.info("Downloading Copilot Chat into ${targetFile.absolutePath}")
+            return DownloadUtil.download(project, url.toExternalForm(), targetFile.toPath(), "Copilot Chat")
         }
     }
 }
