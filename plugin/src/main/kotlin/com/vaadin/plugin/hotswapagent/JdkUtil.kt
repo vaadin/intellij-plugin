@@ -12,6 +12,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.roots.ui.configuration.SdkPopupBuilder
+import com.intellij.openapi.roots.ui.configuration.SdkPopupFactory
 import java.io.File
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.jps.model.java.JdkVersionDetector
@@ -114,6 +116,13 @@ class JdkUtil {
                 val project: Project = module.project
                 return ExternalSystemApiUtil.findModuleNode(project, GRADLE_SYSTEM_ID, projectPath)
             }
+        }
+
+        fun createSdkPopupBuilder(project: Project): SdkPopupBuilder {
+            return SdkPopupFactory.newBuilder()
+                .withProject(project)
+                .withSdkFilter(JdkUtil::isJetbrainsRuntime)
+                .updateProjectSdkFromSelection()
         }
     }
 }

@@ -6,13 +6,12 @@ import com.intellij.execution.configurations.JavaCommandLine
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.invokeLater
-import com.intellij.openapi.project.DumbService
-import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.NOTIFICATION_GROUP
-import com.vaadin.plugin.utils.JetbrainsRuntimeUtil
 import com.vaadin.plugin.utils.trackDebugWithHotswap
 
 class HotswapAgentRunner : GenericDebuggerRunner() {
@@ -55,19 +54,21 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                     invokeLater { super.execute(environment) }
                 } else {
                     invokeLater {
-                        CopilotPluginUtil.notify(
-                            "JetBrains Runtime not found, downloading and setting up...",
-                            NotificationType.INFORMATION,
-                            environment.project)
-                        JetbrainsRuntimeUtil.downloadAndSetupLatestJBR(environment.project).thenRun {
-                            DumbService.getInstance(environment.project).smartInvokeLater {
-                                CopilotPluginUtil.notify(
-                                    "JetBrains Runtime installed and configured, running Debug using Hotswap Agent",
-                                    NotificationType.INFORMATION,
-                                    environment.project)
-                                super.execute(environment)
+                        val action =
+                            NotificationAction.create("Setup JetBrains Runtime...") { event, notification ->
+                                JdkUtil.createSdkPopupBuilder(environment.project)
+                                    .onSdkSelected({ _ -> notification.hideBalloon() })
+                                    .buildPopup()
+                                    .showPopup(event)
                             }
-                        }
+                        Notifications.Bus.notify(
+                            Notification(
+                                    NOTIFICATION_GROUP,
+                                    "Current SDK is not a JetBrains Runtime. Set up JetBrains Runtime to enable Debug with HotSwap.",
+                                    NotificationType.WARNING)
+                                .addAction(action),
+                            environment.project,
+                        )
                     }
                 }
             } catch (_: BrokenJbrException) {
