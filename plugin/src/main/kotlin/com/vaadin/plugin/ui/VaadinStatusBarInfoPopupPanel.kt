@@ -9,9 +9,9 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.JBEmptyBorder
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
+import com.intellij.vcsUtil.showAbove
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.hotswapagent.JdkUtil
-import com.vaadin.plugin.utils.JetbrainsRuntimeUtil
 import com.vaadin.plugin.utils.doNotifyAboutVaadinProject
 import com.vaadin.plugin.utils.hasEndpoints
 import com.vaadin.plugin.utils.trackManualCopilotRestart
@@ -36,7 +36,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
         add(p)
     }
 
-    var refreshPopup: (() -> Unit)? = null
+    var closePopup: (() -> Unit)? = null
 
     private fun headerRow(): JComponent {
         val header = JBLabel("Vaadin plugin information")
@@ -51,10 +51,11 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
                 "JetBrains Runtime unavailable",
                 UIUtil.getLabelForeground(),
                 createJbrDownloadButton(),
-                "Download and setup latest JetBrains Runtime")
+                "Setup existing or new JetBrains Runtime SDK")
         }
 
-        return wrapMessage("JetBrains Runtime in use", UIUtil.getLabelSuccessForeground())
+        val description = JdkUtil.getProjectSdk(project)?.versionString
+        return wrapMessage("JetBrains Runtime in use", UIUtil.getLabelSuccessForeground(), description)
     }
 
     private fun copilotStatusRow(): JPanel {
@@ -93,7 +94,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
             doNotifyAboutVaadinProject(project)
             DumbService.getInstance(project).smartInvokeLater {
                 VaadinStatusBarWidget.update(project)
-                refreshPopup?.invoke()
+                closePopup?.invoke()
                 trackManualCopilotRestart()
             }
         }
@@ -101,9 +102,12 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
     }
 
     private fun createJbrDownloadButton(): JButton {
-        val downloadButton = JButton(AllIcons.Actions.Download)
+        val downloadButton = JButton(AllIcons.Actions.InlayGear)
         downloadButton.addActionListener {
-            JetbrainsRuntimeUtil.downloadAndSetupLatestJBR(project).thenRun { refreshPopup?.invoke() }
+            JdkUtil.createSdkPopupBuilder(project)
+                .onSdkSelected({ _ -> closePopup?.invoke() })
+                .buildPopup()
+                .showAbove(this)
         }
         return downloadButton
     }
