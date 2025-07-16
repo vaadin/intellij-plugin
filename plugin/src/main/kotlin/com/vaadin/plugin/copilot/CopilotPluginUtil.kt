@@ -16,6 +16,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.EnvironmentUtil
 import com.intellij.util.download.DownloadableFileDescription
 import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.DeleteFileHandler
@@ -230,6 +231,8 @@ class CopilotPluginUtil {
         private var springBootProcess: Process? = null
 
         fun startChatApp(project: Project) {
+            val shellEnv = loadShellEnv().ifEmpty { captureShellEnv() }
+            val userPath = shellEnv["PATH"]
             val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-chat.jar").path
 
             if (springBootProcess?.isAlive == true || isChatAppRunning()) {
@@ -239,10 +242,11 @@ class CopilotPluginUtil {
 
             try {
                 val processBuilder = ProcessBuilder("java", "-jar", target)
+                val fullEnv = ProcessBuilder().environment()
+                fullEnv.replace("PATH", fullEnv.get("PATH") + ":" + userPath)
+                processBuilder.environment().putAll(fullEnv)
                 processBuilder.redirectErrorStream(true)
                 springBootProcess = processBuilder.start()
-
-                notify("Chat App started successfully.", NotificationType.INFORMATION, project)
 
                 Thread {
                         springBootProcess?.inputStream?.bufferedReader()?.use { reader ->
@@ -254,6 +258,7 @@ class CopilotPluginUtil {
                 LOG.error("Failed to start Chat App: ${e.message}", e)
                 notify("Failed to start Chat App: ${e.message}", NotificationType.ERROR, project)
             }
+            notify("Chat App started successfully.", NotificationType.INFORMATION, project)
         }
 
         private fun isChatAppRunning(): Boolean {
@@ -354,6 +359,33 @@ class CopilotPluginUtil {
 
             LOG.info("Downloading Copilot Chat into ${targetFile.absolutePath}")
             return DownloadUtil.download(project, url.toExternalForm(), targetFile.toPath(), "Copilot Chat")
+        }
+
+        fun loadShellEnv(): Map<String, String> {
+            return try {
+                EnvironmentUtil.getEnvironmentMap()
+            } catch (e: Exception) {
+                emptyMap()
+            }
+        }
+
+        fun captureShellEnv(): Map<String, String> {
+            val shell = System.getenv("SHELL") ?: return emptyMap()
+            val pb = ProcessBuilder(shell, "-ilc", "env")
+            val env = mutableMapOf<String, String>()
+            pb.start().inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { line ->
+                    line
+                        .indexOf('=')
+                        .takeIf { it > 0 }
+                        ?.let { idx ->
+                            val key = line.substring(0, idx)
+                            val value = line.substring(idx + 1)
+                            env[key] = value
+                        }
+                }
+            }
+            return env
         }
     }
 }
