@@ -36,7 +36,8 @@ class AgenticChatUtil {
         data class AgenticChatInstallResult(
             val status: AgenticChatInstallStatus,
             val pathChat: Path?,
-            val pathMCP: Path?
+            val pathMCP: Path?,
+            val version: String
         )
 
         enum class AgenticChatInstallStatus {
@@ -63,7 +64,9 @@ class AgenticChatUtil {
             }
 
             try {
-                val processBuilder = ProcessBuilder("java", "-jar", target)
+                val processBuilder =
+                    ProcessBuilder(
+                        "java", "-Dcopilot.localMcpVersion=${agenticChatInstallResult.version}", "-jar", target)
                 val fullEnv = ProcessBuilder().environment()
                 fullEnv.replace("PATH", fullEnv.get("PATH") + ":" + userPath)
                 processBuilder.environment().putAll(fullEnv)
@@ -138,7 +141,8 @@ class AgenticChatUtil {
             if (latest == null || (latest.chat_app_url.file.isEmpty() || latest.mcp_server_url.file.isEmpty())) {
                 LOG.error("Unable to fetch latest Agentic Chat release info")
                 return CompletableFuture.completedFuture(
-                    AgenticChatInstallResult(status = AgenticChatInstallStatus.ERROR, pathChat = null, pathMCP = null))
+                    AgenticChatInstallResult(
+                        status = AgenticChatInstallStatus.ERROR, pathChat = null, pathMCP = null, version = "unknown"))
             }
             val latestChatArtifact = getFilename(latest.chat_app_url)
             val latestMcpArtifact = getFilename(latest.mcp_server_url)
@@ -151,7 +155,8 @@ class AgenticChatUtil {
                     AgenticChatInstallResult(
                         status = AgenticChatInstallStatus.ALREADY_EXISTS,
                         pathChat = chatTarget.toPath(),
-                        pathMCP = mcpTarget.toPath()))
+                        pathMCP = mcpTarget.toPath(),
+                        version = latest.version))
             }
             if (!chatTarget.exists()) {
                 LOG.info("Downloading Agentic Chat artifact into ${chatTarget.absolutePath}")
@@ -165,7 +170,8 @@ class AgenticChatUtil {
                                     AgenticChatInstallResult(
                                         status = AgenticChatInstallStatus.INSTALLED,
                                         pathChat = chatTarget.toPath(),
-                                        pathMCP = mcpTarget.toPath())
+                                        pathMCP = mcpTarget.toPath(),
+                                        version = latest.version)
                                 }
                         } else {
                             LOG.info("Agentic Chat artifact downloaded successfully.")
@@ -175,7 +181,8 @@ class AgenticChatUtil {
                         AgenticChatInstallResult(
                             status = AgenticChatInstallStatus.INSTALLED,
                             pathChat = chatTarget.toPath(),
-                            pathMCP = mcpTarget.toPath())
+                            pathMCP = mcpTarget.toPath(),
+                            version = latest.version)
                     }
             }
             if (!mcpTarget.exists()) {
@@ -186,11 +193,13 @@ class AgenticChatUtil {
                         AgenticChatInstallResult(
                             status = AgenticChatInstallStatus.INSTALLED,
                             pathChat = chatTarget.toPath(),
-                            pathMCP = mcpTarget.toPath())
+                            pathMCP = mcpTarget.toPath(),
+                            version = latest.version)
                     }
             }
             return CompletableFuture.completedFuture(
-                AgenticChatInstallResult(status = AgenticChatInstallStatus.ERROR, pathChat = null, pathMCP = null))
+                AgenticChatInstallResult(
+                    status = AgenticChatInstallStatus.ERROR, pathChat = null, pathMCP = null, version = "unknown"))
         }
 
         /**
