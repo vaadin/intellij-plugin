@@ -187,7 +187,8 @@ class AgenticChatUtil {
         /**
          * Downloads the latest version of the Copilot Chat JAR file from the CDN and saves it to the Vaadin home
          * directory under "ai/copilot-chat.jar".
-         **
+         * *
+         *
          * @param project The current project context.
          * @param url The URL of the Copilot Chat JAR file to download.
          * @param targetFile The target file where the JAR will be saved.
@@ -212,7 +213,8 @@ class AgenticChatUtil {
         /**
          * Downloads the latest version of the Copilot Local MCP Server JAR file from the CDN and saves it to the Vaadin
          * home directory under "ai/copilot-local-mcp-server.jar".
-         **
+         * *
+         *
          * @param project The current project context.
          * @param url The URL of the Copilot Local MCP Server JAR file to download.
          * @param targetFile The target file where the JAR will be saved.
@@ -235,8 +237,7 @@ class AgenticChatUtil {
         }
 
         /**
-         * Loads the shell environment variables using IntelliJ's EnvironmentUtil.
-         * If it fails, it returns an empty map.
+         * Loads the shell environment variables using IntelliJ's EnvironmentUtil. If it fails, it returns an empty map.
          *
          * @return A map of environment variables.
          */
