@@ -116,24 +116,6 @@ class AgenticChatUtil {
             }
         }
 
-        /**
-         * Checks if the latest version of the Copilot Chat JAR file exists in the Vaadin home directory. So far version
-         * is not checked, only the file existence.
-         */
-        fun existsLatestCopilotChatJar(): Boolean {
-            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-chat.jar")
-            return target.exists() && target.isFile
-        }
-
-        /**
-         * Checks if the latest version of the Copilot Local MCP Server JAR file exists in the Vaadin home directory. So
-         * far version is not checked, only the file existence.
-         */
-        fun existsLatestCopilotLocalMcpServerJar(): Boolean {
-            val target = VaadinHomeUtil.resolveVaadinHomeDirectory().resolve("ai/copilot-local-mcp-server.jar")
-            return target.exists() && target.isFile
-        }
-
         private fun getFilename(url: URL): String = url.file.replace(".*/".toRegex(), "")
 
         fun downloadLatestAgenticChatRelease(project: Project): CompletableFuture<AgenticChatInstallResult> {
@@ -205,10 +187,10 @@ class AgenticChatUtil {
         /**
          * Downloads the latest version of the Copilot Chat JAR file from the CDN and saves it to the Vaadin home
          * directory under "ai/copilot-chat.jar".
-         *
-         * TODO actually check the version of the downloaded file
-         *
+         **
          * @param project The current project context.
+         * @param url The URL of the Copilot Chat JAR file to download.
+         * @param targetFile The target file where the JAR will be saved.
          * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and
          *   DownloadableFileDescription.
          */
@@ -230,10 +212,10 @@ class AgenticChatUtil {
         /**
          * Downloads the latest version of the Copilot Local MCP Server JAR file from the CDN and saves it to the Vaadin
          * home directory under "ai/copilot-local-mcp-server.jar".
-         *
-         * TODO actually check the version of the downloaded file
-         *
+         **
          * @param project The current project context.
+         * @param url The URL of the Copilot Local MCP Server JAR file to download.
+         * @param targetFile The target file where the JAR will be saved.
          * @return A CompletableFuture that resolves to a list of pairs containing VirtualFile and
          *   DownloadableFileDescription.
          */
@@ -252,6 +234,12 @@ class AgenticChatUtil {
             return DownloadUtil.download(project, url.toExternalForm(), targetFile.toPath(), "Copilot Chat")
         }
 
+        /**
+         * Loads the shell environment variables using IntelliJ's EnvironmentUtil.
+         * If it fails, it returns an empty map.
+         *
+         * @return A map of environment variables.
+         */
         fun loadShellEnv(): Map<String, String> {
             return try {
                 EnvironmentUtil.getEnvironmentMap()
@@ -260,6 +248,12 @@ class AgenticChatUtil {
             }
         }
 
+        /**
+         * Fallback to capture the environment variables through the shell by executing the `env` command in a shell.
+         * This is useful for environments where EnvironmentUtil does not provide the necessary variables.
+         *
+         * @return A map of environment variables captured from the shell.
+         */
         fun captureShellEnv(): Map<String, String> {
             val shell = System.getenv("SHELL") ?: return emptyMap()
             val pb = ProcessBuilder(shell, "-ilc", "env")
