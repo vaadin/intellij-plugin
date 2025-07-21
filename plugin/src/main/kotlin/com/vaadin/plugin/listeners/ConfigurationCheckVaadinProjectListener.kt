@@ -16,13 +16,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.openapi.vcs.VcsBundle
-import com.intellij.openapi.vcs.VcsConfiguration
-import com.intellij.openapi.vcs.VcsShowConfirmationOption
-import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
 import com.vaadin.plugin.copilot.service.CopilotUndoManager
+import com.vaadin.plugin.utils.IdeUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.trackPluginInitialized
@@ -88,9 +86,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     }
 
     private fun checkVcsAddConfirmationSetting(project: Project) {
-        val confirmation = VcsConfiguration.StandardConfirmation.ADD
-        val value = ProjectLevelVcsManagerImpl.getInstanceImpl(project).getConfirmation(confirmation).value
-        if (value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION) {
+        if (IdeUtil.willVcsPopupBeShown(project)) {
             notify(
                 project,
                 "Change your $MESSAGE_VCS setting to \"$MESSAGE_DO_NOT_ADD\" or \"$MESSAGE_ADD_SILENTLY\". " +

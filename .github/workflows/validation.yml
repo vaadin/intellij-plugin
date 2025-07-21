@@ -51,11 +51,12 @@ jobs:
             For MacOS users: there is a zip inside this zip and Finder unzips them both at once. Use `unzip distributions.zip` from Terminal or [check solution for Archive Manager](https://apple.stackexchange.com/questions/443607/is-there-a-way-to-prevent-macoss-archive-utility-from-unarchiving-inner-zip-fil).
 
   runPluginVerifier:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: codeChecks
     strategy:
+      fail-fast: false
       matrix:
-        version: [ "2024.1", "252.18003.27" ] # for EAPs - use specific version
+        version: [ "2024.2", "252.23892.248" ] # for EAPs - use specific version
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -87,6 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: waitForResults
     strategy:
+      fail-fast: false
       matrix:
         dir: ${{fromJson(needs.waitForResults.outputs.directories)}}
     steps:
