@@ -65,10 +65,7 @@ class VaadinStatusBarWidget(private val project: Project) : StatusBarWidget, Sta
     private fun showPopup(e: MouseEvent) {
         val panel = VaadinStatusBarInfoPopupPanel(project)
         val popup = JBPopupFactory.getInstance().createComponentPopupBuilder(panel, null).createPopup()
-        panel.refreshPopup = {
-            popup.cancel()
-            showPopup(e)
-        }
+        panel.closePopup = { popup.cancel() }
         val dimension = popup.content.preferredSize
         val at = Point(0, -dimension.height)
         popup.show(RelativePoint(e.component, at))
