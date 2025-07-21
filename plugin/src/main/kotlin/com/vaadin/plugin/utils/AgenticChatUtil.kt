@@ -277,7 +277,10 @@ class AgenticChatUtil {
 
         fun findLatestArtifactsRelease(): AgenticChatRelease? {
             try {
-                val text = HttpConnectionUtils.openConnection(AGENTIC_CHAT_RELEASES_URL).inputStream.bufferedReader().use { it.readText() }
+                val text =
+                    HttpConnectionUtils.openConnection(AGENTIC_CHAT_RELEASES_URL).inputStream.bufferedReader().use {
+                        it.readText()
+                    }
                 return jacksonObjectMapper().readValue(text, AgenticChatRelease::class.java)
             } catch (e: Exception) {
                 throw IOException("Unable to fetch JetBrains Runtime releases info", e)
