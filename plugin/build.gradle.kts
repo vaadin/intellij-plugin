@@ -12,10 +12,10 @@ plugins {
 }
 
 // version for building plugin
-val buildVersion = "2024.1"
+val buildVersion = "2024.2"
 
 // compatibility range
-val sinceBuildProperty = "241"
+val sinceBuildProperty = "242"
 val untilBuildProperty = "252.*"
 
 // version for verifying plugin, check validation.yml

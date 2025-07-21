@@ -55,7 +55,7 @@ jobs:
     needs: codeChecks
     strategy:
       matrix:
-        version: [ "2024.1", "252.18003.27" ] # for EAPs - use specific version
+        version: [ "2024.2", "252.23892.248" ] # for EAPs - use specific version
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
