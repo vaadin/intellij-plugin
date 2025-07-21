@@ -51,7 +51,7 @@ jobs:
             For MacOS users: there is a zip inside this zip and Finder unzips them both at once. Use `unzip distributions.zip` from Terminal or [check solution for Archive Manager](https://apple.stackexchange.com/questions/443607/is-there-a-way-to-prevent-macoss-archive-utility-from-unarchiving-inner-zip-fil).
 
   runPluginVerifier:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: codeChecks
     strategy:
       fail-fast: false
@@ -94,12 +94,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          SHORT=`cat ${{ matrix.dir }}/report.md | head -n 3 | sed s/#/###/`
-          if echo $SHORT | grep -q "Compatible."; then
-            echo $SHORT > ${{ matrix.dir }}/report.short.md
-          else
-            cp ${{ matrix.dir }}/report.md ${{ matrix.dir }}/report.short.md
-          fi
+          cat ${{ matrix.dir }}/report.md | head -n 3 | sed s/#/###/ > ${{ matrix.dir }}/report.short.md
       - name: Publish report
         uses: mshick/add-pr-comment@v2
         with:
