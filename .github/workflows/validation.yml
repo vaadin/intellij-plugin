@@ -54,6 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: codeChecks
     strategy:
+      fail-fast: false
       matrix:
         version: [ "2024.2", "252.23892.248" ] # for EAPs - use specific version
     steps:
