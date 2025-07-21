@@ -5,9 +5,9 @@ import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.vcs.ProjectLevelVcsManager
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
-import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
 import java.nio.file.Path
 
 object IdeUtil {
@@ -16,8 +16,14 @@ object IdeUtil {
 
     fun willVcsPopupBeShown(project: Project): Boolean {
         val confirmation = VcsConfiguration.StandardConfirmation.ADD
-        val value = ProjectLevelVcsManagerImpl.getInstanceImpl(project).getConfirmation(confirmation).value
-        return value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION
+        val vcsManager = ProjectLevelVcsManager.getInstance(project)
+        vcsManager.allActiveVcss.forEach {
+            val value = vcsManager.getStandardConfirmation(confirmation, it).value
+            if (value == VcsShowConfirmationOption.Value.SHOW_CONFIRMATION) {
+                return true
+            }
+        }
+        return false
     }
 
     fun willHotSwapPopupBeShown(): Boolean {

@@ -9,6 +9,7 @@ import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EnvironmentUtil
 import com.intellij.util.download.DownloadableFileDescription
+import com.intellij.util.net.HttpConnectionUtils
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.notify
 import java.io.File
 import java.io.IOException
@@ -276,7 +277,10 @@ class AgenticChatUtil {
 
         fun findLatestArtifactsRelease(): AgenticChatRelease? {
             try {
-                val text = DownloadUtil.openUrlWithProxy(AGENTIC_CHAT_RELEASES_URL)
+                val text =
+                    HttpConnectionUtils.openConnection(AGENTIC_CHAT_RELEASES_URL).inputStream.bufferedReader().use {
+                        it.readText()
+                    }
                 return jacksonObjectMapper().readValue(text, AgenticChatRelease::class.java)
             } catch (e: Exception) {
                 throw IOException("Unable to fetch JetBrains Runtime releases info", e)
