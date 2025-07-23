@@ -93,6 +93,12 @@
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
 
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
+        
+        
+        <toolWindow factoryClass="com.vaadin.plugin.ui.VaadinChatAppToolWindowFactory" id="VaadinChatApp"
+                    icon="/vaadin/icons/vaadin.svg"
+                    anchor="right" />
+        
     </extensions>
 
     <actions>
