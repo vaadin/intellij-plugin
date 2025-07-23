@@ -2,6 +2,7 @@ package com.vaadin.plugin.utils
 
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.ProjectLevelVcsManager
@@ -28,5 +29,9 @@ object IdeUtil {
 
     fun bringToFront(project: Project) {
         runInEdt { ProjectUtil.focusProjectWindow(project, true) }
+    }
+
+    fun isDarkTheme(): Boolean {
+        return LafManager.getInstance().currentUIThemeLookAndFeel.isDark
     }
 }
