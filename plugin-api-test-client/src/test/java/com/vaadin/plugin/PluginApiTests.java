@@ -149,4 +149,12 @@ public class PluginApiTests {
         Assertions.assertEquals(HttpStatusCode.valueOf(200), response.toBodilessEntity().getStatusCode());
     }
 
+    @Test
+    public void testGetVaadinVersion() throws IOException {
+        var response = client.getVaadinRoutes();
+        if (response.isPresent()){
+            System.out.println(response.get());
+        }
+    }
+
 }

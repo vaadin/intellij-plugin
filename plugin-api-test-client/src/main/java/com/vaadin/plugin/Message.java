@@ -31,4 +31,6 @@ public class Message {
     record DeleteMessage(String file) {
     }
 
+    record GetVaadinRoutesMessage() {
+    }
 }
