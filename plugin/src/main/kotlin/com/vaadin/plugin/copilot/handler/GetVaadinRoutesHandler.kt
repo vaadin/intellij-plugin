@@ -23,6 +23,7 @@ class GetVaadinRoutesHandler(project: Project) : AbstractHandler(project) {
 
             val query: Query<PsiClass> = AnnotatedElementsSearch.searchPsiClasses(annotationClass, scope)
             val classNames = query.findAll().mapNotNull { it.qualifiedName }
+            LOG.info("Vaadin Routes detected: ${classNames}")
 
             HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to classNames))
         }

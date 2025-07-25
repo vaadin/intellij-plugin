@@ -1,5 +1,6 @@
 package com.vaadin.plugin.copilot.handler
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.JarFileSystem
 import com.intellij.openapi.vfs.VirtualFile
@@ -13,27 +14,34 @@ internal const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
 class GetVaadinVersionHandler(project: Project) : AbstractHandler(project) {
 
     override fun run(): HandlerResponse {
-        val psiClass: PsiClass =
-            JavaPsiFacade.getInstance(project).findClass(VAADIN_SERVICE, GlobalSearchScope.allScope(project))
-                ?: return HandlerResponse(
-                    status = HttpResponseStatus.NOT_FOUND, data = mapOf("error" to "VaadinService class not found"))
+        return ApplicationManager.getApplication().runReadAction<HandlerResponse> {
+            val psiClass: PsiClass =
+                JavaPsiFacade.getInstance(project).findClass(VAADIN_SERVICE, GlobalSearchScope.allScope(project))
+                    ?: return@runReadAction HandlerResponse(
+                        status = HttpResponseStatus.NOT_FOUND, data = mapOf("error" to "VaadinService class not found"))
 
-        val classFile: VirtualFile =
-            psiClass.containingFile.virtualFile
-                ?: return HandlerResponse(
-                    status = HttpResponseStatus.NOT_FOUND, data = mapOf("error" to "VaadinService class not found"))
+            LOG.info("Vaadin Service psiClass: ${psiClass.qualifiedName}")
 
-        // If class file is inside a JAR, this returns the jar root
-        val jarFile = JarFileSystem.getInstance().getVirtualFileForJar(classFile)
-        val version =
-            if (jarFile != null) {
-                // Extract version from the JAR file name
-                extractArtifactVersionFromJarPath(jarFile.path)
-            } else {
-                // If not in a JAR, we cannot determine the version
-                "N/A"
-            }
-        return HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("version" to version) as Map<String, Any>?)
+            val classFile: VirtualFile =
+                psiClass.containingFile.virtualFile
+                    ?: return@runReadAction HandlerResponse(
+                        status = HttpResponseStatus.NOT_FOUND,
+                        data = mapOf("error" to "VaadinService class file not found"))
+
+            LOG.info("Vaadin Service class file: ${classFile.path}")
+
+            val jarFile = JarFileSystem.getInstance().getVirtualFileForJar(classFile)
+            val version =
+                if (jarFile != null) {
+                    extractArtifactVersionFromJarPath(jarFile.path)
+                } else {
+                    "N/A"
+                }
+
+            LOG.info("Vaadin Version detected: $version")
+
+            HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("version" to version) as Map<String, Any>?)
+        }
     }
 
     fun extractArtifactVersionFromJarPath(jarPath: String): String? {
