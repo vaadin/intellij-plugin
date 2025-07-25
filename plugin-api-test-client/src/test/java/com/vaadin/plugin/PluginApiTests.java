@@ -150,12 +150,14 @@ public class PluginApiTests {
     @Test
     public void testGetVaadinRoutes() throws IOException {
         var response = client.getVaadinRoutes();
+        Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("HelloWorldView") && response.get().toPrettyString().contains("CustomView"));
     }
 
     @Test
     public void testGetVaadinVersion() throws IOException {
         var response = client.getVaadinVersion();
+        Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("version"));
     }
 }

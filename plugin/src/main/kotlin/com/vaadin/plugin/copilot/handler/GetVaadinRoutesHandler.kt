@@ -19,13 +19,29 @@ class GetVaadinRoutesHandler(project: Project) : AbstractHandler(project) {
             val annotationClass =
                 facade.findClass("com.vaadin.flow.router.Route", scope)
                     ?: return@runReadAction HandlerResponse(
-                        HttpResponseStatus.NOT_FOUND, mapOf("error" to "Annotation class @Route not found"))
+                        HttpResponseStatus.OK, data = mapOf("classes" to listOf<Class<*>>()))
 
             val query: Query<PsiClass> = AnnotatedElementsSearch.searchPsiClasses(annotationClass, scope)
-            val classNames = query.findAll().mapNotNull { it.qualifiedName }
-            LOG.info("Vaadin Routes detected: ${classNames}")
 
-            HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to classNames))
+            val routeInfoList =
+                query.findAll().mapNotNull { psiClass ->
+                    val annotation =
+                        psiClass.modifierList?.annotations?.firstOrNull {
+                            it.qualifiedName == "com.vaadin.flow.router.Route"
+                        } ?: return@mapNotNull null
+
+                    val valueExpr =
+                        annotation.findAttributeValue("value")
+                            ?: annotation.parameterList.attributes.firstOrNull()?.value
+
+                    val value = valueExpr?.text?.removeSurrounding("\"")
+
+                    mapOf("class" to (psiClass.qualifiedName ?: return@mapNotNull null), "value" to (value ?: ""))
+                }
+
+            LOG.info("Vaadin Routes detected: $routeInfoList")
+
+            HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to routeInfoList))
         }
     }
 }
