@@ -8,12 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Properties;
@@ -150,11 +148,18 @@ public class PluginApiTests {
     }
 
     @Test
-    public void testGetVaadinVersion() throws IOException {
+    public void testGetVaadinRoutes() throws IOException {
         var response = client.getVaadinRoutes();
         if (response.isPresent()){
             System.out.println(response.get());
         }
     }
 
+    @Test
+    public void testGetVaadinVersion() throws IOException {
+        var response = client.getVaadinVersion();
+        if (response.isPresent()){
+            System.out.println(response.get());
+        }
+    }
 }

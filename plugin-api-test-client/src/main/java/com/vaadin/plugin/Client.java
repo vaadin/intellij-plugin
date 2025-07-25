@@ -64,6 +64,10 @@ public class Client {
         return sendRestSync("getVaadinRoutes", new Message.GetVaadinRoutesMessage());
     }
 
+    public Optional<JsonNode> getVaadinVersion() throws IOException {
+        return sendRestSync("getVaadinVersion", new Message.GetVaadinVersionMessage());
+    }
+
     private RestClient.ResponseSpec send(String command, Object data) throws JsonProcessingException {
         Message.CopilotRestRequest message = new Message.CopilotRestRequest(command, projectBasePath, data);
         String body = new ObjectMapper().writeValueAsString(message);
