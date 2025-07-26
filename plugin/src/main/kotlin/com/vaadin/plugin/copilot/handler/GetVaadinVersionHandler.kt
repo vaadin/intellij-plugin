@@ -7,9 +7,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
 import com.intellij.psi.search.GlobalSearchScope
+import com.vaadin.plugin.utils.VAADIN_SERVICE
 import io.netty.handler.codec.http.HttpResponseStatus
-
-internal const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
 
 class GetVaadinVersionHandler(project: Project) : AbstractHandler(project) {
 

@@ -10,7 +10,7 @@ import com.intellij.openapi.util.Key
 import com.vaadin.plugin.listeners.VaadinProjectListener
 import com.vaadin.plugin.starter.DownloadableModel
 
-internal const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
+const val VAADIN_SERVICE = "com.vaadin.flow.server.VaadinService"
 
 internal const val ENDPOINTS_PLUGIN_ID = "com.intellij.microservices.ui"
 
