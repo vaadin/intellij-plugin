@@ -3,6 +3,7 @@ package com.vaadin.plugin.utils
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Pair
@@ -70,8 +71,8 @@ class AgenticChatUtil {
                     ProcessBuilder(
                         "java",
                         "-Dcopilot.localMcpVersion=${agenticChatInstallResult.version}",
-                        "-Dcopilot.copilotPluginPath=${project.getService(CopilotDotfileService::class.java).getDotfilePath()?.toAbsolutePath()}",
-                        "-Dcopilot.projectBasePath=${project.getService(CopilotDotfileService::class.java).getDotfileDirectoryPath()?.parent?.toAbsolutePath()}",
+                        "-Dcopilot.copilotPluginPath=${project.service<CopilotDotfileService>().getDotfilePath()?.toAbsolutePath()}",
+                        "-Dcopilot.projectBasePath=${project.service<CopilotDotfileService>().getDotfileDirectoryPath()?.parent?.toAbsolutePath()}",
                         "-jar",
                         target)
                 val fullEnv = ProcessBuilder().environment()
