@@ -4,11 +4,15 @@ import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vcs.VcsConfiguration
 import com.intellij.openapi.vcs.VcsShowConfirmationOption
 import com.intellij.openapi.vcs.impl.ProjectLevelVcsManagerImpl
+import java.nio.file.Path
 
 object IdeUtil {
+
+    private val IDEA_DIR = ".idea"
 
     fun willVcsPopupBeShown(project: Project): Boolean {
         val confirmation = VcsConfiguration.StandardConfirmation.ADD
@@ -22,5 +26,9 @@ object IdeUtil {
 
     fun bringToFront(project: Project) {
         runInEdt { ProjectUtil.focusProjectWindow(project, true) }
+    }
+
+    fun getIdeaDirectoryPath(project: Project): Path? {
+        return project.guessProjectDir()?.toNioPath()?.resolve(IDEA_DIR)
     }
 }

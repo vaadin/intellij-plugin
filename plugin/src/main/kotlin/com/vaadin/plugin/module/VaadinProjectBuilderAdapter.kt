@@ -12,8 +12,11 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.util.io.ZipUtil
 import com.vaadin.plugin.utils.DownloadUtil
+import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
+import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import com.vaadin.plugin.utils.trackProjectCreated
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
 
 class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard = VaadinProjectWizard()) :
@@ -36,6 +39,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
                     ZipUtil.extract(tempFile.toPath(), outputPath, null, true)
                     FileUtil.moveDirWithContent(outputPath.resolve(zipRoot).toFile(), outputPath.toFile())
                     FileUtil.delete(tempFile)
+                    copyVaadinIcon(project)
                 }
                 .thenRun {
                     afterProjectCreated(project)
@@ -56,6 +60,17 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
             val descriptor = OpenFileDescriptor(project, it)
             descriptor.isUsePreviewTab = true
             FileEditorManager.getInstance(project).openEditor(descriptor, true)
+        }
+    }
+
+    private fun copyVaadinIcon(project: Project) {
+        val ideaDir = getIdeaDirectoryPath(project)
+        if (ideaDir != null) {
+            FileUtil.createIfDoesntExist(ideaDir.toFile())
+            val classLoader = getVaadinPluginDescriptor().classLoader
+            classLoader.getResourceAsStream("icon.png")?.use { inputStream ->
+                Files.copy(inputStream, ideaDir.resolve("icon.png"))
+            }
         }
     }
 }
