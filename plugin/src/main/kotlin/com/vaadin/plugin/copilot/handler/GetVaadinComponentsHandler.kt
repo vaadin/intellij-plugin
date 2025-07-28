@@ -65,7 +65,9 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
                     mapOf("class" to fqName, "origin" to origin, "source" to sourceName, "path" to path)
                 }
             val componentsFiltered =
-                classesInfo.filter { it["origin"] != "library" && !(it["source"]?.contains("com.vaadin") ?: false) }
+                classesInfo
+                    .filterNot { it["origin"] == "library" && it["source"]?.contains("com.vaadin") == true }
+                    .sortedBy { it["class"] ?: "" }
             HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to componentsFiltered))
         }
     }
