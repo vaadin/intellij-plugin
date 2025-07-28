@@ -160,4 +160,24 @@ public class PluginApiTests {
         Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("version"));
     }
+
+    @Test
+    public void testGetVaadinComponents() throws IOException {
+        var response = client.getVaadinComponents();
+        if (response.isPresent()){
+            System.out.println(response.get().toPrettyString());
+        }
+//        Assertions.assertTrue(response.isPresent());
+//        Assertions.assertTrue(response.get().toPrettyString().contains("version"));
+    }
+
+    @Test
+    public void testGetVaadinPersistence() throws IOException {
+        var response = client.getVaadinEntities();
+        if (response.isPresent()){
+            System.out.println(response.get().toPrettyString());
+        }
+//        Assertions.assertTrue(response.isPresent());
+//        Assertions.assertTrue(response.get().toPrettyString().contains("version"));
+    }
 }

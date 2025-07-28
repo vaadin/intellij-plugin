@@ -16,6 +16,7 @@ internal const val VAADIN_APP_SHELL_CONFIGURATOR = "com.vaadin.flow.component.pa
 internal const val VAADIN_ID = "com.vaadin.flow.component.template.Id"
 internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
 internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
+internal const val PERSISTENCE_ENTITY = "jakarta.persistence.Entity"
 
 fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val vaadinRouteClass =
@@ -66,4 +67,28 @@ fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<V
             })
 
     return endpoints.toList()
+}
+
+fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity> {
+    val entityClass =
+        JavaPsiFacade.getInstance(project).findClass(PERSISTENCE_ENTITY, ProjectScope.getLibrariesScope(project))
+            ?: return emptyList()
+
+    val entities = ArrayList<Entity>()
+
+    AnnotatedElementsSearch.searchPsiClasses(entityClass, scope)
+        .forEach(
+            Processor { psiClass ->
+                val uClass = psiClass.toUElementOfType<UClass>()
+                val sourcePsi = uClass?.sourcePsi
+                val className = psiClass.name
+
+                if (sourcePsi == null || className == null) return@Processor true
+
+                entities.add(Entity(className, psiClass.visibleSignatures))
+
+                true
+            })
+
+    return entities.toList()
 }

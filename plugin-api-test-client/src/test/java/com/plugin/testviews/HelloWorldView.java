@@ -1,4 +1,4 @@
-package com.vaadin.plugin;
+package com.plugin.testviews;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
