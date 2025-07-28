@@ -17,8 +17,9 @@ class GetVaadinPersistenceHandler(project: Project) : AbstractHandler(project) {
             val mapEntities =
                 entities.map { entity ->
                     mapOf(
-                        "classname" to entity.locationString,
-                        "methods" to entity.visibleMethods.joinToString(",") { signatureToString(it) })
+                        "classname" to entity.className,
+                        "methods" to entity.visibleMethods.joinToString(",") { signatureToString(it) },
+                        "path" to entity.path)
                 }
 
             LOG.info("Entities detected: $entities")

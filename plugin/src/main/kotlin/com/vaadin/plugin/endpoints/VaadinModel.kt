@@ -82,10 +82,10 @@ fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity>
                 val uClass = psiClass.toUElementOfType<UClass>()
                 val sourcePsi = uClass?.sourcePsi
                 val className = psiClass.name
-
+                val path = psiClass.containingFile?.virtualFile?.path
                 if (sourcePsi == null || className == null) return@Processor true
 
-                entities.add(Entity(className, psiClass.visibleSignatures))
+                entities.add(Entity(className, psiClass.visibleSignatures, path ?: "unknown"))
 
                 true
             })
