@@ -1,11 +1,9 @@
 package com.vaadin.plugin.copilot
 
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -32,6 +30,7 @@ import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.utils.VaadinIcons
+import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
 import java.io.IOException
@@ -78,7 +77,7 @@ class CopilotPluginUtil {
             HEARTBEAT("heartbeat"),
         }
 
-        private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))?.version
+        private val pluginVersion = getVaadinPluginDescriptor().version
 
         const val NOTIFICATION_GROUP = "Vaadin Copilot"
 
