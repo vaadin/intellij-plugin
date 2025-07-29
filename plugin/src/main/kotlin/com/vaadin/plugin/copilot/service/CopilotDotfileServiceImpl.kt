@@ -5,7 +5,6 @@ import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
-import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -13,6 +12,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileCreateEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileDeleteEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.vaadin.plugin.utils.AgenticChatUtil.Companion.stopChatApp
+import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileService {
 
     private val DOTFILE = ".copilot-plugin"
-    private val IDEA_DIR = ".idea"
 
     private val _fileExists = MutableStateFlow(false)
     private val fileExists: StateFlow<Boolean> = _fileExists.asStateFlow()
@@ -64,12 +63,8 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
         return fileExists.value
     }
 
-    override fun getDotfileDirectoryPath(): Path? {
-        return project.guessProjectDir()?.toNioPath()?.resolve(IDEA_DIR)
-    }
-
     override fun getDotfilePath(): Path? {
-        return getDotfileDirectoryPath()?.resolve(DOTFILE)
+        return getIdeaDirectoryPath(project)?.resolve(DOTFILE)
     }
 
     @Throws(IOException::class)
@@ -82,7 +77,7 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
         runInEdt {
             WriteAction.run<Throwable> {
                 val dotfileDirectory =
-                    getDotfileDirectoryPath() ?: throw IOException("Could not find the .idea directory")
+                    getIdeaDirectoryPath(project) ?: throw IOException("Could not find the .idea directory")
                 val vfsDotfileDirectory =
                     VfsUtil.createDirectoryIfMissing(dotfileDirectory.toString())
                         ?: throw IOException("Could not create .idea directory")

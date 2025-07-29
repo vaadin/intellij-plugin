@@ -13,6 +13,7 @@ import com.intellij.util.download.DownloadableFileDescription
 import com.intellij.util.net.HttpConnectionUtils
 import com.vaadin.plugin.copilot.CopilotPluginUtil.Companion.notify
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
+import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -72,7 +73,7 @@ class AgenticChatUtil {
                         "java",
                         "-Dcopilot.localMcpVersion=${agenticChatInstallResult.version}",
                         "-Dcopilot.copilotPluginPath=${project.service<CopilotDotfileService>().getDotfilePath()?.toAbsolutePath()}",
-                        "-Dcopilot.projectBasePath=${project.service<CopilotDotfileService>().getDotfileDirectoryPath()?.parent?.toAbsolutePath()}",
+                        "-Dcopilot.projectBasePath=${getIdeaDirectoryPath(project)?.parent?.toAbsolutePath()}",
                         "-jar",
                         target)
                 val fullEnv = ProcessBuilder().environment()
