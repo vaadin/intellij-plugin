@@ -6,8 +6,10 @@ import com.intellij.openapi.roots.OrderEntry
 import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.HierarchicalMethodSignature
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.util.Query
@@ -31,11 +33,12 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
                 query.findAll().mapNotNull { psi ->
                     val fqName = psi.qualifiedName ?: return@mapNotNull null
                     val vfile = psi.containingFile?.virtualFile ?: return@mapNotNull null
+                    val visibleSignature = psi.visibleSignatures
 
                     val origin: String
                     val sourceName: String
                     val path: String
-
+                    val methods = visibleSignature.joinToString(",") { signatureToString(it) }
                     when {
                         index.isInLibraryClasses(vfile) -> {
                             origin = "library"
@@ -62,7 +65,12 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
                         }
                     }
 
-                    mapOf("class" to fqName, "origin" to origin, "source" to sourceName, "path" to path)
+                    mapOf(
+                        "class" to fqName,
+                        "origin" to origin,
+                        "source" to sourceName,
+                        "path" to path,
+                        "methods" to methods)
                 }
             val componentsFiltered =
                 classesInfo
@@ -70,5 +78,14 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
                     .sortedBy { it["class"] ?: "" }
             HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to componentsFiltered))
         }
+    }
+
+    fun signatureToString(sig: HierarchicalMethodSignature?): String {
+        if (sig == null) return "<unknownMethod>"
+        val method: PsiMethod = sig.method
+        val returnType = method.returnType?.presentableText ?: "void"
+        val params = method.parameterList.parameters.joinToString(", ") { p -> "${p.type.presentableText} ${p.name}" }
+        val className = method.containingClass?.qualifiedName ?: "<unknownClass>"
+        return "$returnType $className.${method.name}($params)"
     }
 }
