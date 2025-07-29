@@ -15,6 +15,8 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
+import com.vaadin.plugin.copilot.handler.GetVaadinRoutesHandler
+import com.vaadin.plugin.copilot.handler.GetVaadinVersionHandler
 import com.vaadin.plugin.copilot.handler.Handler
 import com.vaadin.plugin.copilot.handler.HandlerResponse
 import com.vaadin.plugin.copilot.handler.HeartbeatHandler
@@ -69,6 +71,8 @@ class CopilotPluginUtil {
             GET_MODULE_PATHS("getModulePaths"),
             COMPILE_FILES("compileFiles"),
             RESTART_APPLICATION("restartApplication"),
+            GET_VAADIN_ROUTES("getVaadinRoutes"),
+            GET_VAADIN_VERSION("getVaadinVersion"),
             RELOAD_MAVEN_MODULE("reloadMavenModule"),
             HEARTBEAT("heartbeat"),
         }
@@ -100,6 +104,8 @@ class CopilotPluginUtil {
                 HANDLERS.GET_MODULE_PATHS.command -> return GetModulePathsHandler(project)
                 HANDLERS.COMPILE_FILES.command -> return CompileFilesHandler(project, data)
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
+                HANDLERS.GET_VAADIN_ROUTES.command -> return GetVaadinRoutesHandler(project)
+                HANDLERS.GET_VAADIN_VERSION.command -> return GetVaadinVersionHandler(project)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
                 HANDLERS.HEARTBEAT.command -> return HeartbeatHandler(project)
