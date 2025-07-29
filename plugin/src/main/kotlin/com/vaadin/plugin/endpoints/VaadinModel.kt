@@ -163,3 +163,126 @@ fun signatureToString(sig: HierarchicalMethodSignature?): String {
     val className = method.containingClass?.qualifiedName ?: "<unknownClass>"
     return "$returnType $className.${method.name}($params)"
 }
+
+fun findSecurityConfig(project: Project, scope: GlobalSearchScope): Collection<VaadinSecurity> {
+    val facade = JavaPsiFacade.getInstance(project)
+    val securityClass =
+        facade.findClass("com.vaadin.flow.spring.security.VaadinWebSecurity", scope) ?: return emptyList()
+
+    val security = ArrayList<VaadinSecurity>()
+    val index: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+    val query: Query<PsiClass> = ClassInheritorsSearch.search(securityClass, scope, true)
+
+    query.findAll().forEach { psi ->
+        val fqName = psi.qualifiedName ?: return@forEach
+        val vfile = psi.containingFile?.virtualFile ?: return@forEach
+
+        val origin: String
+        val sourceName: String
+        val path: String
+        when {
+            index.isInLibraryClasses(vfile) -> {
+                origin = "library"
+                val entries: List<OrderEntry> = index.getOrderEntriesForFile(vfile)
+                // Try to get JAR path from orderEntries' CLASS roots
+                val jarPaths =
+                    entries
+                        .flatMap { entry -> entry.getFiles(OrderRootType.CLASSES).toList() }
+                        .mapNotNull { it.path }
+                        .distinct()
+                path = jarPaths.firstOrNull() ?: "unknown.jar"
+                sourceName = entries.firstOrNull()?.presentableName ?: "unknown-library"
+            }
+            index.isInSourceContent(vfile) -> {
+                origin = "source"
+                // File path from project content
+                path = vfile.path
+                sourceName = psi.qualifiedName?.substringBeforeLast('.', "") ?: "unknown-source"
+            }
+            else -> {
+                origin = "unknown"
+                path = vfile.path
+                sourceName = "unknown"
+            }
+        }
+
+        // Look for setLoginView call
+        var loginViewClassName: String? = null
+        psi.methods.forEach { method ->
+            method.body?.statements?.forEach { stmt ->
+                val callExpr = stmt as? com.intellij.psi.PsiExpressionStatement ?: return@forEach
+                val expr = callExpr.expression as? com.intellij.psi.PsiMethodCallExpression ?: return@forEach
+                val methodName = expr.methodExpression.referenceName
+
+                if (methodName == "setLoginView") {
+                    val args = expr.argumentList.expressions
+                    if (args.size == 2) {
+                        val arg = args[1]
+                        if (arg is com.intellij.psi.PsiClassObjectAccessExpression) {
+                            val refClass = arg.operand?.type as? com.intellij.psi.PsiClassType
+                            loginViewClassName = refClass?.resolve()?.qualifiedName
+                        }
+                    }
+                }
+            }
+        }
+
+        security.add(
+            VaadinSecurity(
+                fqName, origin, sourceName, path, PsiAnchor.create(psi), loginViewClassName // added parameter
+                ))
+    }
+
+    return security.filterNot { it.origin == "library" && it.source.contains("com.vaadin") }.sortedBy { it.className }
+}
+
+fun findUserDetails(project: Project, scope: GlobalSearchScope): Collection<VaadinUserDetails> {
+    val facade = JavaPsiFacade.getInstance(project)
+    val userDetailsClass =
+        facade.findClass("org.springframework.security.core.userdetails.UserDetailsService", scope)
+            ?: return emptyList()
+
+    val userDetails = ArrayList<VaadinUserDetails>()
+    val index: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+    val query: Query<PsiClass> = ClassInheritorsSearch.search(userDetailsClass, scope, true)
+
+    query.findAll().forEach { psi ->
+        val fqName = psi.qualifiedName ?: return@forEach
+        val vfile = psi.containingFile?.virtualFile ?: return@forEach
+
+        val origin: String
+        val sourceName: String
+        val path: String
+        when {
+            index.isInLibraryClasses(vfile) -> {
+                origin = "library"
+                val entries: List<OrderEntry> = index.getOrderEntriesForFile(vfile)
+                // Try to get JAR path from orderEntries' CLASS roots
+                val jarPaths =
+                    entries
+                        .flatMap { entry -> entry.getFiles(OrderRootType.CLASSES).toList() }
+                        .mapNotNull { it.path }
+                        .distinct()
+                path = jarPaths.firstOrNull() ?: "unknown.jar"
+                sourceName = entries.firstOrNull()?.presentableName ?: "unknown-library"
+            }
+            index.isInSourceContent(vfile) -> {
+                origin = "source"
+                // File path from project content
+                path = vfile.path
+                sourceName = psi.qualifiedName?.substringBeforeLast('.', "") ?: "unknown-source"
+            }
+            else -> {
+                origin = "unknown"
+                path = vfile.path
+                sourceName = "unknown"
+            }
+        }
+
+        userDetails.add(VaadinUserDetails(fqName, origin, sourceName, path, PsiAnchor.create(psi)))
+    }
+
+    return userDetails
+        .filterNot { it.origin == "library" && it.source.contains("com.vaadin") }
+        .sortedBy { it.className }
+}

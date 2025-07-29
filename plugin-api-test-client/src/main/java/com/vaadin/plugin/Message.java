@@ -42,4 +42,7 @@ public class Message {
 
     record GetVaadinPersistenceMessage() {
     }
+
+    record GetVaadinSecurityMessage() {
+    }
 }

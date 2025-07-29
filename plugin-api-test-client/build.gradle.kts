@@ -13,6 +13,9 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:3.4.2")
+    implementation("org.springframework.boot:spring-boot-starter-security:3.4.2")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.2")
+    implementation("com.vaadin:vaadin-spring:24.6.5")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
     implementation("com.vaadin:vaadin-core:24.6.5")
     implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")

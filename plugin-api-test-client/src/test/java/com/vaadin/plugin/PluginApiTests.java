@@ -167,8 +167,8 @@ public class PluginApiTests {
         if (response.isPresent()){
             System.out.println(response.get().toPrettyString());
         }
-//        Assertions.assertTrue(response.isPresent());
-//        Assertions.assertTrue(response.get().toPrettyString().contains("version"));
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("CustomButton"));
     }
 
     @Test
@@ -177,7 +177,17 @@ public class PluginApiTests {
         if (response.isPresent()){
             System.out.println(response.get().toPrettyString());
         }
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("User"));
+    }
+
+    @Test
+    public void testGetVaadinSecurity() throws IOException {
+        var response = client.getVaadinSecurity();
+        if (response.isPresent()){
+            System.out.println(response.get().toPrettyString());
+        }
 //        Assertions.assertTrue(response.isPresent());
-//        Assertions.assertTrue(response.get().toPrettyString().contains("version"));
+//        Assertions.assertTrue(response.get().toPrettyString().contains("User"));
     }
 }
