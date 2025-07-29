@@ -97,7 +97,8 @@
         
         <toolWindow factoryClass="com.vaadin.plugin.ui.VaadinChatAppToolWindowFactory" id="VaadinChatApp"
                     icon="/vaadin/icons/vaadin.svg"
-                    anchor="right" />
+                    anchor="right" canCloseContents="true" doNotActivateOnStart="true">
+        </toolWindow>
         
     </extensions>
 
