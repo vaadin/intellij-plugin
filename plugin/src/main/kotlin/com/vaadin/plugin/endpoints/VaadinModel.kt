@@ -17,7 +17,7 @@ internal const val VAADIN_ID = "com.vaadin.flow.component.template.Id"
 internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
 internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
 
-fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val vaadinRouteClass =
         JavaPsiFacade.getInstance(project).findClass(VAADIN_ROUTE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -44,7 +44,7 @@ fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<Vaadi
     return routes.toList()
 }
 
-fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+internal fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val hillaBrowserCallableClass =
         JavaPsiFacade.getInstance(project).findClass(HILLA_BROWSER_CALLABLE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
