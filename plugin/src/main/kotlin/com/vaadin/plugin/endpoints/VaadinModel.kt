@@ -1,12 +1,21 @@
 package com.vaadin.plugin.endpoints
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.OrderEntry
+import com.intellij.openapi.roots.OrderRootType
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.HierarchicalMethodSignature
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiAnchor
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
+import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.util.Processor
+import com.intellij.util.Query
 import org.jetbrains.uast.UClass
 import org.jetbrains.uast.evaluateString
 import org.jetbrains.uast.toUElementOfType
@@ -69,6 +78,59 @@ fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<V
     return endpoints.toList()
 }
 
+fun findComponents(project: Project, scope: GlobalSearchScope): Collection<VaadinComponent> {
+    val facade = JavaPsiFacade.getInstance(project)
+    val scope = GlobalSearchScope.allScope(project)
+    val componentClass = facade.findClass("com.vaadin.flow.component.Component", scope) ?: return emptyList()
+
+    val components = ArrayList<VaadinComponent>()
+
+    val index: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+    val query: Query<PsiClass> = ClassInheritorsSearch.search(componentClass, scope, true)
+
+    query
+        .findAll()
+        .forEach({ psi ->
+            val fqName = psi.qualifiedName ?: return@forEach
+            val vfile = psi.containingFile?.virtualFile ?: return@forEach
+
+            val origin: String
+            val sourceName: String
+            val path: String
+            when {
+                index.isInLibraryClasses(vfile) -> {
+                    origin = "library"
+                    val entries: List<OrderEntry> = index.getOrderEntriesForFile(vfile)
+                    // Try to get JAR path from orderEntries' CLASS roots
+                    val jarPaths =
+                        entries
+                            .flatMap { entry -> entry.getFiles(OrderRootType.CLASSES).toList() }
+                            .mapNotNull { it.path }
+                            .distinct()
+                    path = jarPaths.firstOrNull() ?: "unknown.jar"
+                    sourceName = entries.firstOrNull()?.presentableName ?: "unknown-library"
+                }
+                index.isInSourceContent(vfile) -> {
+                    origin = "source"
+                    // File path from project content
+                    path = vfile.path
+                    sourceName = psi.qualifiedName?.substringBeforeLast('.', "") ?: "unknown-source"
+                }
+                else -> {
+                    origin = "unknown"
+                    path = vfile.path
+                    sourceName = "unknown"
+                }
+            }
+
+            components.add(
+                VaadinComponent(fqName, origin, sourceName, path, PsiAnchor.create(psi), psi.visibleSignatures))
+        })
+    val notVaadinComponentsFiltered =
+        components.filterNot { it.origin == "library" && it.source.contains("com.vaadin") }.sortedBy { it.className }
+    return notVaadinComponentsFiltered
+}
+
 fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity> {
     val entityClass =
         JavaPsiFacade.getInstance(project).findClass(PERSISTENCE_ENTITY, ProjectScope.getLibrariesScope(project))
@@ -91,4 +153,13 @@ fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity>
             })
 
     return entities.toList()
+}
+
+fun signatureToString(sig: HierarchicalMethodSignature?): String {
+    if (sig == null) return "<unknownMethod>"
+    val method: PsiMethod = sig.method
+    val returnType = method.returnType?.presentableText ?: "void"
+    val params = method.parameterList.parameters.joinToString(", ") { p -> "${p.type.presentableText} ${p.name}" }
+    val className = method.containingClass?.qualifiedName ?: "<unknownClass>"
+    return "$returnType $className.${method.name}($params)"
 }
