@@ -8,12 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Properties;
@@ -149,4 +147,17 @@ public class PluginApiTests {
         Assertions.assertEquals(HttpStatusCode.valueOf(200), response.toBodilessEntity().getStatusCode());
     }
 
+    @Test
+    public void testGetVaadinRoutes() throws IOException {
+        var response = client.getVaadinRoutes();
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("HelloWorldView") && response.get().toPrettyString().contains("CustomView"));
+    }
+
+    @Test
+    public void testGetVaadinVersion() throws IOException {
+        var response = client.getVaadinVersion();
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("version"));
+    }
 }
