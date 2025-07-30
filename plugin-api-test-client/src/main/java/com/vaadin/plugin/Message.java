@@ -37,10 +37,10 @@ public class Message {
     record GetVaadinVersionMessage() {
     }
 
-    record GetVaadinComponentsMessage() {
+    record GetVaadinComponentsMessage(boolean includeMethods) {
     }
 
-    record GetVaadinPersistenceMessage() {
+    record GetVaadinPersistenceMessage(boolean includeMethods) {
     }
 
     record GetVaadinSecurityMessage() {

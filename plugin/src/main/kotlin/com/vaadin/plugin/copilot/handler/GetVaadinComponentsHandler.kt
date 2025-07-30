@@ -7,7 +7,9 @@ import com.vaadin.plugin.endpoints.findComponents
 import com.vaadin.plugin.endpoints.signatureToString
 import io.netty.handler.codec.http.HttpResponseStatus
 
-class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
+class GetVaadinComponentsHandler(project: Project, includeMethods: Boolean) : AbstractHandler(project) {
+
+    private val includeMethods: Boolean = includeMethods
 
     override fun run(): HandlerResponse {
         return ApplicationManager.getApplication().runReadAction<HandlerResponse> {
@@ -15,12 +17,20 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
 
             val mapComponents =
                 components.map { component ->
-                    mapOf(
-                        "class" to component.className,
-                        "origin" to component.origin,
-                        "source" to component.source,
-                        "path" to component.path,
-                        "methods" to component.visibleMethods.joinToString(",") { signatureToString(it) })
+                    if (includeMethods) {
+                        mapOf(
+                            "class" to component.className,
+                            "origin" to component.origin,
+                            "source" to component.source,
+                            "path" to component.path,
+                            "methods" to component.visibleMethods.joinToString(",") { signatureToString(it) })
+                    } else {
+                        mapOf(
+                            "class" to component.className,
+                            "origin" to component.origin,
+                            "source" to component.source,
+                            "path" to component.path)
+                    }
                 }
 
             LOG.info("Components detected: $components")

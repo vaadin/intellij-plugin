@@ -163,7 +163,7 @@ public class PluginApiTests {
 
     @Test
     public void testGetVaadinComponents() throws IOException {
-        var response = client.getVaadinComponents();
+        var response = client.getVaadinComponents(true);
         if (response.isPresent()){
             System.out.println(response.get().toPrettyString());
         }
@@ -172,8 +172,8 @@ public class PluginApiTests {
     }
 
     @Test
-    public void testGetVaadinPersistence() throws IOException {
-        var response = client.getVaadinEntities();
+    public void testGetVaadinEntities() throws IOException {
+        var response = client.getVaadinEntities(true);
         if (response.isPresent()){
             System.out.println(response.get().toPrettyString());
         }

@@ -7,7 +7,9 @@ import com.vaadin.plugin.endpoints.findEntities
 import com.vaadin.plugin.endpoints.signatureToString
 import io.netty.handler.codec.http.HttpResponseStatus
 
-class GetVaadinPersistenceHandler(project: Project) : AbstractHandler(project) {
+class GetVaadinEntitiesHandler(project: Project, includeMethods: Boolean) : AbstractHandler(project) {
+
+    private val includeMethods: Boolean = includeMethods
 
     override fun run(): HandlerResponse {
         return ApplicationManager.getApplication().runReadAction<HandlerResponse> {
@@ -15,10 +17,14 @@ class GetVaadinPersistenceHandler(project: Project) : AbstractHandler(project) {
 
             val mapEntities =
                 entities.map { entity ->
-                    mapOf(
-                        "classname" to entity.className,
-                        "methods" to entity.visibleMethods.joinToString(",") { signatureToString(it) },
-                        "path" to entity.path)
+                    if (includeMethods) {
+                        mapOf(
+                            "classname" to entity.className,
+                            "methods" to entity.visibleMethods.joinToString(",") { signatureToString(it) },
+                            "path" to entity.path)
+                    } else {
+                        mapOf("classname" to entity.className, "path" to entity.path)
+                    }
                 }
 
             LOG.info("Entities detected: $entities")

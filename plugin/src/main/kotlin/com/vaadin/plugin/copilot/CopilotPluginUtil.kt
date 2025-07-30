@@ -16,7 +16,7 @@ import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
 import com.vaadin.plugin.copilot.handler.GetVaadinComponentsHandler
-import com.vaadin.plugin.copilot.handler.GetVaadinPersistenceHandler
+import com.vaadin.plugin.copilot.handler.GetVaadinEntitiesHandler
 import com.vaadin.plugin.copilot.handler.GetVaadinRoutesHandler
 import com.vaadin.plugin.copilot.handler.GetVaadinSecurityHandler
 import com.vaadin.plugin.copilot.handler.GetVaadinVersionHandler
@@ -77,7 +77,7 @@ class CopilotPluginUtil {
             GET_VAADIN_ROUTES("getVaadinRoutes"),
             GET_VAADIN_VERSION("getVaadinVersion"),
             GET_VAADIN_COMPONENTS("getVaadinComponents"),
-            GET_VAADIN_PERSISTENCE("getVaadinPersistence"),
+            GET_VAADIN_ENTITIES("getVaadinEntities"),
             GET_VAADIN_SECURITY("getVaadinSecurity"),
             RELOAD_MAVEN_MODULE("reloadMavenModule"),
             HEARTBEAT("heartbeat"),
@@ -112,8 +112,10 @@ class CopilotPluginUtil {
                 HANDLERS.RESTART_APPLICATION.command -> return RestartApplicationHandler(project, data)
                 HANDLERS.GET_VAADIN_ROUTES.command -> return GetVaadinRoutesHandler(project)
                 HANDLERS.GET_VAADIN_VERSION.command -> return GetVaadinVersionHandler(project)
-                HANDLERS.GET_VAADIN_COMPONENTS.command -> return GetVaadinComponentsHandler(project)
-                HANDLERS.GET_VAADIN_PERSISTENCE.command -> return GetVaadinPersistenceHandler(project)
+                HANDLERS.GET_VAADIN_COMPONENTS.command ->
+                    return GetVaadinComponentsHandler(project, data["includeMethods"] as Boolean)
+                HANDLERS.GET_VAADIN_ENTITIES.command ->
+                    return GetVaadinEntitiesHandler(project, data["includeMethods"] as Boolean)
                 HANDLERS.GET_VAADIN_SECURITY.command -> return GetVaadinSecurityHandler(project)
                 HANDLERS.RELOAD_MAVEN_MODULE.command ->
                     return ReloadMavenModuleHandler(project, data["moduleName"] as String)
