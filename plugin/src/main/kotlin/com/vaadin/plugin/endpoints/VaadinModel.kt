@@ -31,7 +31,7 @@ internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
 internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
 internal const val PERSISTENCE_ENTITY = "jakarta.persistence.Entity"
 
-fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val vaadinRouteClass =
         JavaPsiFacade.getInstance(project).findClass(VAADIN_ROUTE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -58,7 +58,7 @@ fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<Vaadi
     return routes.toList()
 }
 
-fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+internal fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
     val hillaBrowserCallableClass =
         JavaPsiFacade.getInstance(project).findClass(HILLA_BROWSER_CALLABLE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -82,7 +82,7 @@ fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Collection<V
     return endpoints.toList()
 }
 
-fun findComponents(project: Project, scope: GlobalSearchScope): Collection<VaadinComponent> {
+internal fun findComponents(project: Project, scope: GlobalSearchScope): Collection<VaadinComponent> {
     val facade = JavaPsiFacade.getInstance(project)
     val scope = GlobalSearchScope.allScope(project)
     val componentClass = facade.findClass("com.vaadin.flow.component.Component", scope) ?: return emptyList()
@@ -135,7 +135,7 @@ fun findComponents(project: Project, scope: GlobalSearchScope): Collection<Vaadi
     return notVaadinComponentsFiltered
 }
 
-fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity> {
+internal fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity> {
     val entityClass =
         JavaPsiFacade.getInstance(project).findClass(PERSISTENCE_ENTITY, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -159,7 +159,7 @@ fun findEntities(project: Project, scope: GlobalSearchScope): Collection<Entity>
     return entities.toList()
 }
 
-fun signatureToString(sig: HierarchicalMethodSignature?): String {
+internal fun signatureToString(sig: HierarchicalMethodSignature?): String {
     if (sig == null) return "<unknownMethod>"
     val method: PsiMethod = sig.method
     val returnType = method.returnType?.presentableText ?: "void"
@@ -168,7 +168,7 @@ fun signatureToString(sig: HierarchicalMethodSignature?): String {
     return "$returnType $className.${method.name}($params)"
 }
 
-fun findSecurityConfig(project: Project, scope: GlobalSearchScope): Collection<VaadinSecurity> {
+internal fun findSecurityConfig(project: Project, scope: GlobalSearchScope): Collection<VaadinSecurity> {
     val facade = JavaPsiFacade.getInstance(project)
     val securityClass =
         facade.findClass("com.vaadin.flow.spring.security.VaadinWebSecurity", scope) ?: return emptyList()
@@ -240,7 +240,7 @@ fun findSecurityConfig(project: Project, scope: GlobalSearchScope): Collection<V
     return security.filterNot { it.origin == "library" && it.source.contains("com.vaadin") }.sortedBy { it.className }
 }
 
-fun findUserDetails(project: Project, scope: GlobalSearchScope): Collection<VaadinUserDetails> {
+internal fun findUserDetails(project: Project, scope: GlobalSearchScope): Collection<VaadinUserDetails> {
     val facade = JavaPsiFacade.getInstance(project)
     val userDetailsClass =
         facade.findClass("org.springframework.security.core.userdetails.UserDetailsService", scope)
@@ -326,7 +326,7 @@ private fun extractJpaEntityFromField(field: PsiField): String? {
  * Given a PsiClassType like JpaRepository<User, Long>, returns actual [PsiClass]s for the type arguments in order:
  * [User], [Long].
  */
-fun extractTypeArgumentClasses(type: PsiClassType): List<PsiClass> {
+private fun extractTypeArgumentClasses(type: PsiClassType): List<PsiClass> {
     val result: PsiClassType.ClassResolveResult = type.resolveGenerics()
     val resolvedCls: PsiClass? = result.element
     val substitutor = result.substitutor
