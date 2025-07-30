@@ -164,9 +164,6 @@ public class PluginApiTests {
     @Test
     public void testGetVaadinComponents() throws IOException {
         var response = client.getVaadinComponents(true);
-        if (response.isPresent()){
-            System.out.println(response.get().toPrettyString());
-        }
         Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("CustomButton"));
     }
@@ -174,9 +171,6 @@ public class PluginApiTests {
     @Test
     public void testGetVaadinEntities() throws IOException {
         var response = client.getVaadinEntities(true);
-        if (response.isPresent()){
-            System.out.println(response.get().toPrettyString());
-        }
         Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("\"classname\" : \"User\""));
     }
@@ -184,9 +178,6 @@ public class PluginApiTests {
     @Test
     public void testGetVaadinSecurity() throws IOException {
         var response = client.getVaadinSecurity();
-        if (response.isPresent()){
-            System.out.println(response.get().toPrettyString());
-        }
         Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("\"loginView\" : \"com.plugin.testviews.HelloWorldView\""));
         Assertions.assertTrue(response.get().toPrettyString().contains("\"entity\" : \"com.plugin.testviews.User\""));
