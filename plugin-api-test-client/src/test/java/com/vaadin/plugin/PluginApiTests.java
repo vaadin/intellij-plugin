@@ -178,7 +178,7 @@ public class PluginApiTests {
             System.out.println(response.get().toPrettyString());
         }
         Assertions.assertTrue(response.isPresent());
-        Assertions.assertTrue(response.get().toPrettyString().contains("User"));
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"classname\" : \"User\""));
     }
 
     @Test
@@ -187,7 +187,8 @@ public class PluginApiTests {
         if (response.isPresent()){
             System.out.println(response.get().toPrettyString());
         }
-//        Assertions.assertTrue(response.isPresent());
-//        Assertions.assertTrue(response.get().toPrettyString().contains("User"));
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"loginView\" : \"com.plugin.testviews.HelloWorldView\""));
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"entity\" : \"com.plugin.testviews.User\""));
     }
 }

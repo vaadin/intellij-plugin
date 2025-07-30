@@ -25,7 +25,7 @@ class GetVaadinComponentsHandler(project: Project) : AbstractHandler(project) {
 
             LOG.info("Components detected: $components")
 
-            HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("classes" to mapComponents))
+            HandlerResponse(status = HttpResponseStatus.OK, data = mapOf("components" to mapComponents))
         }
     }
 }

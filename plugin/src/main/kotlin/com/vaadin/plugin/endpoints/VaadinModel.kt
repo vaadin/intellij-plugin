@@ -9,11 +9,15 @@ import com.intellij.psi.HierarchicalMethodSignature
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiAnchor
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiClassType
+import com.intellij.psi.PsiField
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiType
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
 import com.intellij.psi.search.searches.ClassInheritorsSearch
+import com.intellij.psi.util.InheritanceUtil
 import com.intellij.util.Processor
 import com.intellij.util.Query
 import org.jetbrains.uast.UClass
@@ -279,10 +283,62 @@ fun findUserDetails(project: Project, scope: GlobalSearchScope): Collection<Vaad
             }
         }
 
-        userDetails.add(VaadinUserDetails(fqName, origin, sourceName, path, PsiAnchor.create(psi)))
+        // Extract JPA repository entity types from fields
+        val jpaEntities = psi.fields.mapNotNull { field -> extractJpaEntityFromField(field) }
+        userDetails.add(VaadinUserDetails(fqName, origin, sourceName, path, PsiAnchor.create(psi), jpaEntities))
     }
 
     return userDetails
         .filterNot { it.origin == "library" && it.source.contains("com.vaadin") }
         .sortedBy { it.className }
+}
+
+private fun extractJpaEntityFromField(field: PsiField): String? {
+    val type = field.type
+    if (type !is PsiClassType) return null
+
+    // Resolve the class and its generic substitutor
+    val resolveResult: PsiClassType.ClassResolveResult = type.resolveGenerics()
+    val resolvedCls: PsiClass? = resolveResult.element
+    val substitutor = resolveResult.substitutor
+    if (resolvedCls == null) return null
+
+    // Check if type is JpaRepository or subclass
+    val jpaRepoFqn = "org.springframework.data.jpa.repository.JpaRepository"
+    if (resolvedCls.qualifiedName == jpaRepoFqn || InheritanceUtil.isInheritor(resolvedCls, jpaRepoFqn)) {
+        // Get actual type argument for T
+        val paramIndexMap = resolvedCls.interfaceTypes
+        if (paramIndexMap.isNotEmpty()) {
+            // lookup mapping for first parameter
+            val interfaceImplemented = paramIndexMap[0]
+            if (interfaceImplemented is PsiClassType) {
+                val paramsClasses = extractTypeArgumentClasses(interfaceImplemented)
+                if (paramsClasses.isNotEmpty()) {
+                    return paramsClasses[0].qualifiedName
+                }
+            }
+        }
+    }
+    return null
+}
+
+/**
+ * Given a PsiClassType like JpaRepository<User, Long>, returns actual [PsiClass]s for the type arguments in order:
+ * [User], [Long].
+ */
+fun extractTypeArgumentClasses(type: PsiClassType): List<PsiClass> {
+    val result: PsiClassType.ClassResolveResult = type.resolveGenerics()
+    val resolvedCls: PsiClass? = result.element
+    val substitutor = result.substitutor
+
+    val paramClasses = mutableListOf<PsiClass>()
+    if (resolvedCls != null && type.hasParameters()) {
+        type.parameters.forEach { param ->
+            val substituted: PsiType? = substitutor.substitute(param)
+            if (substituted is PsiClassType) {
+                substituted.resolve()?.let { paramClasses.add(it) }
+            }
+        }
+    }
+    return paramClasses
 }

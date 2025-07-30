@@ -8,6 +8,7 @@ class VaadinUserDetails(
     val source: String,
     val path: String,
     val anchor: PsiAnchor,
+    val entity: List<String>? = null,
 ) {
     fun isValid(): Boolean = anchor.retrieve() != null
 }

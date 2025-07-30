@@ -24,12 +24,13 @@ class GetVaadinSecurityHandler(project: Project) : AbstractHandler(project) {
                         "loginView" to component.loginView)
                 }
             val mapUserDetails =
-                userDetails.map { component ->
+                userDetails.filterNot({ component -> component.origin == "library" }).map { component ->
                     mapOf(
                         "class" to component.className,
                         "origin" to component.origin,
                         "source" to component.source,
-                        "path" to component.path)
+                        "path" to component.path,
+                        "entity" to component.entity?.joinToString(","))
                 }
 
             LOG.info("Security detected: $security")
