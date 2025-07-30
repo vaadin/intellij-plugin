@@ -6,6 +6,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Pair
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EnvironmentUtil
@@ -72,7 +73,7 @@ class AgenticChatUtil {
                         "java",
                         "-Dcopilot.localMcpVersion=${agenticChatInstallResult.version}",
                         "-Dcopilot.copilotPluginPath=${project.service<CopilotDotfileService>().getDotfilePath()?.toAbsolutePath()}",
-                        "-Dcopilot.projectBasePath=${project.service<CopilotDotfileService>().getDotfileDirectoryPath()?.parent?.toAbsolutePath()}",
+                        "-Dcopilot.projectBasePath=${project.guessProjectDir()?.path}",
                         "-jar",
                         target)
                 val fullEnv = ProcessBuilder().environment()
