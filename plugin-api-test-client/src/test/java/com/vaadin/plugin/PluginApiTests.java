@@ -160,4 +160,26 @@ public class PluginApiTests {
         Assertions.assertTrue(response.isPresent());
         Assertions.assertTrue(response.get().toPrettyString().contains("version"));
     }
+
+    @Test
+    public void testGetVaadinComponents() throws IOException {
+        var response = client.getVaadinComponents(true);
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("CustomButton"));
+    }
+
+    @Test
+    public void testGetVaadinEntities() throws IOException {
+        var response = client.getVaadinEntities(true);
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"classname\" : \"User\""));
+    }
+
+    @Test
+    public void testGetVaadinSecurity() throws IOException {
+        var response = client.getVaadinSecurity();
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"loginView\" : \"com.plugin.testviews.HelloWorldView\""));
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"entity\" : \"com.plugin.testviews.User\""));
+    }
 }
