@@ -1,12 +1,12 @@
 package com.vaadin.plugin.module
 
+import com.intellij.ide.actions.NewProjectAction
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
 import com.intellij.ide.wizard.NewProjectWizardStep
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ui.configuration.actions.NewModuleAction
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.util.io.ZipUtil
@@ -50,8 +50,8 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
 
     // Show wizard only for new projects, not modules
     override fun isAvailable(): Boolean {
-        return Thread.currentThread().stackTrace.none { element ->
-            element.className.equals(NewModuleAction::class.java.name)
+        return Thread.currentThread().stackTrace.any { element ->
+            element.className.contains(NewProjectAction::class.java.name)
         }
     }
 
