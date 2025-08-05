@@ -68,6 +68,18 @@ public class Client {
         return sendRestSync("getVaadinVersion", new Message.GetVaadinVersionMessage());
     }
 
+    public Optional<JsonNode> getVaadinComponents(boolean includeMethods) throws IOException {
+        return sendRestSync("getVaadinComponents", new Message.GetVaadinComponentsMessage(includeMethods));
+    }
+
+    public Optional<JsonNode> getVaadinEntities(boolean includeMethods) throws IOException {
+        return sendRestSync("getVaadinEntities", new Message.GetVaadinPersistenceMessage(includeMethods));
+    }
+
+    public Optional<JsonNode> getVaadinSecurity() throws IOException {
+        return sendRestSync("getVaadinSecurity", new Message.GetVaadinSecurityMessage());
+    }
+
     private RestClient.ResponseSpec send(String command, Object data) throws JsonProcessingException {
         Message.CopilotRestRequest message = new Message.CopilotRestRequest(command, projectBasePath, data);
         String body = new ObjectMapper().writeValueAsString(message);
