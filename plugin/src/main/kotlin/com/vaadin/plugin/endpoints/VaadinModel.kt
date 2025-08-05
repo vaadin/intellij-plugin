@@ -1,5 +1,6 @@
 package com.vaadin.plugin.endpoints
 
+import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.OrderEntry
 import com.intellij.openapi.roots.OrderRootType
@@ -11,6 +12,7 @@ import com.intellij.psi.PsiAnchor
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiField
+import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
 import com.intellij.psi.search.GlobalSearchScope
@@ -31,7 +33,11 @@ internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
 internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
 internal const val PERSISTENCE_ENTITY = "jakarta.persistence.Entity"
 
-internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {
+/**
+ * ModulesScope.moduleWithDependenciesAndLibrariesScope(targetModule) does not work so we need to manually filter
+ * modules by name.
+ */
+internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope, moduleName: String?): Collection<VaadinRoute> {
     val vaadinRouteClass =
         JavaPsiFacade.getInstance(project).findClass(VAADIN_ROUTE, ProjectScope.getLibrariesScope(project))
             ?: return emptyList()
@@ -49,8 +55,18 @@ internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collect
                 val uAnnotation = uClass.findAnnotation(VAADIN_ROUTE) ?: return@Processor true
 
                 val urlMapping = uAnnotation.findAttributeValue("value")?.evaluateString() ?: ""
+                if (moduleName != null) {
+                    val module = ModuleUtilCore.findModuleForPsiElement(psiClass)
 
-                routes.add(VaadinRoute(urlMapping, className, PsiAnchor.create(sourcePsi)))
+                    if (module != null && !module.name.startsWith(moduleName)) {
+                        return@Processor true
+                    }
+                }
+
+                val psiJavaFile = psiClass.containingFile as? PsiJavaFile
+
+                routes.add(
+                    VaadinRoute(urlMapping, className, psiJavaFile?.packageName ?: "", PsiAnchor.create(sourcePsi)))
 
                 true
             })
@@ -74,7 +90,10 @@ internal fun findHillaEndpoints(project: Project, scope: GlobalSearchScope): Col
 
                 if (sourcePsi == null || className == null) return@Processor true
 
-                endpoints.add(VaadinRoute(className, className, PsiAnchor.create(sourcePsi)))
+                val psiJavaFile = psiClass.containingFile as? PsiJavaFile
+
+                endpoints.add(
+                    VaadinRoute(className, className, psiJavaFile?.packageName ?: "", PsiAnchor.create(sourcePsi)))
 
                 true
             })
