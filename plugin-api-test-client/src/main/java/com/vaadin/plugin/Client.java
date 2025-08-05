@@ -60,6 +60,10 @@ public class Client {
         return send("delete", new Message.DeleteMessage(path.toString()));
     }
 
+    public Optional<JsonNode> getModulePaths() throws IOException {
+        return sendRestSync("getModulePaths", new Message.GetModulesPathsMessage());
+    }
+
     public Optional<JsonNode> getVaadinRoutes() throws IOException {
         return sendRestSync("getVaadinRoutes", new Message.GetVaadinRoutesMessage());
     }

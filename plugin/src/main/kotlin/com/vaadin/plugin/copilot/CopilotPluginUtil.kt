@@ -12,6 +12,7 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.psi.search.GlobalSearchScope
 import com.vaadin.plugin.copilot.handler.CompileFilesHandler
 import com.vaadin.plugin.copilot.handler.DeleteFileHandler
 import com.vaadin.plugin.copilot.handler.GetModulePathsHandler
@@ -32,6 +33,7 @@ import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
+import com.vaadin.plugin.endpoints.findFlowRoutes
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -47,12 +49,15 @@ class CopilotPluginUtil {
     @JvmRecord
     data class ModuleInfo(
         val name: String,
+        val realName: String,
         val contentRoots: List<String>,
         val javaSourcePaths: ArrayList<String>,
         val javaTestSourcePaths: ArrayList<String>,
         val resourcePaths: ArrayList<String>,
         val testResourcePaths: ArrayList<String>,
-        val outputPath: String?
+        val outputPath: String?,
+        val isVaadinModule: Boolean,
+        val rootViewsPackage: String? = null,
     )
 
     @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<ModuleInfo>)
@@ -195,18 +200,26 @@ class CopilotPluginUtil {
                         {
                             val targetModuleRootManager = ModuleRootManager.getInstance(targetModule)
                             val contentRoots = targetModuleRootManager.contentRoots.map { it.path }
-
+                            // get the real name of the module, which is the parent folder name as
+                            // module names can be an alias
+                            val realName = targetModuleRootManager.contentRoots[0].name
                             val compilerModuleExtension = CompilerModuleExtension.getInstance(module)
                             val outputPath = compilerModuleExtension?.compilerOutputPath
-
+                            val vaadinRoutes =
+                                findFlowRoutes(project, GlobalSearchScope.allScope(project), targetModuleName)
+                            val rootViewsPackages = vaadinRoutes.map { it.packageName }
+                            val rootViewsPackage = commonAncestorPackageBestEffort(rootViewsPackages)
                             ModuleInfo(
                                 targetModuleName,
+                                realName,
                                 contentRoots,
                                 ArrayList<String>(),
                                 ArrayList<String>(),
                                 ArrayList<String>(),
                                 ArrayList<String>(),
-                                outputPath?.path)
+                                outputPath?.path,
+                                vaadinRoutes.isNotEmpty(),
+                                rootViewsPackage)
                         })
 
                 // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
@@ -235,6 +248,47 @@ class CopilotPluginUtil {
             }
             moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
             return moduleBaseDirectories
+        }
+
+        /**
+         * Returns:
+         * - the common package prefix shared by **all** package names if present;
+         * - otherwise, the prefix shared by the **most packages**, preferring longer prefixes when tied.
+         *
+         * Example: ["com.example.a", "com.example.b", "org.other"] → no universal prefix (would be ""), so returns
+         * "com.example" (occurring twice)
+         */
+        fun commonAncestorPackageBestEffort(packages: List<String>): String {
+            if (packages.isEmpty()) return ""
+
+            // Split package strings into segments
+            val splits = packages.map { it.trim().split('.') }.filter { it.isNotEmpty() }
+            if (splits.isEmpty()) return ""
+
+            // 1. Compute strict LCP (shared by all)
+            val shortest = splits.minByOrNull { it.size }!!
+            val strictCommon =
+                shortest.indices.takeWhile { i -> splits.all { it[i] == shortest[i] } }.map { shortest[it] }
+
+            if (strictCommon.isNotEmpty()) {
+                return strictCommon.joinToString(".")
+            }
+
+            // 2. No universal prefix: count all partial prefixes
+            val prefixCount = mutableMapOf<String, Int>()
+            for (parts in splits) {
+                var prefix = ""
+                for (seg in parts) {
+                    prefix = if (prefix.isEmpty()) seg else "$prefix.$seg"
+                    prefixCount[prefix] = (prefixCount[prefix] ?: 0) + 1
+                }
+            }
+
+            // 3. Choose the most frequent prefix (>=2), tiebreaker: longer depth
+            return prefixCount.entries
+                .filter { it.key.isNotEmpty() && it.value >= 2 }
+                .maxWithOrNull(compareBy<Map.Entry<String, Int>> { it.value }.thenBy { it.key.length })
+                ?.key ?: ""
         }
     }
 }
