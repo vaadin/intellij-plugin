@@ -7,15 +7,10 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.download.DownloadableFileDescription
 import com.intellij.util.download.DownloadableFileService
-import com.intellij.util.net.HttpConfigurable
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.PasswordAuthentication
-import java.net.Proxy
-import java.net.URL
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.zip.ZipFile
@@ -25,38 +20,6 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
 object DownloadUtil {
 
     private val LOG: Logger = Logger.getInstance(DownloadUtil::class.java)
-
-    /**
-     * Open connection to given url using IDE proxy if configured
-     *
-     * @param urlStr resource URL
-     * @return content as String
-     */
-    fun openUrlWithProxy(urlStr: String): String {
-        val config = HttpConfigurable.getInstance()
-        val url = URL(urlStr)
-
-        val connection =
-            if (config.USE_HTTP_PROXY && !config.isProxyException(url.toURI())) {
-                val proxy = Proxy(Proxy.Type.HTTP, InetSocketAddress(config.PROXY_HOST, config.PROXY_PORT))
-
-                if (config.PROXY_AUTHENTICATION) {
-                    java.net.Authenticator.setDefault(
-                        object : java.net.Authenticator() {
-                            override fun getPasswordAuthentication(): PasswordAuthentication {
-                                return PasswordAuthentication(
-                                    config.proxyLogin, config.plainProxyPassword?.toCharArray())
-                            }
-                        })
-                }
-
-                url.openConnection(proxy)
-            } else {
-                url.openConnection()
-            }
-
-        return connection.getInputStream().bufferedReader().use { it.readText() }
-    }
 
     /**
      * Downloads resource from given url in background with progress indicator
