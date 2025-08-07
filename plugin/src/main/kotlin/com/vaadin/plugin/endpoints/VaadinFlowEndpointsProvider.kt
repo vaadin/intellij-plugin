@@ -19,7 +19,7 @@ internal class VaadinFlowEndpointsProvider : VaadinEndpointsProvider() {
         if (filter !is ModuleEndpointsFilter) return emptyList()
         if (!hasVaadin(filter.module)) return emptyList()
 
-        return findFlowRoutes(project, filter.transitiveSearchScope)
+        return findFlowRoutes(project, filter.transitiveSearchScope, null)
     }
 
     override fun getEndpointPresentation(group: VaadinRoute, endpoint: VaadinRoute): ItemPresentation {
