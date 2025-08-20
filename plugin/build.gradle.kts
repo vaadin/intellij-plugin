@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.21"
+  id("org.jetbrains.kotlin.jvm") version "2.1.20"
   id("org.jetbrains.intellij.platform") version "2.6.0"
   id("com.diffplug.spotless") version "7.0.2"
 
@@ -12,7 +12,7 @@ plugins {
 }
 
 // version for building plugin
-val buildVersion = "2024.1"
+val buildVersion = "2025.2"
 
 // compatibility range
 val sinceBuildProperty = "241"
@@ -54,6 +54,8 @@ dependencies {
     exclude(group = "net.java.dev.jna", module = "jna")
     exclude(group = "net.java.dev.jna", module = "jna-platform")
   }
+  implementation("com.fasterxml.jackson.core:jackson-databind:2.19.0")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.0")
 
   intellijPlatform {
     intellijIdeaUltimate(buildVersion)

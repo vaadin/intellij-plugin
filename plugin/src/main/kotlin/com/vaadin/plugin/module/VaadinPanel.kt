@@ -142,6 +142,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
                 .withTextToPathConvertor(::getCanonicalPath)
         val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
         val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor).bindText(property)
+        return textFieldWithBrowseButton(fileChooserDescriptor.withTitle(title), wizardContext.project)
+            .bindText(property)
     }
 }
