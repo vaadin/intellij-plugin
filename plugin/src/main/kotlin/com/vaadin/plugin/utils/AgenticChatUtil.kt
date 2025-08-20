@@ -291,7 +291,7 @@ class AgenticChatUtil {
                     }
                 return jacksonObjectMapper().readValue(text, AgenticChatRelease::class.java)
             } catch (e: Exception) {
-                throw IOException("Unable to fetch JetBrains Runtime releases info", e)
+                throw IOException("Unable to fetch Agentic Chat releases info", e)
             }
         }
     }
