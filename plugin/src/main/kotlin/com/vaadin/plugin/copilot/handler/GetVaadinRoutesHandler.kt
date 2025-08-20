@@ -10,10 +10,15 @@ class GetVaadinRoutesHandler(project: Project) : AbstractHandler(project) {
 
     override fun run(): HandlerResponse {
         return ApplicationManager.getApplication().runReadAction<HandlerResponse> {
-            val flowViews = findFlowRoutes(project, GlobalSearchScope.allScope(project))
+            val flowViews = findFlowRoutes(project, GlobalSearchScope.allScope(project), null)
 
             val mapFlowRoute =
-                flowViews.map { route -> mapOf("route" to route.urlMapping, "classname" to route.locationString) }
+                flowViews.map { route ->
+                    mapOf(
+                        "route" to route.urlMapping,
+                        "classname" to route.locationString,
+                        "packageName" to route.packageName)
+                }
 
             LOG.info("Flow Routes detected: $flowViews")
 
