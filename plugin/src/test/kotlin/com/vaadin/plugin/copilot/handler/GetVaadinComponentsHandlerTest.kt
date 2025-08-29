@@ -14,7 +14,7 @@ class GetVaadinComponentsHandlerTest {
     fun testGetVaadinComponentsHandlerConstructorWithoutMethods() {
         // Given
         val mockProject = mock(Project::class.java)
-        
+
         // When
         val handler = GetVaadinComponentsHandler(mockProject, false)
 
@@ -26,7 +26,7 @@ class GetVaadinComponentsHandlerTest {
     fun testGetVaadinComponentsHandlerConstructorWithMethods() {
         // Given
         val mockProject = mock(Project::class.java)
-        
+
         // When
         val handler = GetVaadinComponentsHandler(mockProject, true)
 
@@ -45,16 +45,17 @@ class GetVaadinComponentsHandlerTest {
         // but it demonstrates the intended test structure
         try {
             val response = handler.run()
-            
+
             // Then
             assertEquals(HttpResponseStatus.OK, response.status)
             assertNotNull(response.data)
             assertTrue(response.data!!.containsKey("components"))
         } catch (e: Exception) {
             // Expected in test environment without full IntelliJ setup
-            assertTrue(e.message?.contains("ApplicationManager") == true || 
-                      e.message?.contains("Cannot instantiate") == true ||
-                      e is NullPointerException)
+            assertTrue(
+                e.message?.contains("ApplicationManager") == true ||
+                    e.message?.contains("Cannot instantiate") == true ||
+                    e is NullPointerException)
         }
     }
 

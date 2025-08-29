@@ -17,12 +17,11 @@ class HeartbeatHandlerTest {
         // Given
         val mockProject = mock(Project::class.java)
         val mockCompilationService = mock(CompilationStatusManagerService::class.java)
-        
-        `when`(mockProject.getService(CompilationStatusManagerService::class.java))
-            .thenReturn(mockCompilationService)
+
+        `when`(mockProject.getService(CompilationStatusManagerService::class.java)).thenReturn(mockCompilationService)
         `when`(mockCompilationService.hasCompilationError()).thenReturn(false)
         `when`(mockCompilationService.getErrorFiles()).thenReturn(emptyList())
-        
+
         val heartbeatHandler = HeartbeatHandler(mockProject)
 
         // When
@@ -43,12 +42,11 @@ class HeartbeatHandlerTest {
         val mockProject = mock(Project::class.java)
         val mockCompilationService = mock(CompilationStatusManagerService::class.java)
         val errorFiles = listOf("Test.java", "Example.kt")
-        
-        `when`(mockProject.getService(CompilationStatusManagerService::class.java))
-            .thenReturn(mockCompilationService)
+
+        `when`(mockProject.getService(CompilationStatusManagerService::class.java)).thenReturn(mockCompilationService)
         `when`(mockCompilationService.hasCompilationError()).thenReturn(true)
         `when`(mockCompilationService.getErrorFiles()).thenReturn(errorFiles)
-        
+
         val heartbeatHandler = HeartbeatHandler(mockProject)
 
         // When

@@ -58,7 +58,7 @@ class VaadinProjectBuilderAdapterTest {
     fun testCustomWizardConstructor() {
         // Given
         val customWizard = VaadinProjectWizard()
-        
+
         // When
         val adapter = VaadinProjectBuilderAdapter(customWizard)
 

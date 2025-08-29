@@ -15,11 +15,7 @@ class WriteFileHandlerTest {
         val mockProject = mock(Project::class.java)
         val outsideFile = "/tmp/outside_project_file.txt"
         val content = "Test content"
-        val data = mapOf(
-            "file" to outsideFile,
-            "content" to content,
-            "undoLabel" to "Test Write"
-        )
+        val data = mapOf("file" to outsideFile, "content" to content, "undoLabel" to "Test Write")
         val handler = WriteFileHandler(mockProject, data)
 
         // When
@@ -36,15 +32,11 @@ class WriteFileHandlerTest {
         val testFilePath = "/path/to/test/file.txt"
         val content = "Test file content"
         val undoLabel = "Custom Undo Label"
-        val data = mapOf(
-            "file" to testFilePath,
-            "content" to content,
-            "undoLabel" to undoLabel
-        )
-        
+        val data = mapOf("file" to testFilePath, "content" to content, "undoLabel" to undoLabel)
+
         // When
         val handler = WriteFileHandler(mockProject, data)
-        
+
         // Then - constructor should complete without errors
         assertNotNull(handler)
     }
@@ -55,15 +47,15 @@ class WriteFileHandlerTest {
         val mockProject = mock(Project::class.java)
         val testFilePath = "/path/to/test/file.txt"
         val content = "Test file content"
-        val data = mapOf(
-            "file" to testFilePath,
-            "content" to content
-            // undoLabel is missing - should use default
-        )
-        
+        val data =
+            mapOf(
+                "file" to testFilePath, "content" to content
+                // undoLabel is missing - should use default
+                )
+
         // When
         val handler = WriteFileHandler(mockProject, data)
-        
+
         // Then - constructor should complete without errors
         assertNotNull(handler)
     }
@@ -73,14 +65,11 @@ class WriteFileHandlerTest {
         // Given
         val mockProject = mock(Project::class.java)
         val content = "Test content with\nmultiple lines"
-        val data = mapOf(
-            "file" to "/test/file.txt",
-            "content" to content
-        )
-        
+        val data = mapOf("file" to "/test/file.txt", "content" to content)
+
         // When
         val handler = WriteFileHandler(mockProject, data)
-        
+
         // Then
         assertNotNull(handler)
     }
@@ -89,10 +78,7 @@ class WriteFileHandlerTest {
     fun testWriteFileHandlerResponseStructure() {
         // Given
         val mockProject = mock(Project::class.java)
-        val data = mapOf(
-            "file" to "/outside/project/file.txt",
-            "content" to "test"
-        )
+        val data = mapOf("file" to "/outside/project/file.txt", "content" to "test")
         val handler = WriteFileHandler(mockProject, data)
 
         // When

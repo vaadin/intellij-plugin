@@ -21,24 +21,23 @@ class GetModulePathsHandlerTest {
         val mockProject = mock(Project::class.java)
         val mockVirtualFile = mock(VirtualFile::class.java)
         val expectedPath = "/test/project/path"
-        val expectedModules = listOf(
-            CopilotPluginUtil.ModuleInfo(
-                "test-module",
-                listOf("/content/root"),
-                arrayListOf("/src/main/java"),
-                arrayListOf("/src/test/java"),
-                arrayListOf("/src/main/resources"),
-                arrayListOf("/src/test/resources"),
-                "/target/classes"
-            )
-        )
+        val expectedModules =
+            listOf(
+                CopilotPluginUtil.ModuleInfo(
+                    "test-module",
+                    listOf("/content/root"),
+                    arrayListOf("/src/main/java"),
+                    arrayListOf("/src/test/java"),
+                    arrayListOf("/src/main/resources"),
+                    arrayListOf("/src/test/resources"),
+                    "/target/classes"))
 
         `when`(mockVirtualFile.path).thenReturn(expectedPath)
 
         mockStatic(CopilotPluginUtil::class.java).use { mockedStatic: MockedStatic<CopilotPluginUtil> ->
-            mockedStatic.`when`<List<CopilotPluginUtil.ModuleInfo>> { 
-                CopilotPluginUtil.getModulesInfo(mockProject) 
-            }.thenReturn(expectedModules)
+            mockedStatic
+                .`when`<List<CopilotPluginUtil.ModuleInfo>> { CopilotPluginUtil.getModulesInfo(mockProject) }
+                .thenReturn(expectedModules)
 
             val handler = GetModulePathsHandler(mockProject)
 
@@ -49,7 +48,7 @@ class GetModulePathsHandlerTest {
             assertEquals(HttpResponseStatus.OK, response.status)
             assertNotNull(response.data)
             assertTrue(response.data!!.containsKey("project"))
-            
+
             val projectInfo = response.data!!["project"] as CopilotPluginUtil.ProjectInfo
             assertEquals(expectedModules, projectInfo.modules)
         }
@@ -62,9 +61,9 @@ class GetModulePathsHandlerTest {
         val expectedModules = emptyList<CopilotPluginUtil.ModuleInfo>()
 
         mockStatic(CopilotPluginUtil::class.java).use { mockedStatic: MockedStatic<CopilotPluginUtil> ->
-            mockedStatic.`when`<List<CopilotPluginUtil.ModuleInfo>> { 
-                CopilotPluginUtil.getModulesInfo(mockProject) 
-            }.thenReturn(expectedModules)
+            mockedStatic
+                .`when`<List<CopilotPluginUtil.ModuleInfo>> { CopilotPluginUtil.getModulesInfo(mockProject) }
+                .thenReturn(expectedModules)
 
             val handler = GetModulePathsHandler(mockProject)
 

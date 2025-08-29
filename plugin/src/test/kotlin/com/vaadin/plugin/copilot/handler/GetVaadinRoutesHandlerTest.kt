@@ -14,7 +14,7 @@ class GetVaadinRoutesHandlerTest {
     fun testGetVaadinRoutesHandlerConstructor() {
         // Given
         val mockProject = mock(Project::class.java)
-        
+
         // When
         val handler = GetVaadinRoutesHandler(mockProject)
 
@@ -33,16 +33,17 @@ class GetVaadinRoutesHandlerTest {
         // but it demonstrates the intended test structure
         try {
             val response = handler.run()
-            
+
             // Then
             assertEquals(HttpResponseStatus.OK, response.status)
             assertNotNull(response.data)
             assertTrue(response.data!!.containsKey("routes"))
         } catch (e: Exception) {
             // Expected in test environment without full IntelliJ setup
-            assertTrue(e.message?.contains("ApplicationManager") == true || 
-                      e.message?.contains("Cannot instantiate") == true ||
-                      e is NullPointerException)
+            assertTrue(
+                e.message?.contains("ApplicationManager") == true ||
+                    e.message?.contains("Cannot instantiate") == true ||
+                    e is NullPointerException)
         }
     }
 

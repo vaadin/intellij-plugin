@@ -30,10 +30,10 @@ class DeleteFileHandlerTest {
         val mockProject = mock(Project::class.java)
         val testFilePath = "/path/to/test/file.txt"
         val data = mapOf("file" to testFilePath)
-        
+
         // When
         val handler = DeleteFileHandler(mockProject, data)
-        
+
         // Then - constructor should complete without errors
         assertNotNull(handler)
     }
@@ -54,9 +54,8 @@ class DeleteFileHandlerTest {
         assertNotNull(response.status)
         // Response should be either BAD_REQUEST or INTERNAL_SERVER_ERROR depending on file state
         assertTrue(
-            response.status == HttpResponseStatus.BAD_REQUEST || 
-            response.status == HttpResponseStatus.INTERNAL_SERVER_ERROR
-        )
+            response.status == HttpResponseStatus.BAD_REQUEST ||
+                response.status == HttpResponseStatus.INTERNAL_SERVER_ERROR)
     }
 
     private fun assertTrue(condition: Boolean) {

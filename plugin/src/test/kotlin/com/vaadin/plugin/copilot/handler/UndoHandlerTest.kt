@@ -51,10 +51,10 @@ class UndoHandlerTest {
         val mockProject = mock(Project::class.java)
         val files = listOf("/path/to/file1.txt", "/path/to/file2.java")
         val data = mapOf("files" to files)
-        
+
         // When
         val handler = UndoHandler(mockProject, data)
-        
+
         // Then - constructor should complete without errors
         assertNotNull(handler)
     }
