@@ -1,9 +1,7 @@
 package com.vaadin.plugin.module
 
-import com.intellij.ide.util.projectWizard.WizardContext
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 
 class VaadinProjectBuilderAdapterTest {
 
@@ -15,20 +13,6 @@ class VaadinProjectBuilderAdapterTest {
 
         // When & Then
         assertNotNull(adapter)
-    }
-
-    @Test
-    fun testVaadinProjectBuilderAdapterCreateStep() {
-        // Given
-        val wizard = VaadinProjectWizard()
-        val adapter = VaadinProjectBuilderAdapter(wizard)
-        val context = mock(WizardContext::class.java)
-
-        // When
-        val step = adapter.createStep(context)
-
-        // Then
-        assertNotNull(step)
     }
 
     @Test

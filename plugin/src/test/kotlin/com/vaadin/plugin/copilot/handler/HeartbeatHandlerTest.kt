@@ -20,7 +20,7 @@ class HeartbeatHandlerTest {
 
         `when`(mockProject.getService(CompilationStatusManagerService::class.java)).thenReturn(mockCompilationService)
         `when`(mockCompilationService.hasCompilationError()).thenReturn(false)
-        `when`(mockCompilationService.getErrorFiles()).thenReturn(emptyList())
+        `when`(mockCompilationService.getErrorFiles()).thenReturn(emptySet())
 
         val heartbeatHandler = HeartbeatHandler(mockProject)
 
@@ -33,7 +33,7 @@ class HeartbeatHandlerTest {
         assertTrue(response.data!!.containsKey(HeartbeatHandler.HAS_COMPILATION_ERROR))
         assertTrue(response.data!!.containsKey(HeartbeatHandler.FILES_CONTAIN_COMPILATION_ERROR))
         assertEquals(false, response.data!![HeartbeatHandler.HAS_COMPILATION_ERROR])
-        assertEquals(emptyList<String>(), response.data!![HeartbeatHandler.FILES_CONTAIN_COMPILATION_ERROR])
+        assertEquals(emptySet<String>(), response.data!![HeartbeatHandler.FILES_CONTAIN_COMPILATION_ERROR])
     }
 
     @Test
@@ -41,7 +41,7 @@ class HeartbeatHandlerTest {
         // Given
         val mockProject = mock(Project::class.java)
         val mockCompilationService = mock(CompilationStatusManagerService::class.java)
-        val errorFiles = listOf("Test.java", "Example.kt")
+        val errorFiles = setOf("Test.java", "Example.kt")
 
         `when`(mockProject.getService(CompilationStatusManagerService::class.java)).thenReturn(mockCompilationService)
         `when`(mockCompilationService.hasCompilationError()).thenReturn(true)
