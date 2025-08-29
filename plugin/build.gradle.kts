@@ -71,6 +71,8 @@ dependencies {
 
   testImplementation(kotlin("test"))
   testImplementation("junit:junit:4.13.2")
+  testImplementation("org.mockito:mockito-core:5.7.0")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 intellijPlatform {
