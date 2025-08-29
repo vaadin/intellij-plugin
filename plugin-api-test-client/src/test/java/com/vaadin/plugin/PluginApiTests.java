@@ -182,4 +182,13 @@ public class PluginApiTests {
         Assertions.assertTrue(response.get().toPrettyString().contains("\"loginView\" : \"com.plugin.testviews.HelloWorldView\""));
         Assertions.assertTrue(response.get().toPrettyString().contains("\"entity\" : \"com.plugin.testviews.User\""));
     }
+
+    @Test
+    public void testGetModulePaths() throws IOException {
+        var response = client.getModulePaths();
+
+        Assertions.assertTrue(response.isPresent());
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"realName\" : \"plugin-api-test-client\""));
+        Assertions.assertTrue(response.get().toPrettyString().contains("\"rootViewsPackage\" : \"com.plugin.testviews\""));
+    }
 }
