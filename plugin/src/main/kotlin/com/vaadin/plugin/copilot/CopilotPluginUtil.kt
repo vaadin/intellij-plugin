@@ -83,7 +83,7 @@ class CopilotPluginUtil {
             HEARTBEAT("heartbeat"),
         }
 
-        private val _pluginVersion: String? by lazy { 
+        private val _pluginVersion: String? by lazy {
             try {
                 getVaadinPluginDescriptor().version
             } catch (e: Exception) {

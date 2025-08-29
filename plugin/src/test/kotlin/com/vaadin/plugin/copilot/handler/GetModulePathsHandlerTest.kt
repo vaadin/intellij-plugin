@@ -31,7 +31,7 @@ class GetModulePathsHandlerTest {
         assertTrue(handler is AbstractHandler)
         assertEquals(mockProject, handler.project)
     }
-    
+
     private fun assertTrue(condition: Boolean) {
         org.junit.jupiter.api.Assertions.assertTrue(condition)
     }

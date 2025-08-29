@@ -1,7 +1,6 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.openapi.project.Project
-import io.netty.handler.codec.http.HttpResponseStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -87,7 +86,7 @@ class WriteFileHandlerTest {
         assertTrue(handler is AbstractHandler)
         assertEquals(mockProject, handler.project)
     }
-    
+
     private fun assertTrue(condition: Boolean) {
         org.junit.jupiter.api.Assertions.assertTrue(condition)
     }

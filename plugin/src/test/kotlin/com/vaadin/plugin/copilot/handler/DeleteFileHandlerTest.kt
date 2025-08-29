@@ -1,7 +1,6 @@
 package com.vaadin.plugin.copilot.handler
 
 import com.intellij.openapi.project.Project
-import io.netty.handler.codec.http.HttpResponseStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
