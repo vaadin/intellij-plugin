@@ -83,12 +83,18 @@ class CopilotPluginUtil {
             HEARTBEAT("heartbeat"),
         }
 
-        private val pluginVersion = getVaadinPluginDescriptor().version
+        private val _pluginVersion: String? by lazy { 
+            try {
+                getVaadinPluginDescriptor().version
+            } catch (e: Exception) {
+                null // Return null if IntelliJ Platform is not initialized (e.g., during tests)
+            }
+        }
 
         const val NOTIFICATION_GROUP = "Vaadin Copilot"
 
         fun getPluginVersion(): String? {
-            return pluginVersion
+            return _pluginVersion
         }
 
         fun notify(content: String, type: NotificationType, project: Project?) {
@@ -145,7 +151,7 @@ class CopilotPluginUtil {
             val props = Properties()
             props.setProperty("endpoint", RestUtil.getEndpoint())
             props.setProperty("ide", "intellij")
-            props.setProperty("version", pluginVersion)
+            props.setProperty("version", getPluginVersion())
             props.setProperty("supportedActions", HANDLERS.entries.joinToString(",") { a -> a.command })
 
             val stringWriter = StringWriter()

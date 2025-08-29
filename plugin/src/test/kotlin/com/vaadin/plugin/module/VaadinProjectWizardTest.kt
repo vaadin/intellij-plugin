@@ -56,7 +56,7 @@ class VaadinProjectWizardTest {
         // Given
         val wizard = VaadinProjectWizard()
 
-        // When & Then
-        assertNotNull(wizard.projectModel) // Initially null
+        // When & Then - projectModel is initially null
+        assertEquals(null, wizard.projectModel) // Initially null
     }
 }
