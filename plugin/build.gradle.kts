@@ -5,17 +5,17 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij.platform") version "2.6.0"
-  id("com.diffplug.spotless") version "7.0.2"
+  id("org.jetbrains.intellij.platform") version "2.7.2"
+  id("com.diffplug.spotless") version "7.2.1"
 
   id("com.adarshr.test-logger") version "4.0.0"
 }
 
 // version for building plugin
-val buildVersion = "2024.1"
+val buildVersion = "2024.2"
 
 // compatibility range
-val sinceBuildProperty = "241"
+val sinceBuildProperty = "242"
 val untilBuildProperty = "252.*"
 
 // version for verifying plugin, check validation.yml
@@ -36,11 +36,11 @@ val publishChannel =
     }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
-kotlin { jvmToolchain(17) }
+kotlin { jvmToolchain(21) }
 
 repositories {
   mavenCentral()
@@ -84,8 +84,8 @@ intellijPlatform {
   }
   pluginVerification {
     ides {
-      ide(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
-      ide(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
+      create(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
+      create(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
     }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
