@@ -2,6 +2,7 @@ package com.vaadin.plugin.utils
 
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
@@ -36,5 +37,9 @@ object IdeUtil {
 
     fun getIdeaDirectoryPath(project: Project): Path? {
         return project.guessProjectDir()?.toNioPath()?.resolve(IDEA_DIR)
+    }
+
+    fun isDarkTheme(): Boolean {
+        return LafManager.getInstance().currentUIThemeLookAndFeel.isDark
     }
 }
