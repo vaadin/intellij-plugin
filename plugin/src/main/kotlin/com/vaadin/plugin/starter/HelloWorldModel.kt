@@ -5,9 +5,8 @@ import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class HelloWorldModel(
-    val groupIdProperty: com.intellij.openapi.observable.properties.GraphProperty<String>
-) : DownloadableModel {
+class HelloWorldModel(val groupIdProperty: com.intellij.openapi.observable.properties.GraphProperty<String>) :
+    DownloadableModel {
 
     private val graph = PropertyGraph()
     val frameworkProperty = graph.property(StarterSupport.frameworks.keys.first())

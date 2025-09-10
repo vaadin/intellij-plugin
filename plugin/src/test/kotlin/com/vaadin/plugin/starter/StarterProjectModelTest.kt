@@ -1,12 +1,11 @@
 package com.vaadin.plugin.starter
 
+import com.intellij.openapi.observable.properties.PropertyGraph
+import com.intellij.openapi.project.Project
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.observable.properties.PropertyGraph
 
 class StarterProjectModelTest {
     @Test

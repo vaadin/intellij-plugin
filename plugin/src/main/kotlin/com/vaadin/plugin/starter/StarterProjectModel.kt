@@ -6,9 +6,8 @@ import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class StarterProjectModel(
-    val groupIdProperty: com.intellij.openapi.observable.properties.GraphProperty<String>
-) : BaseState(), DownloadableModel {
+class StarterProjectModel(val groupIdProperty: com.intellij.openapi.observable.properties.GraphProperty<String>) :
+    BaseState(), DownloadableModel {
 
     private val graph: PropertyGraph = PropertyGraph()
     val usePrereleaseProperty = graph.property(false)

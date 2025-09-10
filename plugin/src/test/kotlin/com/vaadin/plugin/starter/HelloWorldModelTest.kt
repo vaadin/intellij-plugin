@@ -1,10 +1,10 @@
 package com.vaadin.plugin.starter
 
+import com.intellij.openapi.observable.properties.PropertyGraph
+import com.intellij.openapi.project.Project
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.observable.properties.PropertyGraph
 
 class HelloWorldModelTest {
     @Test
