@@ -6,7 +6,9 @@ import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class StarterProjectModel : BaseState(), DownloadableModel {
+class StarterProjectModel(
+    val groupIdProperty: com.intellij.openapi.observable.properties.GraphProperty<String>
+) : BaseState(), DownloadableModel {
 
     private val graph: PropertyGraph = PropertyGraph()
     val usePrereleaseProperty = graph.property(false)
@@ -16,6 +18,7 @@ class StarterProjectModel : BaseState(), DownloadableModel {
     private val usePrerelease by usePrereleaseProperty
     private val includeFlow by includeFlowProperty
     private val includeHilla by includeHillaProperty
+    private val groupId by groupIdProperty
 
     override fun getDownloadLink(project: Project): String {
         val frameworks =
@@ -33,6 +36,7 @@ class StarterProjectModel : BaseState(), DownloadableModel {
                 "frameworks" to frameworks,
                 "platformVersion" to platformVersion,
                 "artifactId" to toArtifactId(project.name),
+                "groupId" to groupId,
                 "ref" to "intellij-plugin")
         val query =
             params.entries.joinToString("&") { (key, value) ->

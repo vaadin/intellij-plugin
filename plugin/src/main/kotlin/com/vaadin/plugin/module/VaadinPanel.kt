@@ -33,15 +33,18 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     private var starterProjectGroup: CollapsibleRow? = null
     private var helloWorldGroup: CollapsibleRow? = null
 
-    private val starterProjectModel = StarterProjectModel()
+    private val groupIdProperty = propertyGraph.property("com.vaadin.application")
+
+    private val starterProjectModel = StarterProjectModel(groupIdProperty)
     private val starterProjectPanel = StarterProjectPanel(starterProjectModel)
 
-    private val helloWorldModel = HelloWorldModel()
+    private val helloWorldModel = HelloWorldModel(groupIdProperty)
     private val helloWorldPanel = HelloWorldPanel(helloWorldModel)
 
     init {
         builder.panel {
             row("Name:") { textField().bindText(entityNameProperty) }
+            row("Group ID:") { textField().bindText(groupIdProperty) }
             row("Location:") {
                 val commentLabel =
                     projectLocationField(locationProperty, wizardContext)
