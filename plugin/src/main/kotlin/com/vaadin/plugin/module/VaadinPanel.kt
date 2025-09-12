@@ -43,8 +43,21 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
 
     init {
         builder.panel {
-            row("Name:") { textField().bindText(entityNameProperty) }
-            row("Group ID:") { textField().bindText(groupIdProperty) }
+            row("Name:") {
+                val regex = Regex("""^[A-Za-z0-9_.-]+$""")
+                val errMsg = "Name must have only letters/digits/underscores/hyphens/dots"
+                textField().bindText(entityNameProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
+            row("Group ID:") {
+                val regex = Regex("""^(?!\.)(?!.*\.\.)(?=.*\.)([A-Za-z0-9_.]+)(?<!\.)$""")
+                val errMsg =
+                    "Group ID must use letters/digits/underscores/dots, include at least one dot, no leading/trailing or consecutive dots."
+                textField().bindText(groupIdProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
             row("Location:") {
                 val commentLabel =
                     projectLocationField(locationProperty, wizardContext)

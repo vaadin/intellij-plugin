@@ -3,6 +3,7 @@ package com.vaadin.plugin.starter
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
+import com.vaadin.plugin.utils.toArtifactId
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -47,14 +48,5 @@ class StarterProjectModel(val groupIdProperty: com.intellij.openapi.observable.p
 
     override fun getProjectType(): String {
         return "maven"
-    }
-
-    private fun toArtifactId(name: String): String {
-        return name
-            .trim()
-            .replace(Regex("([a-z])([A-Z])"), "$1-$2") // camelCase to kebab-case
-            .replace(Regex("[\\s_]+"), "-") // spaces/underscores to hyphen
-            .replace(Regex("[^a-zA-Z0-9-]"), "") // remove invalid chars
-            .lowercase()
     }
 }

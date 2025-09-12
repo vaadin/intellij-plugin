@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class HelloWorldModelTest {
     @Test
@@ -27,7 +28,9 @@ class HelloWorldModelTest {
         val groupIdProperty = PropertyGraph().property("com.vaadin.application")
         val model = HelloWorldModel(groupIdProperty)
         groupIdProperty.set("org.test")
-        val url = model.getDownloadLink(mock<Project>())
+        val project = mock<Project>()
+        whenever(project.name).thenReturn("my-app")
+        val url = model.getDownloadLink(project)
         assertTrue(url.contains("groupId=org.test"))
     }
 }
