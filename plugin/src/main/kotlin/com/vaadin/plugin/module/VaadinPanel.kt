@@ -33,15 +33,31 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     private var starterProjectGroup: CollapsibleRow? = null
     private var helloWorldGroup: CollapsibleRow? = null
 
-    private val starterProjectModel = StarterProjectModel()
+    private val groupIdProperty = propertyGraph.property("com.example.application")
+
+    private val starterProjectModel = StarterProjectModel(groupIdProperty)
     private val starterProjectPanel = StarterProjectPanel(starterProjectModel)
 
-    private val helloWorldModel = HelloWorldModel()
+    private val helloWorldModel = HelloWorldModel(groupIdProperty)
     private val helloWorldPanel = HelloWorldPanel(helloWorldModel)
 
     init {
         builder.panel {
-            row("Name:") { textField().bindText(entityNameProperty) }
+            row("Name:") {
+                val regex = Regex("""^[A-Za-z0-9_.-]+$""")
+                val errMsg = "Name must have only letters/digits/underscores/hyphens/dots"
+                textField().bindText(entityNameProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
+            row("Group ID:") {
+                val regex = Regex("""^(?!\.)(?!.*\.\.)(?=.*\.)([A-Za-z0-9_.]+)(?<!\.)$""")
+                val errMsg =
+                    "Group ID must use letters/digits/underscores/dots, include at least one dot, no leading/trailing or consecutive dots."
+                textField().bindText(groupIdProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
             row("Location:") {
                 val commentLabel =
                     projectLocationField(locationProperty, wizardContext)
@@ -102,7 +118,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun suggestName(): String {
-        return suggestName("untitled")
+        return suggestName("NewProject")
     }
 
     private fun suggestName(prefix: String): String {
