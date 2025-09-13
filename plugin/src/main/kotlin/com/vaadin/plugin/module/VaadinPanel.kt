@@ -33,7 +33,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     private var starterProjectGroup: CollapsibleRow? = null
     private var helloWorldGroup: CollapsibleRow? = null
 
-    private val groupIdProperty = propertyGraph.property("com.vaadin.application")
+    private val groupIdProperty = propertyGraph.property("com.example.application")
 
     private val starterProjectModel = StarterProjectModel(groupIdProperty)
     private val starterProjectPanel = StarterProjectPanel(starterProjectModel)
@@ -118,7 +118,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun suggestName(): String {
-        return suggestName("untitled")
+        return suggestName("NewProject")
     }
 
     private fun suggestName(prefix: String): String {

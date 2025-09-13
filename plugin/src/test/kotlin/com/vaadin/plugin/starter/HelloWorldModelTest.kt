@@ -9,15 +9,15 @@ import org.mockito.kotlin.whenever
 
 class HelloWorldModelTest {
     @Test
-    fun defaultGroupIdIsComVaadinApplication() {
-        val groupIdProperty = PropertyGraph().property("com.vaadin.application")
+    fun defaultGroupIdIsComExampleApplication() {
+        val groupIdProperty = PropertyGraph().property("com.example.application")
         val model = HelloWorldModel(groupIdProperty)
-        assertEquals("com.vaadin.application", model.groupIdProperty.get())
+        assertEquals("com.example.application", model.groupIdProperty.get())
     }
 
     @Test
     fun groupIdCanBeChanged() {
-        val groupIdProperty = PropertyGraph().property("com.vaadin.application")
+        val groupIdProperty = PropertyGraph().property("com.example.application")
         val model = HelloWorldModel(groupIdProperty)
         groupIdProperty.set("org.example")
         assertEquals("org.example", model.groupIdProperty.get())
@@ -25,7 +25,7 @@ class HelloWorldModelTest {
 
     @Test
     fun groupIdIsIncludedInDownloadUrl() {
-        val groupIdProperty = PropertyGraph().property("com.vaadin.application")
+        val groupIdProperty = PropertyGraph().property("com.example.application")
         val model = HelloWorldModel(groupIdProperty)
         groupIdProperty.set("org.test")
         val project = mock<Project>()
