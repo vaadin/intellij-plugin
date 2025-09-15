@@ -1,7 +1,9 @@
 package com.vaadin.plugin.module
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.projectWizard.WizardContext
+import com.intellij.openapi.externalSystem.util.ExternalSystemBundle
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
@@ -15,6 +17,7 @@ import com.intellij.openapi.ui.getPresentablePath
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.UIBundle
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.dsl.builder.*
 import com.vaadin.plugin.starter.HelloWorldModel
 import com.vaadin.plugin.starter.StarterProjectModel
@@ -33,16 +36,42 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     private var starterProjectGroup: CollapsibleRow? = null
     private var helloWorldGroup: CollapsibleRow? = null
 
-    private val starterProjectModel = StarterProjectModel()
+    private val groupIdProperty = propertyGraph.property("com.example.application")
+
+    private val starterProjectModel = StarterProjectModel(groupIdProperty)
     private val starterProjectPanel = StarterProjectPanel(starterProjectModel)
 
-    private val helloWorldModel = HelloWorldModel()
+    private val helloWorldModel = HelloWorldModel(groupIdProperty)
     private val helloWorldPanel = HelloWorldPanel(helloWorldModel)
 
     init {
         builder.panel {
-            row("Name:") { textField().bindText(entityNameProperty) }
+            row("Name:") {
+                layout(RowLayout.LABEL_ALIGNED)
+                val regex = Regex("""^[A-Za-z0-9_.-]+$""")
+                val errMsg = "Name must have only letters/digits/underscores/hyphens/dots"
+                textField().bindText(entityNameProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
+            row {
+                layout(RowLayout.LABEL_ALIGNED)
+                val regex = Regex("""^(?!\.)(?!.*\.\.)(?=.*\.)([A-Za-z0-9_.]+)(?<!\.)$""")
+                val errMsg =
+                    "Group must use letters/digits/underscores/dots, include at least one dot, no leading/trailing or consecutive dots."
+                label("Group:")
+                    .applyToComponent { horizontalTextPosition = JBLabel.LEFT }
+                    .applyToComponent { icon = AllIcons.General.ContextHelp }
+                    .applyToComponent {
+                        toolTipText =
+                            ExternalSystemBundle.message("external.system.mavenized.structure.wizard.group.id.help")
+                    }
+                textField().bindText(groupIdProperty).validationOnInput {
+                    if (regex.matches(it.text)) null else error(errMsg)
+                }
+            }
             row("Location:") {
+                layout(RowLayout.LABEL_ALIGNED)
                 val commentLabel =
                     projectLocationField(locationProperty, wizardContext)
                         .align(AlignX.FILL)
@@ -102,7 +131,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
     }
 
     private fun suggestName(): String {
-        return suggestName("untitled")
+        return suggestName("NewProject")
     }
 
     private fun suggestName(prefix: String): String {
