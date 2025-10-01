@@ -11,6 +11,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.util.io.ZipUtil
 import com.vaadin.plugin.utils.DownloadUtil
+import com.vaadin.plugin.utils.IdeUtil
 import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
 import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import com.vaadin.plugin.utils.trackProjectCreated
@@ -36,7 +37,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
                     // extracting
                     val zipRoot = DownloadUtil.getZipRootFolder(tempFile)!!
                     ZipUtil.extract(tempFile.toPath(), outputPath, null, true)
-                    FileUtil.moveDirWithContent(outputPath.resolve(zipRoot).toFile(), outputPath.toFile())
+                    IdeUtil.moveDirectoryContentsRobustly(outputPath.resolve(zipRoot).toFile(), outputPath.toFile())
                     FileUtil.delete(tempFile)
                     copyVaadinIcon(project)
                 }
