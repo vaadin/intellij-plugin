@@ -96,14 +96,15 @@ object IdeUtil {
             try {
                 if (file.isFile) {
                     // Force copy with FileUtil
-                    com.intellij.openapi.util.io.FileUtil.copy(file, targetFile)
+                    FileUtil.copy(file, targetFile)
                     if (targetFile.exists() && targetFile.length() == file.length()) {
-                        com.intellij.openapi.util.io.FileUtil.delete(file)
+                        FileUtil.delete(file)
                     }
                 }
             } catch (e: Exception) {
                 // Log the failure but continue - at least we tried
-                System.err.println("Failed to move file: ${file.absolutePath} to ${targetFile.absolutePath}: ${e.message}")
+                System.err.println(
+                    "Failed to move file: ${file.absolutePath} to ${targetFile.absolutePath}: ${e.message}")
             }
         }
 
@@ -111,18 +112,19 @@ object IdeUtil {
         try {
             val remainingFiles = sourceDir.listFiles()
             if (remainingFiles == null || remainingFiles.isEmpty()) {
-                com.intellij.openapi.util.io.FileUtil.delete(sourceDir)
+                FileUtil.delete(sourceDir)
             } else {
                 // Force delete any remaining files
                 for (remainingFile in remainingFiles) {
                     try {
                         if (remainingFile.isFile) {
-                            com.intellij.openapi.util.io.FileUtil.delete(remainingFile)
+                            FileUtil.delete(remainingFile)
                         } else if (remainingFile.isDirectory) {
-                            com.intellij.openapi.util.io.FileUtil.delete(remainingFile)
+                            FileUtil.delete(remainingFile)
                         }
                     } catch (e: Exception) {
-                        System.err.println("Could not delete remaining file: ${remainingFile.absolutePath}: ${e.message}")
+                        System.err.println(
+                            "Could not delete remaining file: ${remainingFile.absolutePath}: ${e.message}")
                     }
                 }
                 // Try to delete the directory one more time
