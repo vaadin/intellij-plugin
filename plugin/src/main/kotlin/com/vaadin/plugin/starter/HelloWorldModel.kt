@@ -10,12 +10,10 @@ class HelloWorldModel(val groupIdProperty: com.intellij.openapi.observable.prope
     DownloadableModel {
 
     private val graph = PropertyGraph()
-    val frameworkProperty = graph.property(StarterSupport.frameworks.keys.first())
     val languageProperty = graph.property(StarterSupport.languages.keys.first())
     val buildToolProperty = graph.property(StarterSupport.buildTools.keys.first())
     val architectureProperty = graph.property(StarterSupport.architectures.keys.first())
 
-    val framework by frameworkProperty
     val language by languageProperty
     val buildTool by buildToolProperty
     val architecture by architectureProperty
@@ -24,7 +22,7 @@ class HelloWorldModel(val groupIdProperty: com.intellij.openapi.observable.prope
     override fun getDownloadLink(project: Project): String {
         val params =
             mapOf(
-                "framework" to framework,
+                "framework" to "flow",
                 "language" to language,
                 "buildtool" to buildTool,
                 "stack" to architecture,

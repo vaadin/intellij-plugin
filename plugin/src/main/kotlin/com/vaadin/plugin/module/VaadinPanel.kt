@@ -101,20 +101,6 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
                         "muscles to your skeleton—transforming it into a fully-featured application.",
                     MAX_LINE_LENGTH)
             }
-            row { text("Flow and Hilla").bold() }
-            row {
-                text(
-                    "<a href=\"https://vaadin.com/flow\">Flow framework</a> is the most productive" +
-                        " choice, allowing 100% of the user interface to be coded in server-side Java.",
-                    MAX_LINE_LENGTH)
-            }
-            row {
-                text(
-                    "<a href=\"https://hilla.dev/\">Hilla framework</a>, on the other hand, enables" +
-                        " implementation of your user interface with React while automatically connecting it to your" +
-                        " Java backend.",
-                    MAX_LINE_LENGTH)
-            }
         }
 
         starterProjectGroup!!.expanded = true

@@ -41,10 +41,8 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
     }
 
     private class ViewModel(val model: HelloWorldModel) {
-        val framework =
-            SegmentModel(StarterSupport.frameworks, model.frameworkProperty, StarterSupport::isSupportedFramework)
         val language =
-            SegmentModel(StarterSupport.languages, model.languageProperty, StarterSupport::isSupportedLanguage)
+            SegmentModel(StarterSupport.languages, model.languageProperty, { _, _ -> true })
         val buildTool =
             SegmentModel(StarterSupport.buildTools, model.buildToolProperty, StarterSupport::isSupportedBuildTool)
         val architecture =
@@ -52,11 +50,11 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
                 StarterSupport.architectures, model.architectureProperty, StarterSupport::isSupportedArchitecture)
 
         fun all(): List<SegmentModel> {
-            return listOf(framework, language, buildTool, architecture)
+            return listOf(language, buildTool, architecture)
         }
 
         fun isSupported(segmentModel: SegmentModel, value: String): Boolean {
-            return segmentModel.supported(model, value)
+            return segmentModel.supported.let { it(model, value) } ?: true
         }
     }
 
@@ -68,7 +66,6 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
     private val notAllArchitecturesSupportedMessage = graph.property("")
 
     init {
-        viewModel.framework.property.afterChange { refreshSegments("framework") }
         viewModel.language.property.afterChange { refreshSegments("language") }
         viewModel.buildTool.property.afterChange { refreshSegments("buildTool") }
         viewModel.architecture.property.afterChange { refreshSegments("architecture") }
@@ -85,7 +82,6 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
     }
 
     val root: DialogPanel = panel {
-        buildSegment(row("Framework") {}, viewModel.framework)
         buildSegment(row("Language") {}, viewModel.language)
         row("") { text("<i>Kotlin support uses a community add-on.</i>") }.visibleIf(kotlinInfoVisibleProperty)
         buildSegment(row("Build tool") {}, viewModel.buildTool)
@@ -94,9 +90,6 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
     }
 
     private fun refreshSegments(source: String) {
-        if (source != "framework") {
-            viewModel.framework.update()
-        }
         if (source != "language") {
             viewModel.language.update()
         }
@@ -106,22 +99,12 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
         if (source != "architecture") {
             viewModel.architecture.update()
         }
-        refreshArchitecturesSupportedMessage()
         refreshKotlinInfo()
         fallbackToFirstEnabled()
     }
 
     private fun refreshKotlinInfo() {
         kotlinInfoVisibleProperty.set(viewModel.language.value() == "kotlin")
-    }
-
-    private fun refreshArchitecturesSupportedMessage() {
-        if (StarterSupport.supportsAllArchitectures(model)) {
-            notAllArchitecturesSupportedMessage.set("")
-        } else {
-            val frameworkName = viewModel.framework.label()
-            notAllArchitecturesSupportedMessage.set("<i>$frameworkName does not support all architectures.</i>")
-        }
     }
 
     private fun fallbackToFirstEnabled() {
