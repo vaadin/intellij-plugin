@@ -31,6 +31,5 @@ class StarterSupport {
             }
             return true
         }
-
     }
 }

@@ -41,8 +41,7 @@ class HelloWorldPanel(private val model: HelloWorldModel) {
     }
 
     private class ViewModel(val model: HelloWorldModel) {
-        val language =
-            SegmentModel(StarterSupport.languages, model.languageProperty, { _, _ -> true })
+        val language = SegmentModel(StarterSupport.languages, model.languageProperty, { _, _ -> true })
         val buildTool =
             SegmentModel(StarterSupport.buildTools, model.buildToolProperty, StarterSupport::isSupportedBuildTool)
         val architecture =

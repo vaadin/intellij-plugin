@@ -14,11 +14,7 @@ class StarterProjectPanel(private val model: StarterProjectModel) {
                 .bind(model.usePrereleaseProperty)
         }
         row { text("Include sample view").bold() }
-        row {
-            text(
-                "A sample view built fully in Java, front to back.",
-                MAX_LINE_LENGTH)
-        }
+        row { text("A sample view built fully in Java, front to back.", MAX_LINE_LENGTH) }
         row("Include sample view") { checkBox("").bindSelected(model.includeFlowProperty) }
     }
 }
