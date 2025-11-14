@@ -13,15 +13,8 @@ class StarterProjectPanel(private val model: StarterProjectModel) {
             segmentedButton(setOf(false, true)) { this.text = if (it) "Prerelease" else "Stable" }
                 .bind(model.usePrereleaseProperty)
         }
-        row { text("Include Walking Skeleton").bold() }
-        row {
-            text(
-                "A walking skeleton is a minimal application that includes a fully-functional " +
-                    "end-to-end workflow. All major building blocks are included, but it does not " +
-                    "yet perform any meaningful tasks.",
-                MAX_LINE_LENGTH)
-        }
-        row("Pure Java with Vaadin Flow") { checkBox("").bindSelected(model.includeFlowProperty) }
-        row("Full-stack React with Vaadin Hilla") { checkBox("").bindSelected(model.includeHillaProperty) }
+        row { text("Include sample view").bold() }
+        row { text("A sample view built fully in Java, front to back.", MAX_LINE_LENGTH) }
+        row("Include sample view") { checkBox("").bindSelected(model.includeFlowProperty) }
     }
 }
