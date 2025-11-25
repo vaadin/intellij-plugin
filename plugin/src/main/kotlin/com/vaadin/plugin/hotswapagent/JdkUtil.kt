@@ -86,7 +86,7 @@ class JdkUtil {
                 mavenProject.properties.getProperty("maven.compiler.release")
                     ?: mavenProject.properties.getProperty("maven.compiler.target")
                     ?: "17"
-            return target.toInt()
+            return parseJavaVersion(target)
         }
 
         private fun getGradleJavaVersion(module: Module): Int? {
@@ -95,7 +95,8 @@ class JdkUtil {
                 ExternalSystemApiUtil.find(gradleModuleData, Key.create<JavaModuleData>(JavaModuleData::class.java, 1))
                     ?.data ?: return null
 
-            return javaModuleData.targetBytecodeVersion?.toInt()
+            val targetVersion = javaModuleData.targetBytecodeVersion ?: return null
+            return parseJavaVersion(targetVersion)
         }
 
         fun getSdkMajorVersion(sdk: Sdk): Int? {
@@ -106,6 +107,24 @@ class JdkUtil {
         fun getProjectSdkVersion(module: Module): Int? {
             val projectSdk = ProjectRootManager.getInstance(module.project)?.projectSdk ?: return null
             return getSdkMajorVersion(projectSdk)
+        }
+
+        internal fun parseJavaVersion(version: String): Int? {
+            val trimmed = version.trim()
+
+            // Standard single-number versions, e.g. "17"
+            trimmed.toIntOrNull()?.let { return it }
+
+            // Legacy format "1.8"
+            if (trimmed.startsWith("1.")) {
+                trimmed.substringAfter("1.")
+                    .takeWhile { it.isDigit() }
+                    .toIntOrNull()
+                    ?.let { return it }
+            }
+
+            // Fallback for strings like "11.0.4"
+            return trimmed.takeWhile { it.isDigit() }.toIntOrNull()
         }
 
         private fun findGradleModuleData(module: Module): DataNode<ModuleData>? {
