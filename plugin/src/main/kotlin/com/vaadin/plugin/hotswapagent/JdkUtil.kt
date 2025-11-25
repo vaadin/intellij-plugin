@@ -113,14 +113,19 @@ class JdkUtil {
             val trimmed = version.trim()
 
             // Standard single-number versions, e.g. "17"
-            trimmed.toIntOrNull()?.let { return it }
+            trimmed.toIntOrNull()?.let {
+                return it
+            }
 
             // Legacy format "1.8"
             if (trimmed.startsWith("1.")) {
-                trimmed.substringAfter("1.")
+                trimmed
+                    .substringAfter("1.")
                     .takeWhile { it.isDigit() }
                     .toIntOrNull()
-                    ?.let { return it }
+                    ?.let {
+                        return it
+                    }
             }
 
             // Fallback for strings like "11.0.4"
