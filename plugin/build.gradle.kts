@@ -5,7 +5,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.21"
-  id("org.jetbrains.intellij.platform") version "2.7.2"
+  id("org.jetbrains.intellij.platform") version "2.10.4"
   id("com.diffplug.spotless") version "7.2.1"
 
   id("com.adarshr.test-logger") version "4.0.0"
@@ -85,8 +85,7 @@ intellijPlatform {
   }
   pluginVerification {
     ides {
-      create(IntelliJPlatformType.IntellijIdeaCommunity, verifyVersion)
-      create(IntelliJPlatformType.IntellijIdeaUltimate, verifyVersion)
+      create(IntelliJPlatformType.IntellijIdea, verifyVersion)
     }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
