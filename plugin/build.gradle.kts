@@ -16,7 +16,7 @@ val buildVersion = "2024.2"
 
 // compatibility range
 val sinceBuildProperty = "242"
-val untilBuildProperty = "252.*"
+val untilBuildProperty = "253.*"
 
 // version for verifying plugin, check validation.yml
 val verifyVersion =

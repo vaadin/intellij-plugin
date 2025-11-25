@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ "2024.2", "2025.2.1" ]
+        version: [ "2024.2", "2025.3" ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
