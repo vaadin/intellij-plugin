@@ -84,9 +84,7 @@ intellijPlatform {
         }
   }
   pluginVerification {
-    ides {
-      create(IntelliJPlatformType.IntellijIdea, verifyVersion)
-    }
+    ides { create(IntelliJPlatformType.IntellijIdea, verifyVersion) }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
 }
