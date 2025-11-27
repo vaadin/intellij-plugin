@@ -11,6 +11,8 @@ import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -120,7 +122,11 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
     private fun createGoToConfigurationAction(project: Project, configurable: String): AnAction {
         return NotificationAction.create("Go to settings...") { _, notification ->
             notification.hideBalloon()
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable)
+            ApplicationManager.getApplication()
+                .invokeLater(
+                    { ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable) },
+                    ModalityState.NON_MODAL,
+                    project.disposed)
         }
     }
 

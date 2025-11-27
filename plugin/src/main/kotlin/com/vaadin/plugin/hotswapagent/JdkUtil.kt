@@ -1,7 +1,9 @@
 package com.vaadin.plugin.hotswapagent
 
 import com.intellij.externalSystem.JavaModuleData
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.externalSystem.model.DataNode
 import com.intellij.openapi.externalSystem.model.Key
 import com.intellij.openapi.externalSystem.model.ProjectSystemId
@@ -22,6 +24,8 @@ class JdkUtil {
 
     companion object {
 
+        private val LOG: Logger = Logger.getInstance(JdkUtil::class.java)
+
         val GRADLE_SYSTEM_ID: ProjectSystemId = ProjectSystemId("GRADLE")
 
         fun getProjectSdk(project: Project): Sdk? {
@@ -30,6 +34,21 @@ class JdkUtil {
 
         fun isJetbrainsRuntime(jdk: Sdk?): Boolean {
             val homePath = jdk?.homePath ?: throw IllegalStateException("JDK has no home path: $jdk")
+
+            // Avoid blocking the EDT with filesystem calls when the SDK popup is being shown.
+            val versionString = jdk.versionString
+            if (versionString != null && versionString.contains("jetbrains runtime", ignoreCase = true)) {
+                return true
+            }
+            if (jdk.name.contains("jetbrains", ignoreCase = true) || homePath.contains("jbr", ignoreCase = true)) {
+                return true
+            }
+
+            if (ApplicationManager.getApplication().isDispatchThread) {
+                LOG.warn("Skipping JetBrains Runtime detection with disk access on EDT for $homePath")
+                return false
+            }
+
             val jdkInfo = JdkVersionDetector.getInstance().detectJdkVersionInfo(homePath)
             return JdkVersionDetector.Variant.JBR == jdkInfo?.variant
         }
