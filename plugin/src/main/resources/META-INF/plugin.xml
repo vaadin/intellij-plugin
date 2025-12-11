@@ -92,6 +92,11 @@
         <!-- Configuration check -->
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
 
+        <weigher key="proximity"
+                 id="vaadinProximity"
+                 order="first"
+                 implementationClass="com.vaadin.plugin.completion.VaadinImportProximityWeigher"/>
+
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
 
