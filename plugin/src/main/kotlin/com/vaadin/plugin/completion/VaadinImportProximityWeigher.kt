@@ -36,9 +36,7 @@ class VaadinImportProximityWeigher : ProximityWeigher() {
     }
 }
 
-/**
- * Prioritizes Vaadin classes in completion lists (e.g., Ctrl+Space) when Vaadin is on the classpath.
- */
+/** Prioritizes Vaadin classes in completion lists (e.g., Ctrl+Space) when Vaadin is on the classpath. */
 class VaadinCompletionWeigher : CompletionWeigher() {
 
     override fun weigh(element: LookupElement, location: CompletionLocation): Comparable<*> {
@@ -49,8 +47,7 @@ class VaadinCompletionWeigher : CompletionWeigher() {
 
         val qualifiedName = qualifiedName(psiElement)
         val module = ModuleUtilCore.findModuleForPsiElement(psiElement)
-        if (qualifiedName?.startsWith(VAADIN_PACKAGE_PREFIX) == true &&
-            hasVaadinInScope(psiElement.project, module)) {
+        if (qualifiedName?.startsWith(VAADIN_PACKAGE_PREFIX) == true && hasVaadinInScope(psiElement.project, module)) {
             return VAADIN_WEIGHT
         }
 
@@ -66,7 +63,9 @@ private fun qualifiedName(element: PsiElement): String? =
     }
 
 private fun hasVaadinInScope(project: Project, module: Module?): Boolean {
-    module?.let(::hasVaadin)?.let { return it }
+    module?.let(::hasVaadin)?.let {
+        return it
+    }
     return hasVaadin(project)
 }
 
