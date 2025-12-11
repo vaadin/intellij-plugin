@@ -10,8 +10,8 @@ import com.intellij.psi.util.proximity.ProximityWeigher
 import com.vaadin.plugin.utils.hasVaadin
 
 /**
- * Boosts Vaadin classes and members in import/completion suggestions when the same short name
- * exists in multiple packages.
+ * Boosts Vaadin classes and members in import/completion suggestions when the same short name exists in multiple
+ * packages.
  */
 class VaadinImportProximityWeigher : ProximityWeigher() {
 
@@ -34,12 +34,12 @@ class VaadinImportProximityWeigher : ProximityWeigher() {
     }
 
     private fun hasVaadinInScope(location: ProximityLocation): Boolean {
-        location.getUserData(HAS_VAADIN_KEY)?.let { return it }
+        location.getUserData(HAS_VAADIN_KEY)?.let {
+            return it
+        }
 
         val project = location.project ?: return false
-        val hasVaadin =
-            location.positionModule?.let(::hasVaadin)
-                ?: hasVaadin(project)
+        val hasVaadin = location.positionModule?.let(::hasVaadin) ?: hasVaadin(project)
 
         location.putUserData(HAS_VAADIN_KEY, hasVaadin)
         return hasVaadin
