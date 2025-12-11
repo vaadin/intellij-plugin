@@ -96,6 +96,10 @@
                  id="vaadinProximity"
                  order="first"
                  implementationClass="com.vaadin.plugin.completion.VaadinImportProximityWeigher"/>
+        <weigher key="completion"
+                 id="vaadinCompletion"
+                 order="after prefix, before grouping"
+                 implementationClass="com.vaadin.plugin.completion.VaadinCompletionWeigher"/>
 
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
