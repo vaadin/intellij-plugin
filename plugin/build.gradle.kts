@@ -61,6 +61,7 @@ dependencies {
     bundledPlugin("org.jetbrains.idea.maven")
     bundledPlugin("com.intellij.properties")
     bundledPlugin("com.intellij.microservices.jvm")
+    bundledPlugin("com.intellij.css")
     bundledPlugin("JavaScript")
 
     pluginVerifier()
