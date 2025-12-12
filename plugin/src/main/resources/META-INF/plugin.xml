@@ -92,15 +92,6 @@
         <!-- Configuration check -->
         <notificationGroup id="Vaadin configuration check" displayType="STICKY_BALLOON"/>
 
-        <weigher key="proximity"
-                 id="vaadinProximity"
-                 order="first"
-                 implementationClass="com.vaadin.plugin.completion.VaadinImportProximityWeigher"/>
-        <weigher key="completion"
-                 id="vaadinCompletion"
-                 order="after prefix, before grouping"
-                 implementationClass="com.vaadin.plugin.completion.VaadinCompletionWeigher"/>
-
         <dependencySupport kind="java" coordinate="com.vaadin:vaadin-core" displayName="Vaadin"/>
     </extensions>
 
@@ -136,8 +127,11 @@
                 class="com.vaadin.plugin.copilot.listeners.CopilotVaadinProjectListener"
                 topic="com.vaadin.plugin.listeners.VaadinProjectListener"/>
         <listener
-            class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
-            topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
+                class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
+                topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
+        <listener
+                class="com.vaadin.plugin.listeners.VaadinImportExclusionListener"
+                topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
         <listener
                 class="com.vaadin.plugin.copilot.listeners.CopilotDynamicPluginListener"
                 topic="com.intellij.ide.plugins.DynamicPluginListener"/>
