@@ -13,6 +13,6 @@ public class CssCompletionTestView extends Div {
 
         var error = new Div();
         error.setText("Error message");
-        error.setClassName("text-error bg-error");
+        error.addClassNames("text-error bg-error");
     }
 }

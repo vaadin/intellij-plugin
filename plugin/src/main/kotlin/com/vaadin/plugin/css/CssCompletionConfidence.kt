@@ -12,11 +12,11 @@ import com.intellij.util.ThreeState
 class CssCompletionConfidence : CompletionConfidence() {
 
     override fun shouldSkipAutopopup(contextElement: PsiElement, psiFile: PsiFile, offset: Int): ThreeState {
-        if (!CssClassCompletionContributor.isInTargetMethod(contextElement)) {
-            return ThreeState.UNSURE
+        if (HasStyleReceiverCondition().accepts(contextElement, null)) {
+            // Don't skip - we want the popup to open automatically when typing
+            return ThreeState.NO
         }
 
-        // Don't skip - we want the popup
-        return ThreeState.NO
+        return ThreeState.UNSURE
     }
 }
