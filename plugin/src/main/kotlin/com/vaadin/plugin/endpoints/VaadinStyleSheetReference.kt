@@ -6,17 +6,12 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 
 /**
- * Custom PSI reference for @StyleSheet annotations that resolves file paths
- * in standard Spring Boot resource locations.
+ * Custom PSI reference for @StyleSheet annotations that resolves file paths in standard Spring Boot resource locations.
  *
- * This enables Cmd/Ctrl+click navigation from @StyleSheet annotation values
- * to their corresponding CSS/SCSS files.
+ * This enables Cmd/Ctrl+click navigation from @StyleSheet annotation values to their corresponding CSS/SCSS files.
  */
-internal class VaadinStyleSheetReference(
-    element: PsiElement,
-    textRange: TextRange,
-    private val pathString: String
-) : PsiReferenceBase<PsiElement>(element, textRange), PsiPolyVariantReference {
+internal class VaadinStyleSheetReference(element: PsiElement, textRange: TextRange, private val pathString: String) :
+    PsiReferenceBase<PsiElement>(element, textRange), PsiPolyVariantReference {
 
     override fun resolve(): PsiElement? {
         val results = multiResolve(false)
@@ -31,13 +26,13 @@ internal class VaadinStyleSheetReference(
         val normalizedPath = pathString.removePrefix("./")
 
         // Standard Spring Boot resource locations (matching VSCode implementation)
-        val resourcePaths = listOf(
-            "src/main/webapp/",
-            "src/main/resources/META-INF/resources/",
-            "src/main/resources/static/",
-            "src/main/resources/public/",
-            "src/main/resources/resources/"
-        )
+        val resourcePaths =
+            listOf(
+                "src/main/webapp/",
+                "src/main/resources/META-INF/resources/",
+                "src/main/resources/static/",
+                "src/main/resources/public/",
+                "src/main/resources/resources/")
 
         val results = mutableListOf<ResolveResult>()
         val contentRoots = ModuleRootManager.getInstance(module).contentRoots

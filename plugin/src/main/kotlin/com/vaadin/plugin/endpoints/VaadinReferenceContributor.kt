@@ -57,9 +57,7 @@ internal class VaadinReferenceContributor : PsiReferenceContributor() {
                     // Get the text range of the string literal value (excludes quotes)
                     val textRange = ElementManipulators.getValueTextRange(sourcePsi)
 
-                    return arrayOf(
-                        VaadinStyleSheetReference(sourcePsi, textRange, path)
-                    )
+                    return arrayOf(VaadinStyleSheetReference(sourcePsi, textRange, path))
                 }
             })
     }
