@@ -39,6 +39,7 @@
     <depends optional="true" config-file="vaadin-with-javascript.xml">JavaScript</depends>
 
     <depends optional="true" config-file="vaadin-injections.xml">org.intellij.intelliLang</depends>
+    <depends optional="true" config-file="vaadin-with-css.xml">com.intellij.css</depends>
 
     <change-notes>
         <![CDATA[
