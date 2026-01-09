@@ -125,7 +125,7 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
             ApplicationManager.getApplication()
                 .invokeLater(
                     { ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable) },
-                    ModalityState.NON_MODAL,
+                    ModalityState.nonModal(),
                     project.disposed)
         }
     }
