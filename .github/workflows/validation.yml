@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ "253.29346.240" ] # Use build versions from https://www.jetbrains.com/idea/download/other.html
+        version: [ "253.28294.169" ] # Use build versions from https://www.jetbrains.com/idea/download/other.html
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
