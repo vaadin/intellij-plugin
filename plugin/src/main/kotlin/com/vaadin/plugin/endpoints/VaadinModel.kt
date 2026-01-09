@@ -29,6 +29,7 @@ internal const val VAADIN_APP_SHELL_CONFIGURATOR = "com.vaadin.flow.component.pa
 internal const val VAADIN_ID = "com.vaadin.flow.component.template.Id"
 internal const val VAADIN_TAG = "com.vaadin.flow.component.Tag"
 internal const val HILLA_BROWSER_CALLABLE = "com.vaadin.hilla.BrowserCallable"
+internal const val VAADIN_STYLESHEET = "com.vaadin.flow.component.dependency.StyleSheet"
 internal const val PERSISTENCE_ENTITY = "jakarta.persistence.Entity"
 
 internal fun findFlowRoutes(project: Project, scope: GlobalSearchScope): Collection<VaadinRoute> {

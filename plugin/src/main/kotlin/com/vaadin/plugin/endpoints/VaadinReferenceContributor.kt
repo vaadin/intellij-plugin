@@ -41,5 +41,24 @@ internal class VaadinReferenceContributor : PsiReferenceContributor() {
                     return arrayOf(object : PropertyReference(key, sourcePsi, null, false), HighlightedReference {})
                 }
             })
+
+        // Register @StyleSheet annotation value provider for CSS/SCSS navigation
+        registrar.registerUastReferenceProvider(
+            injectionHostUExpression().annotationParam(VAADIN_STYLESHEET, "value"),
+            object : UastReferenceProvider() {
+                override fun getReferencesByElement(
+                    element: UElement,
+                    context: ProcessingContext
+                ): Array<PsiReference> {
+                    if (element !is UInjectionHost) return PsiReference.EMPTY_ARRAY
+                    val path = element.evaluateToString() ?: return PsiReference.EMPTY_ARRAY
+                    val sourcePsi = element.sourcePsi ?: return PsiReference.EMPTY_ARRAY
+
+                    // Get the text range of the string literal value (excludes quotes)
+                    val textRange = ElementManipulators.getValueTextRange(sourcePsi)
+
+                    return arrayOf(VaadinStyleSheetReference(sourcePsi, textRange, path))
+                }
+            })
     }
 }
