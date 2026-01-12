@@ -128,8 +128,11 @@
                 class="com.vaadin.plugin.copilot.listeners.CopilotVaadinProjectListener"
                 topic="com.vaadin.plugin.listeners.VaadinProjectListener"/>
         <listener
-            class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
-            topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
+                class="com.vaadin.plugin.listeners.ConfigurationCheckVaadinProjectListener"
+                topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
+        <listener
+                class="com.vaadin.plugin.listeners.VaadinImportExclusionListener"
+                topic="com.vaadin.plugin.listeners.VaadinProjectListener" />
         <listener
                 class="com.vaadin.plugin.copilot.listeners.CopilotDynamicPluginListener"
                 topic="com.intellij.ide.plugins.DynamicPluginListener"/>

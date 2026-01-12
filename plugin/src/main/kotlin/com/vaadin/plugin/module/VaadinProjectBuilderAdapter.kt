@@ -26,9 +26,9 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
         return vaadinWizard.createStep(context)
     }
 
-    override fun createProject(name: String?, path: String?): Project? {
+    override fun createProject(name: String, path: String): Project? {
         return super.createProject(name, path)?.let { project ->
-            val outputPath = Path.of(path!!)
+            val outputPath = Path.of(path)
             val downloadUrl = vaadinWizard.projectModel!!.getDownloadLink(project)
             val tempFile = FileUtil.generateRandomTemporaryPath("project", ".zip")
             DownloadUtil.download(project, downloadUrl, tempFile.toPath(), "Vaadin Project")

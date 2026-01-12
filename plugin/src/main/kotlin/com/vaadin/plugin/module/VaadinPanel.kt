@@ -150,13 +150,13 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         locationProperty: GraphProperty<String>,
         wizardContext: WizardContext,
     ): Cell<TextFieldWithBrowseButton> {
+        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
         val fileChooserDescriptor =
-            FileChooserDescriptorFactory.createSingleLocalFileDescriptor()
-                .withFileFilter { it.isDirectory }
+            FileChooserDescriptorFactory.singleDir()
                 .withPathToTextConvertor(::getPresentablePath)
                 .withTextToPathConvertor(::getCanonicalPath)
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
+                .withTitle(title)
         val property = locationProperty.transform(::getPresentablePath, ::getCanonicalPath)
-        return textFieldWithBrowseButton(title, wizardContext.project, fileChooserDescriptor).bindText(property)
+        return textFieldWithBrowseButton(fileChooserDescriptor, wizardContext.project).bindText(property)
     }
 }
