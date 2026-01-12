@@ -1,0 +1,15 @@
+.text-error {
+    color: red;
+}
+
+.text-success {
+    color: green;
+}
+
+.bg-error {
+    color: #ffcccc;
+}
+
+.bg-success {
+    color: #ccffcc;
+}

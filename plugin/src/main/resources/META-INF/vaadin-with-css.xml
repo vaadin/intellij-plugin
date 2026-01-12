@@ -1,0 +1,13 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor
+            language="JAVA"
+            implementationClass="com.vaadin.plugin.css.CssClassCompletionContributor"/>
+
+        <completion.confidence
+                language="JAVA"
+                implementationClass="com.vaadin.plugin.css.CssCompletionConfidence"
+                id="vaadinCssConfidence"
+                order="before javaSkipAutopopupInStrings"/>
+    </extensions>
+</idea-plugin>
