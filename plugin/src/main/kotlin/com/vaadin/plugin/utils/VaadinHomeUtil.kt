@@ -107,16 +107,14 @@ object VaadinHomeUtil {
         }
     }
 
-    private fun isBundledVersionNewer(): Boolean {
-        val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotSwapAgentJarFile)
-        val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
-        if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
-            return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) == 1
+    fun getInstalledHotswapAgentVersion(): String? {
+        if (!hotSwapAgentJarFile.exists()) {
+            return null
         }
-        return false
+        return getHotswapAgentVersion(hotSwapAgentJarFile)
     }
 
-    private fun getBundledHotswapAgentVersion(): String? {
+    fun getBundledHotswapAgentVersion(): String? {
         var tempFile: File? = null
         try {
             tempFile = File.createTempFile("bundled-hotswap-agent", ".jar")
@@ -136,6 +134,19 @@ object VaadinHomeUtil {
         }
     }
 
+    fun isBundledHotswapAgentNewer(bundledVersion: String, installedVersion: String): Boolean {
+        return bundledVersion.compareTo(installedVersion) > 0
+    }
+
+    private fun isBundledVersionNewer(): Boolean {
+        val hotswapAgentVersionInVaadinFolder = getInstalledHotswapAgentVersion()
+        val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
+        if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
+            return isBundledHotswapAgentNewer(bundledHotswapAgentVersion, hotswapAgentVersionInVaadinFolder)
+        }
+        return false
+    }
+
     private fun getHotswapAgentVersion(file: File): String? {
         val jarFile = JarFile(file)
         val entries = jarFile.entries()
@@ -145,11 +156,7 @@ object VaadinHomeUtil {
                 val inputStream = jarFile.getInputStream(entry)
                 val properties = Properties()
                 properties.load(inputStream)
-                var version = properties.getProperty("version")
-                if (version.indexOf('-') != -1) {
-                    version = version.substring(0, version.indexOf('-'))
-                }
-                return version
+                return properties.getProperty("version")
             }
         }
         return null

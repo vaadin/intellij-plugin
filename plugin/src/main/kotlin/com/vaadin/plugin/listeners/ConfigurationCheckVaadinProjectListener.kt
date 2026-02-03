@@ -5,7 +5,6 @@ import com.intellij.debugger.JavaDebuggerBundle
 import com.intellij.debugger.settings.DebuggerSettings
 import com.intellij.ide.actionsOnSave.ActionsOnSaveConfigurable
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.ide.util.RunOnceUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
@@ -54,15 +53,60 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
             checkCompileOnSave(project)
             initAmplitude(project)
             initLocalServices(project)
-            RunOnceUtil.runOnceForApp("hotswap-version-check-" + CopilotPluginUtil.getPluginVersion()) {
-                VaadinHomeUtil.updateOrInstallHotSwapJar()
-            }
+            checkHotSwapAgentUpdate(project)
         }
     }
 
     private fun initLocalServices(project: Project) {
         project.getService(CompilationStatusManagerService::class.java).subscribeToCompilationStatus()
         project.getService(CopilotUndoManager::class.java).subscribeToVfsChanges()
+    }
+
+    private fun checkHotSwapAgentUpdate(project: Project) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val installedVersion = VaadinHomeUtil.getInstalledHotswapAgentVersion()
+            if (installedVersion == null) {
+                VaadinHomeUtil.updateOrInstallHotSwapJar()
+                return@executeOnPooledThread
+            }
+
+            val bundledVersion = VaadinHomeUtil.getBundledHotswapAgentVersion() ?: return@executeOnPooledThread
+            if (!VaadinHomeUtil.isBundledHotswapAgentNewer(bundledVersion, installedVersion)) {
+                return@executeOnPooledThread
+            }
+
+            ApplicationManager.getApplication().invokeLater {
+                val notification =
+                    Notification(
+                            NOTIFICATION_GROUP,
+                            "A newer version of hotswap-agent.jar is available ($bundledVersion).",
+                            NotificationType.INFORMATION)
+                        .setIcon(VaadinIcons.VAADIN)
+                notification.addAction(
+                    NotificationAction.create("Update") { _, updateNotification ->
+                        updateNotification.expire()
+                        ApplicationManager.getApplication().executeOnPooledThread {
+                            val version = VaadinHomeUtil.updateOrInstallHotSwapJar()
+                            ApplicationManager.getApplication().invokeLater {
+                                if (version != null) {
+                                    CopilotPluginUtil.notify(
+                                        "hotswap-agent.jar:$version installed",
+                                        NotificationType.INFORMATION,
+                                        project,
+                                    )
+                                } else {
+                                    CopilotPluginUtil.notify(
+                                        "Installation of hotswap-agent.jar failed, see logs for details",
+                                        NotificationType.ERROR,
+                                        project,
+                                    )
+                                }
+                            }
+                        }
+                    })
+                Notifications.Bus.notify(notification, project)
+            }
+        }
     }
 
     private fun checkReloadClassesSetting(project: Project) {
