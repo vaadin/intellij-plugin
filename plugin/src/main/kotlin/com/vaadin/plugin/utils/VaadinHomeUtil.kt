@@ -111,7 +111,7 @@ object VaadinHomeUtil {
         val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotSwapAgentJarFile)
         val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
         if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
-            return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) == 1
+            return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) > 0
         }
         return false
     }
