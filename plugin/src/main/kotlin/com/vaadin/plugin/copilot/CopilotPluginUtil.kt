@@ -4,6 +4,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -38,6 +39,8 @@ import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
 import java.io.IOException
 import java.io.StringWriter
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.Properties
 import org.jetbrains.jps.model.java.JavaResourceRootType
 import org.jetbrains.jps.model.java.JavaSourceRootType
@@ -170,56 +173,46 @@ class CopilotPluginUtil {
          * roots, source paths, test source paths, resource paths, test resource paths, and output path.
          */
         fun getModulesInfo(project: Project): List<ModuleInfo> {
-            val modules = HashMap<String, ModuleInfo>()
+
+            val modulesInfo = HashMap<String, ModuleInfo>()
             val moduleManager = ModuleManager.getInstance(project)
             val projectModules = moduleManager.modules
-            val moduleMap = projectModules.associateBy({ it.name }, { it })
-            projectModules.forEach { module: Module ->
+
+            val modulePathMap = buildExternalModulePathMap(projectModules)
+
+            projectModules.forEach { module ->
+                val parent = findExternalParentModule(module, modulePathMap)
+                val targetModule = parent ?: module
+                val targetName = targetModule.name
+
                 val moduleRootManager = ModuleRootManager.getInstance(module)
 
-                val dotIndex = module.name.lastIndexOf('.')
-                var targetModuleName = module.name
-                var targetModule = module
-                if (dotIndex > 0) {
-                    val base = module.name.substring(0, dotIndex)
-                    if (moduleMap.containsKey(base)) {
-                        // Add the modules from this module to the main one
-                        targetModuleName = base
-                        targetModule = moduleMap[base]!!
-                    }
-                }
-
                 val targetModuleInfo =
-                    modules.computeIfAbsent(
-                        targetModuleName,
-                        {
-                            val targetModuleRootManager = ModuleRootManager.getInstance(targetModule)
-                            val contentRoots = targetModuleRootManager.contentRoots.map { it.path }
+                    modulesInfo.computeIfAbsent(targetName) {
+                        val targetRootManager = ModuleRootManager.getInstance(targetModule)
+                        val contentRoots = targetRootManager.contentRoots.map { it.path }
 
-                            val compilerModuleExtension = CompilerModuleExtension.getInstance(module)
-                            val outputPath = compilerModuleExtension?.compilerOutputPath
+                        val compilerModuleExtension = CompilerModuleExtension.getInstance(targetModule)
+                        val outputPath = compilerModuleExtension?.compilerOutputPath?.path
 
-                            ModuleInfo(
-                                targetModuleName,
-                                contentRoots,
-                                ArrayList<String>(),
-                                ArrayList<String>(),
-                                ArrayList<String>(),
-                                ArrayList<String>(),
-                                outputPath?.path)
-                        })
+                        ModuleInfo(
+                            targetName, contentRoots, ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
+                    }
 
-                // Note that the JavaSourceRootType.SOURCE also includes Kotlin source folders
                 targetModuleInfo.javaSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path })
+
                 targetModuleInfo.javaTestSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map { it.path })
+
                 targetModuleInfo.resourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path })
+
                 targetModuleInfo.testResourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path })
             }
-            return modules.values.toList()
+
+            return modulesInfo.values.toList()
         }
 
         /**
@@ -235,6 +228,35 @@ class CopilotPluginUtil {
             }
             moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
             return moduleBaseDirectories
+        }
+
+        private fun buildExternalModulePathMap(modules: Array<Module>): Map<Path, Module> {
+            val map = HashMap<Path, Module>()
+
+            modules.forEach { module ->
+                val path = ExternalSystemApiUtil.getExternalProjectPath(module)
+                if (path != null) {
+                    map[Paths.get(path).normalize()] = module
+                }
+            }
+
+            return map
+        }
+
+        private fun findExternalParentModule(module: Module, modulePathMap: Map<Path, Module>): Module? {
+
+            val modulePathString = ExternalSystemApiUtil.getExternalProjectPath(module) ?: return null
+            var path: Path? = Paths.get(modulePathString).normalize().parent
+
+            while (path != null) {
+                val parentModule = modulePathMap[path]
+                if (parentModule != null) {
+                    return parentModule
+                }
+                path = path.parent
+            }
+
+            return null
         }
     }
 }
