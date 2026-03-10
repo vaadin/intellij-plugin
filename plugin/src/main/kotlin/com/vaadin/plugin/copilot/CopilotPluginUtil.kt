@@ -174,41 +174,69 @@ class CopilotPluginUtil {
          */
         fun getModulesInfo(project: Project): List<ModuleInfo> {
 
-            val modulesInfo = HashMap<String, ModuleInfo>()
-            val moduleManager = ModuleManager.getInstance(project)
-            val projectModules = moduleManager.modules
+            val modules = ModuleManager.getInstance(project).modules
 
-            val modulePathMap = buildExternalModulePathMap(projectModules)
+            // Cache expensive lookups
+            val rootManagers = HashMap<Module, ModuleRootManager>(modules.size)
+            val compilerExtensions = HashMap<Module, CompilerModuleExtension?>(modules.size)
+            val externalPaths = HashMap<Module, Path>(modules.size)
+            val modulePathMap = HashMap<Path, Module>(modules.size)
 
-            projectModules.forEach { module ->
-                val parent = findExternalParentModule(module, modulePathMap)
+            modules.forEach { module ->
+                rootManagers[module] = ModuleRootManager.getInstance(module)
+                compilerExtensions[module] = CompilerModuleExtension.getInstance(module)
+
+                val externalPath = ExternalSystemApiUtil.getExternalProjectPath(module)
+                if (externalPath != null) {
+                    val normalized = Paths.get(externalPath).normalize()
+                    externalPaths[module] = normalized
+                    modulePathMap[normalized] = module
+                }
+            }
+
+            fun findParent(module: Module): Module? {
+                var path = externalPaths[module]?.parent ?: return null
+
+                while (path != null) {
+                    modulePathMap[path]?.let {
+                        return it
+                    }
+                    path = path.parent
+                }
+                return null
+            }
+
+            val modulesInfo = LinkedHashMap<String, ModuleInfo>()
+
+            modules.forEach { module ->
+                val parent = findParent(module)
                 val targetModule = parent ?: module
                 val targetName = targetModule.name
 
-                val moduleRootManager = ModuleRootManager.getInstance(module)
+                val moduleRootManager = rootManagers[module]!!
 
-                val targetModuleInfo =
+                val targetInfo =
                     modulesInfo.computeIfAbsent(targetName) {
-                        val targetRootManager = ModuleRootManager.getInstance(targetModule)
+                        val targetRootManager = rootManagers[targetModule]!!
+
                         val contentRoots = targetRootManager.contentRoots.map { it.path }
 
-                        val compilerModuleExtension = CompilerModuleExtension.getInstance(targetModule)
-                        val outputPath = compilerModuleExtension?.compilerOutputPath?.path
+                        val outputPath = compilerExtensions[targetModule]?.compilerOutputPath?.path
 
-                        ModuleInfo(
+                        CopilotPluginUtil.ModuleInfo(
                             targetName, contentRoots, ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
                     }
 
-                targetModuleInfo.javaSourcePaths.addAll(
+                targetInfo.javaSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path })
 
-                targetModuleInfo.javaTestSourcePaths.addAll(
+                targetInfo.javaTestSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.TEST_SOURCE).map { it.path })
 
-                targetModuleInfo.resourcePaths.addAll(
+                targetInfo.resourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaResourceRootType.RESOURCE).map { it.path })
 
-                targetModuleInfo.testResourcePaths.addAll(
+                targetInfo.testResourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaResourceRootType.TEST_RESOURCE).map { it.path })
             }
 
@@ -228,35 +256,6 @@ class CopilotPluginUtil {
             }
             moduleBaseDirectories["base-module"] = listOf(project.basePath) as List<String>
             return moduleBaseDirectories
-        }
-
-        private fun buildExternalModulePathMap(modules: Array<Module>): Map<Path, Module> {
-            val map = HashMap<Path, Module>()
-
-            modules.forEach { module ->
-                val path = ExternalSystemApiUtil.getExternalProjectPath(module)
-                if (path != null) {
-                    map[Paths.get(path).normalize()] = module
-                }
-            }
-
-            return map
-        }
-
-        private fun findExternalParentModule(module: Module, modulePathMap: Map<Path, Module>): Module? {
-
-            val modulePathString = ExternalSystemApiUtil.getExternalProjectPath(module) ?: return null
-            var path: Path? = Paths.get(modulePathString).normalize().parent
-
-            while (path != null) {
-                val parentModule = modulePathMap[path]
-                if (parentModule != null) {
-                    return parentModule
-                }
-                path = path.parent
-            }
-
-            return null
         }
     }
 }
