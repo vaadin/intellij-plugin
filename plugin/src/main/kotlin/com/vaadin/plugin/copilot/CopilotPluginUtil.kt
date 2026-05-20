@@ -50,7 +50,7 @@ class CopilotPluginUtil {
     @JvmRecord
     data class ModuleInfo(
         val name: String,
-        val contentRoots: List<String>,
+        val contentRoots: ArrayList<String>,
         val javaSourcePaths: ArrayList<String>,
         val javaTestSourcePaths: ArrayList<String>,
         val resourcePaths: ArrayList<String>,
@@ -180,7 +180,7 @@ class CopilotPluginUtil {
             val rootManagers = HashMap<Module, ModuleRootManager>(modules.size)
             val compilerExtensions = HashMap<Module, CompilerModuleExtension?>(modules.size)
             val externalPaths = HashMap<Module, Path>(modules.size)
-            val modulePathMap = HashMap<Path, Module>(modules.size)
+            val modulePathMap = HashMap<Path, MutableList<Module>>(modules.size)
 
             modules.forEach { module ->
                 rootManagers[module] = ModuleRootManager.getInstance(module)
@@ -190,16 +190,30 @@ class CopilotPluginUtil {
                 if (externalPath != null) {
                     val normalized = Paths.get(externalPath).normalize()
                     externalPaths[module] = normalized
-                    modulePathMap[normalized] = module
+                    modulePathMap.getOrPut(normalized) { mutableListOf() }.add(module)
                 }
             }
 
+            // Among modules sharing a path, prefer the one with the fewest dots in its name.
+            // Gradle convention: root module has no dots, source-set modules add ".main"/".test".
+            // Excludes self and any submodule of self (its dotted-descendants), which can never be
+            // parents.
+            fun pickCandidate(candidates: List<Module>, self: Module): Module? {
+                val selfPrefix = self.name + "."
+                return candidates
+                    .asSequence()
+                    .filter { it != self && !it.name.startsWith(selfPrefix) }
+                    .minWithOrNull(compareBy({ it.name.count { c -> c == '.' } }, { it.name.length }, { it.name }))
+            }
+
             fun findParent(module: Module): Module? {
-                var path = externalPaths[module]?.parent ?: return null
+                var path = externalPaths[module] ?: return null
 
                 while (path != null) {
-                    modulePathMap[path]?.let {
-                        return it
+                    modulePathMap[path]?.let { candidates ->
+                        pickCandidate(candidates, module)?.let {
+                            return it
+                        }
                     }
                     path = path.parent
                 }
@@ -217,15 +231,17 @@ class CopilotPluginUtil {
 
                 val targetInfo =
                     modulesInfo.computeIfAbsent(targetName) {
-                        val targetRootManager = rootManagers[targetModule]!!
-
-                        val contentRoots = targetRootManager.contentRoots.map { it.path }
-
                         val outputPath = compilerExtensions[targetModule]?.compilerOutputPath?.path
 
                         CopilotPluginUtil.ModuleInfo(
-                            targetName, contentRoots, ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
+                            targetName, ArrayList(), ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
                     }
+
+                moduleRootManager.contentRoots.forEach { root ->
+                    if (root.path !in targetInfo.contentRoots) {
+                        targetInfo.contentRoots.add(root.path)
+                    }
+                }
 
                 targetInfo.javaSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path })
