@@ -195,9 +195,10 @@ class CopilotPluginUtil {
             }
 
             // Among modules sharing a path, prefer the one with the fewest dots in its name.
-            // Gradle convention: root module has no dots, source-set modules add ".main"/".test".
-            // Excludes self and any submodule of self (its dotted-descendants), which can never be
-            // parents.
+            // Gradle convention: a Gradle project's source-set modules (".main"/".test") share the
+            // externalPath of the owning project module, so we roll them up to the shortest-named
+            // sibling at that same path. We do NOT walk to ancestor paths — Gradle subprojects are
+            // independent modules, not children of the root project.
             fun pickCandidate(candidates: List<Module>, self: Module): Module? {
                 val selfPrefix = self.name + "."
                 return candidates
@@ -207,17 +208,9 @@ class CopilotPluginUtil {
             }
 
             fun findParent(module: Module): Module? {
-                var path = externalPaths[module] ?: return null
-
-                while (path != null) {
-                    modulePathMap[path]?.let { candidates ->
-                        pickCandidate(candidates, module)?.let {
-                            return it
-                        }
-                    }
-                    path = path.parent
-                }
-                return null
+                val path = externalPaths[module] ?: return null
+                val candidates = modulePathMap[path] ?: return null
+                return pickCandidate(candidates, module)
             }
 
             val modulesInfo = LinkedHashMap<String, ModuleInfo>()
