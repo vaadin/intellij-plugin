@@ -55,7 +55,11 @@ class CopilotPluginUtil {
         val javaTestSourcePaths: ArrayList<String>,
         val resourcePaths: ArrayList<String>,
         val testResourcePaths: ArrayList<String>,
-        val outputPath: String?
+        val outputPath: String?,
+        // Authoritative base directory of the (sub)project. For Gradle/Maven this is the external
+        // project path; for plain IDEA modules it falls back to the first content root. Prefer this
+        // over contentRoots[0] — that field is only deterministic by convention.
+        val basePath: String?
     )
 
     @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<ModuleInfo>)
@@ -224,10 +228,24 @@ class CopilotPluginUtil {
 
                 val targetInfo =
                     modulesInfo.computeIfAbsent(targetName) {
+                        // Seed contentRoots from the target module so contentRoots[0] is the
+                        // (sub)project's own root regardless of which sibling is iterated first.
+                        // Keep this to back compatibility on older copilot versions
+                        // Newer consumers should use dedicated basePath field
+                        val targetRootManager = rootManagers[targetModule]!!
+                        val initialRoots = ArrayList(targetRootManager.contentRoots.map { it.path })
+                        val basePath = externalPaths[targetModule]?.toString() ?: initialRoots.firstOrNull()
                         val outputPath = compilerExtensions[targetModule]?.compilerOutputPath?.path
 
                         CopilotPluginUtil.ModuleInfo(
-                            targetName, ArrayList(), ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
+                            targetName,
+                            initialRoots,
+                            ArrayList(),
+                            ArrayList(),
+                            ArrayList(),
+                            ArrayList(),
+                            outputPath,
+                            basePath)
                     }
 
                 moduleRootManager.contentRoots.forEach { root ->
