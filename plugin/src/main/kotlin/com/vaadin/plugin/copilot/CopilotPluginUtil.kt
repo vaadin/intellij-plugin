@@ -50,12 +50,16 @@ class CopilotPluginUtil {
     @JvmRecord
     data class ModuleInfo(
         val name: String,
-        val contentRoots: List<String>,
+        val contentRoots: ArrayList<String>,
         val javaSourcePaths: ArrayList<String>,
         val javaTestSourcePaths: ArrayList<String>,
         val resourcePaths: ArrayList<String>,
         val testResourcePaths: ArrayList<String>,
-        val outputPath: String?
+        val outputPath: String?,
+        // Authoritative base directory of the (sub)project. For Gradle/Maven this is the external
+        // project path; for plain IDEA modules it falls back to the first content root. Prefer this
+        // over contentRoots[0] — that field is only deterministic by convention.
+        val basePath: String?
     )
 
     @JvmRecord data class ProjectInfo(val basePath: String?, val modules: List<ModuleInfo>)
@@ -180,7 +184,7 @@ class CopilotPluginUtil {
             val rootManagers = HashMap<Module, ModuleRootManager>(modules.size)
             val compilerExtensions = HashMap<Module, CompilerModuleExtension?>(modules.size)
             val externalPaths = HashMap<Module, Path>(modules.size)
-            val modulePathMap = HashMap<Path, Module>(modules.size)
+            val modulePathMap = HashMap<Path, MutableList<Module>>(modules.size)
 
             modules.forEach { module ->
                 rootManagers[module] = ModuleRootManager.getInstance(module)
@@ -190,20 +194,27 @@ class CopilotPluginUtil {
                 if (externalPath != null) {
                     val normalized = Paths.get(externalPath).normalize()
                     externalPaths[module] = normalized
-                    modulePathMap[normalized] = module
+                    modulePathMap.getOrPut(normalized) { mutableListOf() }.add(module)
                 }
             }
 
-            fun findParent(module: Module): Module? {
-                var path = externalPaths[module]?.parent ?: return null
+            // Among modules sharing a path, prefer the one with the fewest dots in its name.
+            // Gradle convention: a Gradle project's source-set modules (".main"/".test") share the
+            // externalPath of the owning project module, so we roll them up to the shortest-named
+            // sibling at that same path. We do NOT walk to ancestor paths — Gradle subprojects are
+            // independent modules, not children of the root project.
+            fun pickCandidate(candidates: List<Module>, self: Module): Module? {
+                val selfPrefix = self.name + "."
+                return candidates
+                    .asSequence()
+                    .filter { it != self && !it.name.startsWith(selfPrefix) }
+                    .minWithOrNull(compareBy({ it.name.count { c -> c == '.' } }, { it.name.length }, { it.name }))
+            }
 
-                while (path != null) {
-                    modulePathMap[path]?.let {
-                        return it
-                    }
-                    path = path.parent
-                }
-                return null
+            fun findParent(module: Module): Module? {
+                val path = externalPaths[module] ?: return null
+                val candidates = modulePathMap[path] ?: return null
+                return pickCandidate(candidates, module)
             }
 
             val modulesInfo = LinkedHashMap<String, ModuleInfo>()
@@ -217,15 +228,31 @@ class CopilotPluginUtil {
 
                 val targetInfo =
                     modulesInfo.computeIfAbsent(targetName) {
+                        // Seed contentRoots from the target module so contentRoots[0] is the
+                        // (sub)project's own root regardless of which sibling is iterated first.
+                        // Keep this to back compatibility on older copilot versions
+                        // Newer consumers should use dedicated basePath field
                         val targetRootManager = rootManagers[targetModule]!!
-
-                        val contentRoots = targetRootManager.contentRoots.map { it.path }
-
+                        val initialRoots = ArrayList(targetRootManager.contentRoots.map { it.path })
+                        val basePath = externalPaths[targetModule]?.toString() ?: initialRoots.firstOrNull()
                         val outputPath = compilerExtensions[targetModule]?.compilerOutputPath?.path
 
                         CopilotPluginUtil.ModuleInfo(
-                            targetName, contentRoots, ArrayList(), ArrayList(), ArrayList(), ArrayList(), outputPath)
+                            targetName,
+                            initialRoots,
+                            ArrayList(),
+                            ArrayList(),
+                            ArrayList(),
+                            ArrayList(),
+                            outputPath,
+                            basePath)
                     }
+
+                moduleRootManager.contentRoots.forEach { root ->
+                    if (root.path !in targetInfo.contentRoots) {
+                        targetInfo.contentRoots.add(root.path)
+                    }
+                }
 
                 targetInfo.javaSourcePaths.addAll(
                     moduleRootManager.getSourceRoots(JavaSourceRootType.SOURCE).map { it.path })
