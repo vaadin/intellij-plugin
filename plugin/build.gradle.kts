@@ -4,7 +4,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "2.0.0"
+  id("org.jetbrains.kotlin.jvm") version "2.1.21"
   id("org.jetbrains.intellij.platform") version "2.13.1"
   id("com.diffplug.spotless") version "7.2.1"
 
