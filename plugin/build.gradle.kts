@@ -87,6 +87,7 @@ intellijPlatform {
   pluginVerification {
     ides { create(IntelliJPlatformType.IntellijIdea, verifyVersion) }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
+    ignoredProblemsFile = file("verifier-ignored-problems.txt")
   }
 }
 

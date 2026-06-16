@@ -115,6 +115,15 @@
                           relative-to-action="Rerun"
                           anchor="after" />
         </action>
+        <action
+                id="HotSwap.debug.toolbar"
+                class="com.vaadin.plugin.actions.DebugUsingHotSwapAgentToolbarAction"
+                text="Debug using HotSwapAgent"
+                icon="/vaadin/icons/debug.svg">
+            <add-to-group group-id="RunToolbarMainActionGroup"
+                          relative-to-action="MoreRunToolbarActions"
+                          anchor="before"/>
+        </action>
     </actions>
 
     <projectListeners>

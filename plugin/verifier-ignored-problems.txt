@@ -1,0 +1,7 @@
+// IntelliJ Plugin Verifier — ignored problems
+// Format: [<plugin_id>[:<plugin_version>]:]<message_regexp>   (regex cannot contain ':')
+
+// FUS package houses ActionIdProvider, the only API MoreRunToolbarActions uses to dedupe
+// our executor from the new-UI Run widget's "..." dropdown when the same action is inline.
+// The platform's own ExecutorAction implements this interface for the same reason.
+com.vaadin.intellij-plugin::.*ActionIdProvider reference
