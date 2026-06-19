@@ -1,6 +1,5 @@
 package com.vaadin.plugin.actions
 
-import com.intellij.execution.ExecutionManager
 import com.intellij.execution.ExecutorRegistry
 import com.intellij.execution.RunManager
 import com.intellij.execution.runners.ExecutionUtil
@@ -14,7 +13,8 @@ import com.vaadin.plugin.utils.VaadinIcons
 
 class DebugUsingHotSwapAgentToolbarAction : AnAction(), DumbAware {
 
-    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+    // EDT because update() reads run-content UI state (RunContentManager.getAllDescriptors).
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
 
     override fun update(e: AnActionEvent) {
         val project = e.project
@@ -24,17 +24,16 @@ class DebugUsingHotSwapAgentToolbarAction : AnAction(), DumbAware {
             return
         }
         e.presentation.isEnabledAndVisible = true
-        // A HotSwapAgent session is considered running when one of the live processes has a run
-        // content
-        // registered under the HotSwapAgent executor. This relies only on public API
-        // (getRunningProcesses /
-        // RunContentManager.findContentDescriptor) instead of the internal
-        // ExecutionManager.getRunningDescriptors.
+        // The selected configuration is running when it has a live run content. Uses the public,
+        // side-effect-free RunContentManager.getAllDescriptors() rather than the internal
+        // ExecutionManager.getRunningDescriptors(). findContentDescriptor() is avoided because it
+        // lazily creates/decorates the executor tool window, which must happen on the EDT.
+        val selected = RunManager.getInstance(project).selectedConfiguration
         val running =
-            ExecutionManager.getInstance(project).getRunningProcesses().any { handler ->
-                !handler.isProcessTerminated &&
-                    RunContentManager.getInstance(project).findContentDescriptor(executor, handler) != null
-            }
+            selected != null &&
+                RunContentManager.getInstance(project).allDescriptors.any { descriptor ->
+                    descriptor.processHandler?.isProcessTerminated == false && descriptor.displayName == selected.name
+                }
         if (running) {
             e.presentation.text = "Rerun using HotSwapAgent"
             e.presentation.icon = VaadinIcons.RERUN_HOTSWAP
