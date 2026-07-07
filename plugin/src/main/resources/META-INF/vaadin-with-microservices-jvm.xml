@@ -1,3 +1,7 @@
 <idea-plugin>
 
+    <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="UAST" implementation="com.vaadin.plugin.endpoints.VaadinReferenceContributor"/>
+    </extensions>
+
 </idea-plugin>

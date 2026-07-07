@@ -4,15 +4,11 @@ import com.intellij.microservices.jvm.cache.ModuleCacheValueHolder
 import com.intellij.microservices.jvm.cache.SourceLibSearchProvider
 import com.intellij.microservices.jvm.cache.UastCachedSearchUtils.sequenceWithCache
 import com.intellij.microservices.url.*
-import com.intellij.microservices.url.UrlPath.PathSegment
-import com.intellij.microservices.url.references.UrlPksParser
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiAnchor
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PartiallyKnownString
-import com.intellij.psi.util.SplitEscaper
 import com.vaadin.plugin.utils.VaadinIcons
 import com.vaadin.plugin.utils.hasVaadin
 import javax.swing.Icon
@@ -72,20 +68,4 @@ private class VaadinUrlTargetInfo(route: VaadinRoute) : UrlTargetInfo {
         get() = HTTP_SCHEMES
 
     override fun resolveToPsiElement(): PsiElement? = anchor.retrieve()
-}
-
-internal val vaadinUrlPksParser: UrlPksParser =
-    UrlPksParser(
-        splitEscaper = { _, _ -> SplitEscaper.AcceptAll },
-        customPathSegmentExtractor = { part ->
-            if (part.startsWith(":")) {
-                val varName = part.removePrefix(":").substringBefore("?").substringBefore("(")
-                PathSegment.Variable(varName)
-            } else {
-                PathSegment.Exact(part)
-            }
-        })
-
-internal fun parseVaadinUrlMapping(urlMapping: String): UrlPath {
-    return vaadinUrlPksParser.parseUrlPath(PartiallyKnownString(urlMapping)).urlPath
 }
