@@ -28,6 +28,11 @@ val verifyVersion =
 
 group = "com.vaadin"
 
+// Single source of truth for the plugin version, used both for the published plugin and for the
+// generated runtime resource below.
+val pluginVersion =
+    if (hasProperty("projVersion")) property("projVersion") as String else "1.0-SNAPSHOT"
+
 val publishChannel =
     if (hasProperty("publishChannel")) {
       property("publishChannel") as String
@@ -76,19 +81,26 @@ dependencies {
 }
 
 intellijPlatform {
-  pluginConfiguration {
-    version =
-        if (hasProperty("projVersion")) {
-          property("projVersion") as String
-        } else {
-          "1.0-SNAPSHOT"
-        }
-  }
+  pluginConfiguration { version = pluginVersion }
   pluginVerification {
     ides { create(IntelliJPlatformType.IntellijIdea, verifyVersion) }
     verificationReportsFormats = listOf(VerifyPluginTask.VerificationReportsFormats.MARKDOWN)
   }
 }
+
+// Expose the plugin version to runtime code via a bundled resource. This avoids the internal
+// plugin-descriptor lookup APIs (PluginManager/PluginManagerCore), which were marked @Internal.
+val generatedResourcesDir = layout.buildDirectory.dir("generated/version")
+
+val generateVersionProperties by
+    tasks.registering(WriteProperties::class) {
+      destinationFile = generatedResourcesDir.map { it.file("vaadin-plugin.properties") }
+      property("version", pluginVersion)
+    }
+
+sourceSets.named("main") { resources.srcDir(generatedResourcesDir) }
+
+tasks.named("processResources") { dependsOn(generateVersionProperties) }
 
 configure<com.diffplug.gradle.spotless.SpotlessExtension> {
   kotlin {

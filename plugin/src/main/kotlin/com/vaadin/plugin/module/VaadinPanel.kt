@@ -1,7 +1,6 @@
 package com.vaadin.plugin.module
 
 import com.intellij.icons.AllIcons
-import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.openapi.externalSystem.util.ExternalSystemBundle
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -150,7 +149,7 @@ class VaadinPanel(propertyGraph: PropertyGraph, private val wizardContext: Wizar
         locationProperty: GraphProperty<String>,
         wizardContext: WizardContext,
     ): Cell<TextFieldWithBrowseButton> {
-        val title = IdeBundle.message("title.select.project.file.directory", wizardContext.presentationName)
+        val title = "Select ${wizardContext.presentationName} File Directory"
         val fileChooserDescriptor =
             FileChooserDescriptorFactory.singleDir()
                 .withPathToTextConvertor(::getPresentablePath)
