@@ -1,8 +1,6 @@
 package com.vaadin.plugin.utils
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor
 import com.intellij.ide.plugins.PluginManager
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.java.library.JavaLibraryUtil.hasLibraryClass
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.extensions.PluginId
@@ -37,6 +35,3 @@ internal fun hasEndpoints(): Boolean =
     PluginId.findId(ENDPOINTS_PLUGIN_ID)?.let { PluginManager.isPluginInstalled(it) } ?: false
 
 internal fun isUltimate(): Boolean = ApplicationInfo.getInstance().apiVersion.startsWith("IU-")
-
-internal fun getVaadinPluginDescriptor(): IdeaPluginDescriptor =
-    PluginManagerCore.getPlugin(PluginId.getId("com.vaadin.intellij-plugin"))!!

@@ -13,7 +13,6 @@ import com.intellij.util.io.ZipUtil
 import com.vaadin.plugin.utils.DownloadUtil
 import com.vaadin.plugin.utils.IdeUtil
 import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
-import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import com.vaadin.plugin.utils.trackProjectCreated
 import java.io.File
 import java.nio.file.Files
@@ -68,8 +67,7 @@ class VaadinProjectBuilderAdapter(private val vaadinWizard: VaadinProjectWizard 
         val ideaDir = getIdeaDirectoryPath(project)
         if (ideaDir != null) {
             FileUtil.createIfDoesntExist(ideaDir.toFile())
-            val classLoader = getVaadinPluginDescriptor().classLoader
-            classLoader.getResourceAsStream("icon.png")?.use { inputStream ->
+            javaClass.getResourceAsStream("/icon.png")?.use { inputStream ->
                 Files.copy(inputStream, ideaDir.resolve("icon.png"))
             }
         }

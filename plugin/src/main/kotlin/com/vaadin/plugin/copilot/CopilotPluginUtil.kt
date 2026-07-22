@@ -34,7 +34,6 @@ import com.vaadin.plugin.copilot.handler.WriteBase64FileHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import com.vaadin.plugin.copilot.service.CopilotDotfileService
 import com.vaadin.plugin.utils.VaadinIcons
-import com.vaadin.plugin.utils.getVaadinPluginDescriptor
 import io.netty.handler.codec.http.HttpResponseStatus
 import java.io.BufferedWriter
 import java.io.IOException
@@ -90,7 +89,10 @@ class CopilotPluginUtil {
             HEARTBEAT("heartbeat"),
         }
 
-        private val pluginVersion = getVaadinPluginDescriptor().version
+        private val pluginVersion: String? =
+            CopilotPluginUtil::class.java.getResourceAsStream("/vaadin-plugin.properties")?.use { stream ->
+                Properties().apply { load(stream) }.getProperty("version")
+            }
 
         const val NOTIFICATION_GROUP = "Vaadin Copilot"
 
