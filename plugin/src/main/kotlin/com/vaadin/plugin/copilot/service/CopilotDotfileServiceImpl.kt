@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.vaadin.plugin.utils.IdeUtil.getIdeaDirectoryPath
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,12 +33,21 @@ class CopilotDotfileServiceImpl(private val project: Project) : CopilotDotfileSe
             VirtualFileManager.VFS_CHANGES,
             object : BulkFileListener {
                 override fun after(events: List<VFileEvent>) {
+                    val dotfilePath = getDotfilePath() ?: return
                     for (event in events) {
-                        when (event) {
-                            is VFileCreateEvent ->
-                                if (Path.of(event.path).equals(getDotfilePath())) _fileExists.value = true
-                            is VFileDeleteEvent ->
-                                if (Path.of(event.path).equals(getDotfilePath())) _fileExists.value = false
+                        if (event !is VFileCreateEvent && event !is VFileDeleteEvent) continue
+                        // The dotfile is a local file, so ignore unrelated events early. This also
+                        // skips paths from non-local file systems such as the Database VFS, whose
+                        // names may contain characters that are illegal in file paths (see #542).
+                        if (!event.path.endsWith(DOTFILE)) continue
+                        val eventPath =
+                            try {
+                                Path.of(event.path)
+                            } catch (e: InvalidPathException) {
+                                continue
+                            }
+                        if (eventPath == dotfilePath) {
+                            _fileExists.value = event is VFileCreateEvent
                         }
                     }
                 }
