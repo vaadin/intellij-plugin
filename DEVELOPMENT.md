@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers how to set up, build, and debug the Vaadin IntelliJ Plugin locally.
+This guide covers how to set up, build, and debug the Vaadin IntelliJ Plugin locally..
 
 ## Prerequisites
 
