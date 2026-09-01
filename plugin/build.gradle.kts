@@ -73,6 +73,7 @@ dependencies {
     zipSigner()
 
     testFramework(TestFrameworkType.Platform)
+    testFramework(TestFrameworkType.JUnit5)
   }
 
   testImplementation(kotlin("test"))
