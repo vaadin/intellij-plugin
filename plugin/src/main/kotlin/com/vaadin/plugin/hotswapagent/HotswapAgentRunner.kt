@@ -56,10 +56,9 @@ class HotswapAgentRunner : GenericDebuggerRunner() {
                     invokeLater {
                         val action =
                             NotificationAction.create("Setup JetBrains Runtime...") { event, notification ->
-                                JdkUtil.createSdkPopupBuilder(environment.project)
-                                    .onSdkSelected({ _ -> notification.hideBalloon() })
-                                    .buildPopup()
-                                    .showPopup(event)
+                                JdkUtil.showSdkPopup(environment.project, { notification.hideBalloon() }) { popup ->
+                                    popup.showPopup(event)
+                                }
                             }
                         Notifications.Bus.notify(
                             Notification(

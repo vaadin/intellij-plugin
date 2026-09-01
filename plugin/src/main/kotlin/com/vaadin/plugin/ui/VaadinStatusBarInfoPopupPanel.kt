@@ -104,10 +104,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
     private fun createJbrDownloadButton(): JButton {
         val downloadButton = JButton(AllIcons.Actions.InlayGear)
         downloadButton.addActionListener {
-            JdkUtil.createSdkPopupBuilder(project)
-                .onSdkSelected({ _ -> closePopup?.invoke() })
-                .buildPopup()
-                .showAbove(this)
+            JdkUtil.showSdkPopup(project, { closePopup?.invoke() }) { popup -> popup.showAbove(this) }
         }
         return downloadButton
     }
