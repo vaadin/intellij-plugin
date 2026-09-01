@@ -18,7 +18,6 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.roots.ui.configuration.SdkPopup
 import com.intellij.openapi.roots.ui.configuration.SdkPopupFactory
 import java.io.File
-import org.jetbrains.annotations.VisibleForTesting
 import org.jetbrains.idea.maven.project.MavenProjectsManager
 import org.jetbrains.jps.model.java.JdkVersionDetector
 
@@ -166,9 +165,13 @@ class JdkUtil {
         /**
          * Builds the JetBrains Runtime SDK popup and hands it over to [show], which decides where to display it.
          * [onSdkSelected] is invoked once the user has picked an SDK.
+         *
+         * Building and showing the popup reads the SDK model (SdkDetector), which the platform only allows with
+         * write-intent read access. Swing callbacks such as button clicks and notification actions are not dispatched
+         * with that access, so it is requested explicitly. See https://jb.gg/ij-platform-threading.
          */
         fun showSdkPopup(project: Project, onSdkSelected: () -> Unit, show: (SdkPopup) -> Unit) {
-            withSdkModelAccess {
+            WriteIntentReadAction.run {
                 val popup =
                     SdkPopupFactory.newBuilder()
                         .withProject(project)
@@ -178,18 +181,6 @@ class JdkUtil {
                         .buildPopup()
                 show(popup)
             }
-        }
-
-        /**
-         * Runs [action] with write-intent read access.
-         *
-         * Building and showing the SDK popup reads the SDK model (SdkDetector), which the platform only allows with
-         * write-intent read access. Swing callbacks such as button clicks and notification actions are not dispatched
-         * with that access, so it has to be requested explicitly. See https://jb.gg/ij-platform-threading.
-         */
-        @VisibleForTesting
-        internal fun withSdkModelAccess(action: Runnable) {
-            WriteIntentReadAction.run(action)
         }
     }
 }

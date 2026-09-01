@@ -2,6 +2,7 @@ package com.vaadin.plugin.hotswapagent
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,6 +11,8 @@ import kotlin.test.assertTrue
 
 @TestApplication
 class JdkUtilTest {
+
+    private val project = projectFixture()
 
     @Test
     fun parseJavaVersionSupportsCommonFormats() {
@@ -34,15 +37,17 @@ class JdkUtilTest {
     }
 
     @Test
-    fun sdkModelAccessRunsWithWriteIntentReadAccess() {
+    fun sdkPopupIsBuiltAndShownWithWriteIntentReadAccess() {
         val application = ApplicationManager.getApplication()
 
-        // A thread without write-intent read access, like the EDT when it dispatches a Swing event.
+        // Called from a thread without write-intent read access, like the Swing
+        // callbacks the popup is opened from. Without that access the platform
+        // refuses to read the SDK model while the popup is coming up.
         val hadWriteIntentReadAccess =
             application
                 .executeOnPooledThread<Boolean> {
                     var acquired = false
-                    JdkUtil.withSdkModelAccess { acquired = application.isWriteIntentLockAcquired }
+                    JdkUtil.showSdkPopup(project.get(), {}) { acquired = application.isWriteIntentLockAcquired }
                     acquired
                 }
                 .get(30, TimeUnit.SECONDS)
