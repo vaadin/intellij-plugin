@@ -52,8 +52,6 @@ class CopilotUndoManager(val project: Project) : BulkFileListener {
                 if (stack != null) {
                     if (stack.peek().isInProgress()) {
                         stack.peek().increment()
-                    } else {
-                        undoStack.remove(it.path)
                     }
                 }
             }
