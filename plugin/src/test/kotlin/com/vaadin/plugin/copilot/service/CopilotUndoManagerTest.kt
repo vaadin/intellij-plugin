@@ -5,49 +5,62 @@ import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.testFramework.HeavyPlatformTestCase
 import com.intellij.testFramework.PlatformTestUtil
-import com.intellij.testFramework.junit5.TestApplication
-import com.intellij.testFramework.junit5.fixture.projectFixture
 import com.intellij.testFramework.runInEdtAndWait
 import com.vaadin.plugin.copilot.handler.HandlerResponse
 import com.vaadin.plugin.copilot.handler.RedoHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import org.junit.jupiter.api.BeforeEach
 
-@TestApplication
-class CopilotUndoManagerTest {
+/**
+ * A [HeavyPlatformTestCase] rather than a JUnit 5 `@TestApplication` class: the JUnit 5 test application tears down
+ * inside a fixed twenty second budget, which a slow CI agent misses. This base class reaches the same checks through
+ * TestApplicationManager, which has no such deadline.
+ *
+ * Heavy rather than light, because the handlers resolve real java.io.File paths under the project's base directory, and
+ * a light fixture's project lives in an in-memory filesystem.
+ */
+class CopilotUndoManagerTest : HeavyPlatformTestCase() {
 
-    private val projectFixture = projectFixture(openAfterCreation = true)
-
-    private val project: Project
-        get() = projectFixture.get()
+    private lateinit var tempFile: File
 
     private val undoManager: CopilotUndoManager
         get() = project.getService(CopilotUndoManager::class.java)
 
-    private lateinit var tempFile: File
-
-    @BeforeEach
-    fun setUp() {
+    override fun setUp() {
+        super.setUp()
+        // the handlers resolve paths against it, and a file that does not exist yet is checked
+        // through its parent directory, so it has to be there before the first write
+        Files.createDirectories(Path.of(project.basePath!!))
         tempFile = File("${project.basePath}/${UUID.randomUUID()}.tmp")
         tempFile.deleteOnExit()
     }
 
-    @Test
-    fun newFileIsCreatedUndoneAndRedone() {
+    /** The handlers open what they write in an editor, and the project outlives the test. */
+    override fun tearDown() {
+        try {
+            runInEdtAndWait {
+                val manager = FileEditorManager.getInstance(project)
+                manager.openFiles.forEach { manager.closeFile(it) }
+                EditorHistoryManager.getInstance(project).removeAllFiles()
+            }
+        } finally {
+            super.tearDown()
+        }
+    }
+
+    fun testNewFileIsCreatedUndoneAndRedone() {
         callFileWriteHandler(tempFile.path, "Some changes")
 
         assertNotNull(findFile())
@@ -61,11 +74,10 @@ class CopilotUndoManagerTest {
         callRedoHandler(tempFile.path)
         val vfsFile = findFile()
         assertNotNull(vfsFile)
-        assertEquals("Some changes", contentOf(vfsFile))
+        assertEquals("Some changes", contentOf(vfsFile!!))
     }
 
-    @Test
-    fun existingFileIsWrittenUndoneAndRedone() {
+    fun testExistingFileIsWrittenUndoneAndRedone() {
         val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Some changes")
@@ -79,8 +91,7 @@ class CopilotUndoManagerTest {
     }
 
     /** An action on save landing right after the write is reverted together with it. */
-    @Test
-    fun immediateActionOnSaveIsRevertedWithTheWrite() {
+    fun testImmediateActionOnSaveIsRevertedWithTheWrite() {
         val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Change      one")
@@ -95,8 +106,7 @@ class CopilotUndoManagerTest {
      * write was counted in, which either dropped the whole undo history of the file or left the write with a command
      * count one too low to revert it.
      */
-    @Test
-    fun delayedActionOnSaveIsRevertedWithTheWrite() {
+    fun testDelayedActionOnSaveIsRevertedWithTheWrite() {
         val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Change      one")
@@ -112,8 +122,7 @@ class CopilotUndoManagerTest {
      * reverted together with it. What must not happen is reverting the user's command while leaving the Copilot write
      * in the file.
      */
-    @Test
-    fun userEditAfterTheWriteIsRevertedWithIt() {
+    fun testUserEditAfterTheWriteIsRevertedWithIt() {
         val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Copilot content")
@@ -123,8 +132,7 @@ class CopilotUndoManagerTest {
         assertEquals("Original Content", contentOf(vfsFile))
     }
 
-    @Test
-    fun consecutiveWritesAreUndoneOneByOne() {
+    fun testConsecutiveWritesAreUndoneOneByOne() {
         val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Change      one")
@@ -148,8 +156,7 @@ class CopilotUndoManagerTest {
         assertEquals("Original Content", contentOf(vfsFile))
     }
 
-    @Test
-    fun undoOfAFileCopilotNeverWroteDoesNothing() {
+    fun testUndoOfAFileCopilotNeverWroteDoesNothing() {
         val vfsFile = createFile("Original Content")
 
         assertNull(undoManager.peekUndoBatch(vfsFile))
