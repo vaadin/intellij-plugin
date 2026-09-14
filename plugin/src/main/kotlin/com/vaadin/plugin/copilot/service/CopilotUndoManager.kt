@@ -3,101 +3,85 @@ package com.vaadin.plugin.copilot.service
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.openapi.vfs.newvfs.BulkFileListener
-import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import java.util.Stack
-import java.util.concurrent.locks.ReentrantLock
 
+/**
+ * Keeps track of which IDE undoable commands belong to a Copilot write, so that Copilot undo and redo revert exactly
+ * those commands.
+ *
+ * A single write usually produces more than one command on the IDE undo stack: the write itself, plus whatever the IDE
+ * does as a consequence of saving the file (reformat, optimize imports, ...). Those follow-up actions run
+ * asynchronously, so the plugin cannot execute them inside its own command. Instead, every write records the time it
+ * started, and undo reverts every command that is not older than that - see
+ * [com.vaadin.plugin.copilot.handler.UndoHandler].
+ */
 @Service(Service.Level.PROJECT)
-class CopilotUndoManager(val project: Project) : BulkFileListener {
+class CopilotUndoManager(val project: Project) {
 
-    companion object {
-        const val ACTIONS_ON_SAVE_WINDOW = 1000 // ms window for actions on save
-    }
+    /**
+     * One Copilot write together with everything the IDE did as a consequence of it.
+     *
+     * @param nanoTime [System.nanoTime] taken immediately before the write command is executed. It is compared against
+     *   [com.intellij.openapi.command.undo.UndoManager.getNextUndoNanoTime], which tells when the command on top of the
+     *   IDE undo stack was created.
+     */
+    class Batch(val nanoTime: Long) {
 
-    class Batch() {
-        private val time = System.currentTimeMillis()
-        private var count = 0
-
-        fun getCount(): Int {
-            return count
-        }
-
-        fun increment() {
-            count += 1
-        }
-
-        fun isInProgress(): Boolean {
-            return System.currentTimeMillis() - time <= ACTIONS_ON_SAVE_WINDOW
-        }
+        /** How many commands this batch reverted, replayed as-is when it is redone. */
+        var commandCount: Int = 0
     }
 
     private val undoStack: MutableMap<String, Stack<Batch>> = mutableMapOf()
+
     private val redoStack: MutableMap<String, Stack<Batch>> = mutableMapOf()
-    private val locks: MutableMap<String, ReentrantLock> = mutableMapOf()
 
-    fun subscribeToVfsChanges() {
-        project.messageBus.connect().subscribe(VirtualFileManager.VFS_CHANGES, this)
+    fun fileWritten(file: VirtualFile, nanoTime: Long) {
+        undoStack.getOrPut(file.path) { Stack() }.push(Batch(nanoTime))
+        // a new write pushes new commands onto the IDE undo stack, which drops its redo history
+        redoStack.remove(file.path)
     }
 
-    // increments latest batch for file if is current batch
-    // locking prevents modifying stack during undo / redo
-    override fun after(events: MutableList<out VFileEvent>) {
-        events
-            .filter { ev -> ev.isFromSave }
-            .filter { ev -> locks[ev.path] == null || !locks[ev.path]!!.isLocked }
-            .forEach {
-                val stack = undoStack[it.path]
-                if (stack != null) {
-                    if (stack.peek().isInProgress()) {
-                        stack.peek().increment()
-                    } else {
-                        undoStack.remove(it.path)
-                    }
-                }
-            }
+    fun peekUndoBatch(file: VirtualFile): Batch? = peek(file, undoStack)
+
+    fun peekRedoBatch(file: VirtualFile): Batch? = peek(file, redoStack)
+
+    /** Records that the pending undo batch reverted [commandCount] commands. */
+    fun undoPerformed(file: VirtualFile, commandCount: Int) {
+        move(file, undoStack, redoStack)?.commandCount = commandCount
     }
 
-    fun fileWritten(file: VirtualFile) {
-        undoStack.getOrPut(file.path) { Stack() }.push(Batch())
+    fun redoPerformed(file: VirtualFile) {
+        move(file, redoStack, undoStack)
     }
 
-    fun getUndoCount(file: VirtualFile): Int {
-        return undoStack[file.path]?.peek()?.getCount() ?: 0
+    /**
+     * Drops the recorded undo history of a file, called when the pending batch could not be reverted. That means the
+     * IDE no longer holds the commands of that write, in which case the older batches underneath cannot be reverted
+     * either.
+     */
+    fun undoUnavailable(file: VirtualFile) {
+        undoStack.remove(file.path)
     }
 
-    fun getRedoCount(file: VirtualFile): Int {
-        return redoStack[file.path]?.peek()?.getCount() ?: 0
+    fun redoUnavailable(file: VirtualFile) {
+        redoStack.remove(file.path)
     }
 
-    fun undoStart(file: VirtualFile) {
-        locks.getOrPut(file.path) { ReentrantLock() }.lock()
+    private fun peek(file: VirtualFile, stacks: MutableMap<String, Stack<Batch>>): Batch? {
+        return stacks[file.path]?.takeIf { it.isNotEmpty() }?.peek()
     }
 
-    fun redoStart(file: VirtualFile) {
-        locks.getOrPut(file.path) { ReentrantLock() }.lock()
-    }
-
-    fun undoDone(file: VirtualFile) {
-        popAndPush(file, undoStack, redoStack)
-        locks[file.path]?.unlock()
-    }
-
-    fun redoDone(file: VirtualFile) {
-        popAndPush(file, redoStack, undoStack)
-        locks[file.path]?.unlock()
-    }
-
-    private fun popAndPush(
+    private fun move(
         file: VirtualFile,
         fromStacksMap: MutableMap<String, Stack<Batch>>,
         targetStacksMap: MutableMap<String, Stack<Batch>>
-    ) {
-        val batch = fromStacksMap[file.path]?.pop()
-        targetStacksMap.getOrPut(file.path) { Stack() }.push(batch)
-        if (fromStacksMap[file.path]?.isEmpty() == true) {
+    ): Batch? {
+        val batch = peek(file, fromStacksMap) ?: return null
+        fromStacksMap[file.path]!!.pop()
+        if (fromStacksMap[file.path]!!.isEmpty()) {
             fromStacksMap.remove(file.path)
         }
+        targetStacksMap.getOrPut(file.path) { Stack() }.push(batch)
+        return batch
     }
 }

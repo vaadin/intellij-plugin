@@ -64,9 +64,10 @@ abstract class AbstractHandler(val project: Project) : Handler {
         return FileEditorWrapper(editors.first(), project, false)
     }
 
-    open fun postSave(vfsFile: VirtualFile) {
+    /** @param nanoTime [System.nanoTime] taken before the write command started, see [CopilotUndoManager.Batch] */
+    open fun postSave(vfsFile: VirtualFile, nanoTime: Long) {
         LOG.info("File $vfsFile contents saved")
-        notifyUndoManager(vfsFile)
+        notifyUndoManager(vfsFile, nanoTime)
         commitAndFlush(vfsFile.findDocument())
         openFileInEditor(vfsFile)
     }
@@ -76,8 +77,8 @@ abstract class AbstractHandler(val project: Project) : Handler {
         FileEditorManager.getInstance(project).openTextEditor(openFileDescriptor, false)
     }
 
-    fun notifyUndoManager(vfsFile: VirtualFile) {
-        getCopilotUndoManager().fileWritten(vfsFile)
+    fun notifyUndoManager(vfsFile: VirtualFile, nanoTime: Long) {
+        getCopilotUndoManager().fileWritten(vfsFile, nanoTime)
     }
 
     fun commitAndFlush(vfsDoc: Document?) {
