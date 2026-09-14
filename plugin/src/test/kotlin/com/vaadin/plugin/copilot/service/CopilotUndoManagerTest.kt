@@ -1,175 +1,206 @@
 package com.vaadin.plugin.copilot.service
 
-import ai.grazie.utils.mpp.UUID
 import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findDocument
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.PlatformTestUtil
+import com.intellij.testFramework.junit5.TestApplication
+import com.intellij.testFramework.junit5.fixture.projectFixture
 import com.intellij.testFramework.runInEdtAndWait
+import com.vaadin.plugin.copilot.handler.HandlerResponse
 import com.vaadin.plugin.copilot.handler.RedoHandler
 import com.vaadin.plugin.copilot.handler.UndoHandler
 import com.vaadin.plugin.copilot.handler.WriteFileHandler
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import org.junit.jupiter.api.AfterEach
+import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
 
-@Disabled
-class CopilotUndoManagerTest : BasePlatformTestCase() {
+@TestApplication
+class CopilotUndoManagerTest {
+
+    private val projectFixture = projectFixture(openAfterCreation = true)
+
+    private val project: Project
+        get() = projectFixture.get()
+
+    private val undoManager: CopilotUndoManager
+        get() = project.getService(CopilotUndoManager::class.java)
 
     private lateinit var tempFile: File
 
-    private lateinit var undoManager: CopilotUndoManager
-
     @BeforeEach
-    fun setup() {
-        super.setUp()
-        DumbService.getInstance(project).waitForSmartMode()
-        tempFile = File("${project.basePath}/${UUID.random().text}.tmp")
+    fun setUp() {
+        tempFile = File("${project.basePath}/${UUID.randomUUID()}.tmp")
         tempFile.deleteOnExit()
-        Files.createDirectories(Path.of(project.basePath))
-        undoManager = project.getService(CopilotUndoManager::class.java)
-    }
-
-    @AfterEach
-    fun teardown() {
-        super.tearDown()
     }
 
     @Test
-    fun test_newFile_createUndoRedo() {
+    fun newFileIsCreatedUndoneAndRedone() {
         callFileWriteHandler(tempFile.path, "Some changes")
 
-        var vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
-        assertTrue(vfsFile?.exists() == true)
+        assertNotNull(findFile())
+        assertNotNull(undoManager.peekUndoBatch(findFile()!!))
 
-        assertEquals(1, undoManager.getUndoCount(vfsFile!!))
-
-        // simulate save action
-        writeFile(vfsFile, "Updated Content", "Format On Save")
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
-
-        // undo should remove file
+        // undo should remove the file
         callUndoHandler(tempFile.path)
-        assertEquals(0, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
-        vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
-        assertTrue(vfsFile == null)
+        assertNull(findFile())
 
         // redo should recreate it
         callRedoHandler(tempFile.path)
-
-        vfsFile = VfsUtil.findFileByIoFile(tempFile, false)
-        assertTrue(vfsFile?.exists() == true)
-        assertEquals(2, undoManager.getUndoCount(vfsFile!!))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        val vfsFile = findFile()
+        assertNotNull(vfsFile)
+        assertEquals("Some changes", contentOf(vfsFile))
     }
 
     @Test
-    fun test_existingFile_writeUndoRedo() {
-        tempFile.createNewFile()
-        Files.writeString(tempFile.toPath(), "Original Content")
-
-        val vfsFile = VfsUtil.findFileByIoFile(tempFile, false)!!
-        assertTrue(vfsFile.exists())
+    fun existingFileIsWrittenUndoneAndRedone() {
+        val vfsFile = createFile("Original Content")
 
         callFileWriteHandler(vfsFile.path, "Some changes")
-
-        assertEquals(1, undoManager.getUndoCount(vfsFile))
-
-        // simulate save action
-        writeFile(vfsFile, "Updated Content", "Format On Save")
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertEquals("Some changes", contentOf(vfsFile))
 
         callUndoHandler(vfsFile.path)
-        assertEquals(0, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertEquals("Original Content", contentOf(vfsFile))
 
         callRedoHandler(vfsFile.path)
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(0, undoManager.getRedoCount(vfsFile))
+        assertEquals("Some changes", contentOf(vfsFile))
+    }
 
-        runWriteActionAndWait { vfsFile.delete(this) }
+    /** An action on save landing right after the write is reverted together with it. */
+    @Test
+    fun immediateActionOnSaveIsRevertedWithTheWrite() {
+        val vfsFile = createFile("Original Content")
+
+        callFileWriteHandler(vfsFile.path, "Change      one")
+        runCommand(vfsFile, "Change one", "Reformat Code")
+
+        callUndoHandler(vfsFile.path)
+        assertEquals("Original Content", contentOf(vfsFile))
+    }
+
+    /**
+     * The same, for an action on save that takes longer to arrive. It used to fall outside the one second window the
+     * write was counted in, which either dropped the whole undo history of the file or left the write with a command
+     * count one too low to revert it.
+     */
+    @Test
+    fun delayedActionOnSaveIsRevertedWithTheWrite() {
+        val vfsFile = createFile("Original Content")
+
+        callFileWriteHandler(vfsFile.path, "Change      one")
+        Thread.sleep(1500)
+        runCommand(vfsFile, "Change one", "Reformat Code")
+
+        callUndoHandler(vfsFile.path)
+        assertEquals("Original Content", contentOf(vfsFile))
+    }
+
+    /**
+     * A command of the user's own, made after the write, sits on top of it in the IDE undo stack and can only be
+     * reverted together with it. What must not happen is reverting the user's command while leaving the Copilot write
+     * in the file.
+     */
+    @Test
+    fun userEditAfterTheWriteIsRevertedWithIt() {
+        val vfsFile = createFile("Original Content")
+
+        callFileWriteHandler(vfsFile.path, "Copilot content")
+        runCommand(vfsFile, "Copilot content, edited by hand", "Typing")
+
+        callUndoHandler(vfsFile.path)
+        assertEquals("Original Content", contentOf(vfsFile))
     }
 
     @Test
-    fun testExistingFile_multipleUndo() {
-        tempFile.createNewFile()
-        Files.writeString(tempFile.toPath(), "Original Content")
+    fun consecutiveWritesAreUndoneOneByOne() {
+        val vfsFile = createFile("Original Content")
 
-        val vfsFile = VfsUtil.findFileByIoFile(tempFile, false)!!
-        assertTrue(vfsFile.exists())
-
-        // write and format first time
         callFileWriteHandler(vfsFile.path, "Change      one")
-        writeFile(vfsFile, "Change one", "Format On Save")
+        runCommand(vfsFile, "Change one", "Reformat Code")
+        Thread.sleep(1500)
 
-        // idle time
-        Thread.sleep(1000)
-
-        // write and format second time
         callFileWriteHandler(vfsFile.path, "Change      two")
-        writeFile(vfsFile, "Change two", "Format On Save")
+        runCommand(vfsFile, "Change two", "Reformat Code")
+        Thread.sleep(1500)
 
-        // idle time
-        Thread.sleep(1000)
-
-        // write and format third time
         callFileWriteHandler(vfsFile.path, "Change      three")
-        writeFile(vfsFile, "Change three", "Format On Save")
+        runCommand(vfsFile, "Change three", "Reformat Code")
 
-        // 3 Copilot consecutive operations -> all should be possible to undo
-
-        // call undo first time
         callUndoHandler(vfsFile.path)
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertEquals("Change two", contentOf(vfsFile))
 
-        // call undo second time
         callUndoHandler(vfsFile.path)
-        assertEquals(2, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertEquals("Change one", contentOf(vfsFile))
 
-        // call undo third time
         callUndoHandler(vfsFile.path)
-        assertEquals(0, undoManager.getUndoCount(vfsFile))
-        assertEquals(2, undoManager.getRedoCount(vfsFile))
+        assertEquals("Original Content", contentOf(vfsFile))
+    }
+
+    @Test
+    fun undoOfAFileCopilotNeverWroteDoesNothing() {
+        val vfsFile = createFile("Original Content")
+
+        assertNull(undoManager.peekUndoBatch(vfsFile))
+        assertFalse(callUndoHandler(vfsFile.path))
+        assertEquals("Original Content", contentOf(vfsFile))
+    }
+
+    private fun findFile(): VirtualFile? {
+        return computeInEdt { VfsUtil.findFileByIoFile(tempFile, true) }
+    }
+
+    private fun createFile(content: String): VirtualFile {
+        return runWriteActionAndWait {
+            val parent = VfsUtil.createDirectories(tempFile.parent)
+            val vfsFile = parent.createChildData(this, tempFile.name)
+            VfsUtil.saveText(vfsFile, content)
+            vfsFile
+        }
+    }
+
+    private fun contentOf(vfsFile: VirtualFile): String {
+        return computeInEdt { vfsFile.findDocument()?.text ?: VfsUtil.loadText(vfsFile) }
     }
 
     private fun callFileWriteHandler(file: String, text: String) {
         val data = mapOf<String, Any>("content" to text, "undoLabel" to "Vaadin File Write", "file" to file)
-        runInEdtAndWait {
-            val response = WriteFileHandler(project, data).run()
-            assertEquals(200, response.status.code())
-        }
+        callHandler { WriteFileHandler(project, data).run() }
     }
 
-    private fun callUndoHandler(file: String) {
+    private fun callUndoHandler(file: String): Boolean {
         val data = mapOf<String, Any>("files" to listOf(file))
-        runInEdtAndWait {
-            val response = UndoHandler(project, data).run()
-            assertEquals(200, response.status.code())
-        }
+        return callHandler { UndoHandler(project, data).run() }
     }
 
-    private fun callRedoHandler(file: String) {
+    private fun callRedoHandler(file: String): Boolean {
         val data = mapOf<String, Any>("files" to listOf(file))
-        runInEdtAndWait {
-            val response = RedoHandler(project, data).run()
-            assertEquals(200, response.status.code())
-        }
+        return callHandler { RedoHandler(project, data).run() }
+    }
+
+    private fun callHandler(call: () -> HandlerResponse): Boolean {
+        val response = computeInEdt(call)
+        assertEquals(200, response.status.code())
+        // handlers schedule their work with runInEdt, which only queues it
+        runInEdtAndWait { PlatformTestUtil.dispatchAllInvocationEventsInIdeEventQueue() }
+        return response.data?.get("performed") == true
+    }
+
+    private fun <T> computeInEdt(block: () -> T): T {
+        var result: T? = null
+        runInEdtAndWait { result = block() }
+        @Suppress("UNCHECKED_CAST") return result as T
     }
 
     private fun commitAndFlush(doc: Document) {
@@ -177,7 +208,8 @@ class CopilotUndoManagerTest : BasePlatformTestCase() {
         FileDocumentManager.getInstance().saveDocuments(doc::equals)
     }
 
-    private fun writeFile(vfsFile: VirtualFile, content: String, undoLabel: String = "Test Write") {
+    /** Simulates a command made by somebody other than Copilot: an action on save, or the user. */
+    private fun runCommand(vfsFile: VirtualFile, content: String, undoLabel: String) {
         runInEdtAndWait {
             CommandProcessor.getInstance()
                 .executeCommand(

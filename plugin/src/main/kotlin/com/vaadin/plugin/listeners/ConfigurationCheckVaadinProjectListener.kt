@@ -21,7 +21,6 @@ import com.intellij.openapi.vcs.VcsBundle
 import com.vaadin.plugin.actions.VaadinCompileOnSaveActionInfo
 import com.vaadin.plugin.copilot.CopilotPluginUtil
 import com.vaadin.plugin.copilot.service.CompilationStatusManagerService
-import com.vaadin.plugin.copilot.service.CopilotUndoManager
 import com.vaadin.plugin.utils.IdeUtil
 import com.vaadin.plugin.utils.VaadinHomeUtil
 import com.vaadin.plugin.utils.VaadinIcons
@@ -62,7 +61,6 @@ class ConfigurationCheckVaadinProjectListener : VaadinProjectListener {
 
     private fun initLocalServices(project: Project) {
         project.getService(CompilationStatusManagerService::class.java).subscribeToCompilationStatus()
-        project.getService(CopilotUndoManager::class.java).subscribeToVfsChanges()
     }
 
     private fun checkReloadClassesSetting(project: Project) {

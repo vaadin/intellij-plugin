@@ -54,13 +54,16 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
 
     private fun writeAndFlush(vfsFile: VirtualFile) {
         vfsFile.findDocument()?.let {
+            // taken before the command starts so that it is not later than the timestamp the IDE
+            // records for it, see CopilotUndoManager.Batch
+            val nanoTime = System.nanoTime()
             CommandProcessor.getInstance()
                 .executeCommand(
                     project,
                     {
                         WriteCommandAction.runWriteCommandAction(project) {
                             doWrite(vfsFile, it, content)
-                            postSave(vfsFile)
+                            postSave(vfsFile, nanoTime)
                         }
                     },
                     undoLabel ?: "Vaadin Copilot Write File",
@@ -72,13 +75,14 @@ open class WriteFileHandler(project: Project, data: Map<String, Any>) : Abstract
 
     private fun create() {
         runInEdt {
+            val nanoTime = System.nanoTime()
             CommandProcessor.getInstance()
                 .executeCommand(
                     project,
                     {
                         WriteCommandAction.runWriteCommandAction(project) {
                             val vfsFile = doCreate(ioFile, content)
-                            postSave(vfsFile)
+                            postSave(vfsFile, nanoTime)
                         }
                     },
                     undoLabel ?: "Vaadin Copilot Write File",

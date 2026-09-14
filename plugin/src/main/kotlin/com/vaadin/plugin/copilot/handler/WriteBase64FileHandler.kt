@@ -12,9 +12,9 @@ class WriteBase64FileHandler(project: Project, data: Map<String, Any>) : WriteFi
         vfsFile?.setBinaryContent(Base64.getDecoder().decode(content))
     }
 
-    override fun postSave(vfsFile: VirtualFile) {
+    override fun postSave(vfsFile: VirtualFile, nanoTime: Long) {
         LOG.info("File $vfsFile created")
-        notifyUndoManager(vfsFile)
+        notifyUndoManager(vfsFile, nanoTime)
         // there is no Document associated with binary VirtualFile, call "compile" always to process
         // resource
         processResource(vfsFile)
