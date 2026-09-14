@@ -73,6 +73,7 @@ dependencies {
     zipSigner()
 
     testFramework(TestFrameworkType.Platform)
+    // kept from #579: CopilotUndoManagerTest (#591) needs @TestApplication and projectFixture
     testFramework(TestFrameworkType.JUnit5)
   }
 
