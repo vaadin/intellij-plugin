@@ -1,21 +1,20 @@
 package com.vaadin.plugin.hotswapagent
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.testFramework.junit5.TestApplication
-import com.intellij.testFramework.junit5.fixture.projectFixture
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import java.util.concurrent.TimeUnit
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
-@TestApplication
-class JdkUtilTest {
+/**
+ * A [BasePlatformTestCase] rather than a JUnit 5 `@TestApplication` class: the JUnit 5 test application tears down
+ * inside a fixed twenty second budget, which a slow CI agent misses. This base class reaches the same checks through
+ * TestApplicationManager, which has no such deadline.
+ */
+class JdkUtilTest : BasePlatformTestCase() {
 
-    private val project = projectFixture()
+    // the SDK popup has to be opened from a thread that does not already hold the write-intent lock
+    override fun runInDispatchThread(): Boolean = false
 
-    @Test
-    fun parseJavaVersionSupportsCommonFormats() {
+    fun testParseJavaVersionSupportsCommonFormats() {
         val cases =
             mapOf(
                 "17" to 17,
@@ -27,17 +26,15 @@ class JdkUtilTest {
             )
 
         cases.forEach { (input, expected) ->
-            assertEquals(expected, JdkUtil.parseJavaVersion(input), "Failed for input '$input'")
+            assertEquals("Failed for input '$input'", expected, JdkUtil.parseJavaVersion(input))
         }
     }
 
-    @Test
-    fun parseJavaVersionReturnsNullWhenNotParsable() {
+    fun testParseJavaVersionReturnsNullWhenNotParsable() {
         assertNull(JdkUtil.parseJavaVersion("abc"))
     }
 
-    @Test
-    fun sdkPopupIsBuiltAndShownWithWriteIntentReadAccess() {
+    fun testSdkPopupIsBuiltAndShownWithWriteIntentReadAccess() {
         val application = ApplicationManager.getApplication()
 
         // Called from a thread without write-intent read access, like the Swing
@@ -47,11 +44,11 @@ class JdkUtilTest {
             application
                 .executeOnPooledThread<Boolean> {
                     var acquired = false
-                    JdkUtil.showSdkPopup(project.get(), {}) { acquired = application.isWriteIntentLockAcquired }
+                    JdkUtil.showSdkPopup(project, {}) { acquired = application.isWriteIntentLockAcquired }
                     acquired
                 }
                 .get(30, TimeUnit.SECONDS)
 
-        assertTrue(hadWriteIntentReadAccess, "SDK popup must be built and shown with write-intent read access")
+        assertTrue("SDK popup must be built and shown with write-intent read access", hadWriteIntentReadAccess)
     }
 }

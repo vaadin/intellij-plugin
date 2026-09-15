@@ -67,6 +67,46 @@ The project uses [Spotless](https://github.com/diffplug/spotless) with ktfmt (Go
 ./gradlew :plugin:test
 ```
 
+### Writing tests that need an IDE application
+
+Tests that need a live `Application` or `Project` — anything touching services, VFS, documents,
+editors or `UndoManager` — must extend the platform's JUnit 3 base classes:
+
+| need | base class |
+|---|---|
+| a project on a real filesystem (files, VFS, documents) | `HeavyPlatformTestCase` |
+| a project only, no real files | `BasePlatformTestCase` |
+| neither | a plain JUnit 5 class — most tests belong here |
+
+**Do not use `@TestApplication` or `projectFixture()`.** They read as the modern choice, and they
+were used here until [#592](https://github.com/vaadin/intellij-plugin/pull/592). Their teardown,
+`TestApplicationResource.close()`, wraps the whole shutdown in `withTimeout(20s)`, ten seconds of
+which can go to `waitForAppLeakingThreads` alone. Miss the budget and `disposeTestApplication()` is
+skipped — it is what clears `ApplicationManager.ourApplication` — so the Platform framework's second
+teardown pass repeats every check against a disposed but still registered application and fails the
+build with `AlreadyDisposedException`, while every test passes.
+
+This is invisible on a developer machine and on GitHub PR validation. It fails on the marketplace
+publishing agent, which benchmarks at roughly a quarter of reference CPU and an eighth of reference
+I/O. `TestApplicationManager.disposeApplicationAndCheckForLeaks`, the path the JUnit 3 base classes
+take, runs the same leak checks with no timeout at all.
+
+One class still on `@TestApplication` is enough to arm the deadline for the whole run.
+
+Things that bite when writing these:
+
+- Test bodies run **on the EDT**. Overriding `runInDispatchThread()` to `false` deadlocks anything
+  that calls back into the EDT — it waits for a write-intent permit the test thread holds. Override
+  it only when the code under test must run *without* that lock, as `JdkUtilTest` does for the SDK
+  popup.
+- Methods are named `test*`, with `setUp`/`tearDown` overrides. No `@Test`, `@BeforeEach` or
+  `@AfterEach` — mixing JUnit 5 annotations into a `TestCase` silently stops the class being
+  collected, which is how `CopilotUndoManagerTest` sat dead and `@Disabled` for a long time.
+- `junit-vintage-engine` is what lets `useJUnitPlatform()` collect a JUnit 3 `TestCase`. It is
+  already declared; removing it makes these tests vanish from the run rather than fail.
+- A project created by the fixture may have no base directory on disk yet. Create it in `setUp` if
+  the code under test resolves paths through it.
+
 ## 5. Run the plugin in a sandbox IDE
 
 The most important step for development: launch a **second IntelliJ IDEA instance** with the plugin installed into a sandboxed environment.

@@ -78,6 +78,8 @@ dependencies {
 
   testImplementation(kotlin("test"))
   testImplementation("junit:junit:4.13.2")
+  // BasePlatformTestCase is a JUnit 3 TestCase; useJUnitPlatform() only collects it through vintage
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
