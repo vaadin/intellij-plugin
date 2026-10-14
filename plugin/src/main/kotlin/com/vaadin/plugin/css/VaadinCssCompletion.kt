@@ -58,12 +58,15 @@ private class VaadinCssCompletionProvider : CompletionProvider<CompletionParamet
     }
 
     private fun addParts(catalog: VaadinCssCatalog, componentName: String, result: CompletionResultSet) {
-        catalog.components.firstOrNull { it.name == componentName }?.parts?.forEach { part ->
-            result.addElement(
-                LookupElementBuilder.create(part.name)
-                    .withIcon(AllIcons.Xml.Css_class)
-                    .withTypeText("$componentName part"))
-        }
+        catalog.components
+            .firstOrNull { it.name == componentName }
+            ?.parts
+            ?.forEach { part ->
+                result.addElement(
+                    LookupElementBuilder.create(part.name)
+                        .withIcon(AllIcons.Xml.Css_class)
+                        .withTypeText("$componentName part"))
+            }
     }
 
     private fun isVariableContext(text: String): Boolean =
@@ -71,7 +74,9 @@ private class VaadinCssCompletionProvider : CompletionProvider<CompletionParamet
 
     private fun partComponent(text: String): String? =
         Regex("(vaadin-[a-z0-9-]+)[^{}]*::part\\(\\s*[a-z0-9-]*$", RegexOption.IGNORE_CASE)
-            .find(text)?.groupValues?.get(1)
+            .find(text)
+            ?.groupValues
+            ?.get(1)
 
     private fun isSelectorContext(text: String): Boolean {
         val currentBlock = text.substringAfterLast('{')
