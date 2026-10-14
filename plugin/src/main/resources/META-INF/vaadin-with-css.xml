@@ -4,6 +4,10 @@
             language="JAVA"
             implementationClass="com.vaadin.plugin.css.CssClassCompletionContributor"/>
 
+        <completion.contributor
+            language="CSS"
+            implementationClass="com.vaadin.plugin.css.VaadinCssCompletionContributor"/>
+
         <completion.confidence
                 language="JAVA"
                 implementationClass="com.vaadin.plugin.css.CssCompletionConfidence"
