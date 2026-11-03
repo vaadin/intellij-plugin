@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ "2026.2" ] # Use versions from https://www.jetbrains.com/idea/download/other.html
+        version: [ "263.7307.44" ] # 2026.3 EAP; switch to "2026.3" once released. Use versions from https://www.jetbrains.com/idea/download/other.html
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21

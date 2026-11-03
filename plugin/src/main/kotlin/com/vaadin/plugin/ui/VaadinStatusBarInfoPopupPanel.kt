@@ -6,6 +6,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.NewUiValue
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.panels.HorizontalLayout
+import com.intellij.ui.components.panels.VerticalLayout
 import com.intellij.util.ui.JBEmptyBorder
 import com.intellij.util.ui.JBFont
 import com.intellij.util.ui.UIUtil
@@ -21,8 +23,7 @@ import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
-import org.jdesktop.swingx.HorizontalLayout
-import org.jdesktop.swingx.VerticalLayout
+import javax.swing.SwingConstants
 
 class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
 
@@ -124,7 +125,7 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
     }
 
     private fun wrapMessage(text: String, foreground: Color, description: String? = null): JPanel {
-        val wrapper = JPanel(VerticalLayout())
+        val wrapper = JPanel(VerticalLayout(0))
         wrapper.add(createMessage(text, foreground))
         if (description != null) {
             wrapper.add(createDescription(description))
@@ -138,8 +139,8 @@ class VaadinStatusBarInfoPopupPanel(private val project: Project) : JPanel() {
         component: Component,
         description: String? = null
     ): JPanel {
-        val wrapper = JPanel(VerticalLayout())
-        val horizontalPanel = JPanel(HorizontalLayout(UIUtil.DEFAULT_HGAP))
+        val wrapper = JPanel(VerticalLayout(0))
+        val horizontalPanel = JPanel(HorizontalLayout(UIUtil.DEFAULT_HGAP, SwingConstants.CENTER))
         horizontalPanel.add(createMessage(text, foreground))
         horizontalPanel.add(component)
         wrapper.add(horizontalPanel)

@@ -30,6 +30,10 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
+    <!-- Version Control and the Services view became bundled plugins in 2026.3 (263). Older builds
+         don't have these IDs and serve the same classes from the platform core. -->
+    <depends optional="true" config-file="vaadin-with-vcs.xml">com.intellij.platform.vcs</depends>
+    <depends optional="true" config-file="vaadin-with-service-view.xml">com.intellij.platform.serviceView</depends>
 
     <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
     <depends>com.intellij.properties</depends>

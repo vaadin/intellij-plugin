@@ -1,0 +1,4 @@
+<idea-plugin>
+    <!-- Empty on purpose: the dependency only makes the Version Control classes (IdeUtil,
+         VaadinStatusBarInfoPopupPanel) visible on 263+, where they live in a bundled plugin. -->
+</idea-plugin>
