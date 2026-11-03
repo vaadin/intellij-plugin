@@ -87,7 +87,7 @@ object VaadinHomeUtil {
                         e,
                     )
                 }
-            } else if (isBundledVersionNewer()) {
+            } else if (isBundledVersionDifferent()) {
                 try {
                     FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
                     val version = getHotswapAgentVersion(hotSwapAgentJarFile)
@@ -107,11 +107,15 @@ object VaadinHomeUtil {
         }
     }
 
-    private fun isBundledVersionNewer(): Boolean {
+    /**
+     * The jar in ~/.vaadin is owned by the plugin, so any version other than the bundled one is replaced - comparing
+     * for "newer" would never replace e.g. a 2.0.4-SNAPSHOT with the 2.0.4 release.
+     */
+    private fun isBundledVersionDifferent(): Boolean {
         val hotswapAgentVersionInVaadinFolder = getHotswapAgentVersion(hotSwapAgentJarFile)
         val bundledHotswapAgentVersion = getBundledHotswapAgentVersion()
         if (bundledHotswapAgentVersion != null && hotswapAgentVersionInVaadinFolder != null) {
-            return bundledHotswapAgentVersion.compareTo(hotswapAgentVersionInVaadinFolder) > 0
+            return bundledHotswapAgentVersion != hotswapAgentVersionInVaadinFolder
         }
         return false
     }
@@ -145,11 +149,7 @@ object VaadinHomeUtil {
                 val inputStream = jarFile.getInputStream(entry)
                 val properties = Properties()
                 properties.load(inputStream)
-                var version = properties.getProperty("version")
-                if (version.indexOf('-') != -1) {
-                    version = version.substring(0, version.indexOf('-'))
-                }
-                return version
+                return properties.getProperty("version")
             }
         }
         return null
