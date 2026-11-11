@@ -30,6 +30,11 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     <depends>org.jetbrains.idea.maven</depends>
+    <!-- Platform APIs moved out of the core into bundled plugins in 2026.3 (build 263): VCS (ProjectLevelVcsManager,
+         showAbove) and Run Dashboard (ExecutorAction). Optional because these plugin ids do not exist in older builds,
+         where the same classes are still part of the core. -->
+    <depends optional="true" config-file="vaadin-with-vcs.xml">com.intellij.platform.vcs</depends>
+    <depends optional="true" config-file="vaadin-with-services-view.xml">com.intellij.platform.serviceView</depends>
 
     <!-- Vaadin Endpoints IntelliJ Ultimate dependencies -->
     <depends>com.intellij.properties</depends>
