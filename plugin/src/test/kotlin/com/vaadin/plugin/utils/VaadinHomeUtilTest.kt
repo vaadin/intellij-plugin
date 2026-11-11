@@ -7,6 +7,8 @@ import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -23,6 +25,19 @@ class VaadinHomeUtilTest {
     @AfterEach
     fun restoreVaadinHome() {
         VaadinHomeUtil.vaadinHomeDirectoryOverride = null
+    }
+
+    @Test
+    fun missingAgentIsInstalled() {
+        val version = VaadinHomeUtil.updateOrInstallHotSwapJar()
+
+        assertEquals(bundledVersion(), version)
+        assertArrayEquals(bundledJar(), Files.readAllBytes(agentJar().toPath()))
+    }
+
+    @Test
+    fun bundledVersionIsRead() {
+        assertTrue(Regex("""\d+\.\d+\.\d+""").matches(bundledVersion()), bundledVersion())
     }
 
     @Test
@@ -48,8 +63,9 @@ class VaadinHomeUtilTest {
     private fun assertReplaced(installedVersion: String) {
         val installed = installFakeAgent(installedVersion)
 
-        VaadinHomeUtil.updateOrInstallHotSwapJar()
+        val version = VaadinHomeUtil.updateOrInstallHotSwapJar()
 
+        assertEquals(bundledVersion(), version)
         assertArrayEquals(bundledJar(), Files.readAllBytes(installed.toPath()))
     }
 
@@ -57,13 +73,14 @@ class VaadinHomeUtilTest {
         val installed = installFakeAgent(installedVersion)
         val before = Files.readAllBytes(installed.toPath())
 
-        VaadinHomeUtil.updateOrInstallHotSwapJar()
+        val version = VaadinHomeUtil.updateOrInstallHotSwapJar()
 
+        assertEquals(installedVersion, version)
         assertArrayEquals(before, Files.readAllBytes(installed.toPath()))
     }
 
     private fun installFakeAgent(version: String): File {
-        val jar = File(home.toFile(), "intellij-plugin/hotswap-agent.jar")
+        val jar = agentJar()
         jar.parentFile.mkdirs()
         JarOutputStream(jar.outputStream()).use {
             it.putNextEntry(JarEntry("version.properties"))
@@ -72,6 +89,8 @@ class VaadinHomeUtilTest {
         }
         return jar
     }
+
+    private fun agentJar(): File = File(home.toFile(), "intellij-plugin/hotswap-agent.jar")
 
     private fun bundledJar(): ByteArray =
         javaClass.classLoader.getResourceAsStream("hotswap-agent.jar")!!.use { it.readAllBytes() }

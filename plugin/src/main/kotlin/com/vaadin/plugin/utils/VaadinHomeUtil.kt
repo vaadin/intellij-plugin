@@ -143,8 +143,7 @@ object VaadinHomeUtil {
         }
     }
 
-    @VisibleForTesting
-    internal fun getHotswapAgentVersion(file: File): String? = file.inputStream().use { readHotswapAgentVersion(it) }
+    private fun getHotswapAgentVersion(file: File): String? = file.inputStream().use { readHotswapAgentVersion(it) }
 
     private fun readHotswapAgentVersion(jar: InputStream): String? {
         val jarStream = JarInputStream(jar)
