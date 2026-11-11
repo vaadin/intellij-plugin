@@ -41,7 +41,7 @@ class VaadinHomeUtilTest {
 
     @Test
     fun newerInstalledVersionIsKept() {
-        val installed = installFakeAgent("99.0.0")
+        val installed = installFakeAgent("10.0.0")
         val before = Files.readAllBytes(installed.toPath())
 
         VaadinHomeUtil.updateOrInstallHotSwapJar()
