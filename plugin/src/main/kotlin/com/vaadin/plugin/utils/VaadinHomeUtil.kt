@@ -7,10 +7,13 @@ import elemental.json.Json
 import elemental.json.JsonException
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.jar.JarFile
+import java.util.jar.JarInputStream
+import org.jetbrains.annotations.VisibleForTesting
 
 object VaadinHomeUtil {
     private val LOG: Logger = Logger.getInstance(VaadinHomeUtil::class.java)
@@ -18,12 +21,18 @@ object VaadinHomeUtil {
     private const val VAADIN_FOLDER_NAME: String = ".vaadin"
     private const val HOTSWAP_AGENT_JAR_FILE_NAME = "hotswap-agent.jar"
 
+    /** Replaces the Vaadin home directory, so tests don't have to change the JVM-wide `user.home`. */
+    @VisibleForTesting internal var vaadinHomeDirectoryOverride: File? = null
+
     /**
      * Get Vaadin home directory.
      *
      * @return File instance for Vaadin home folder. Does not check if the folder exists.
      */
     fun resolveVaadinHomeDirectory(): File {
+        vaadinHomeDirectoryOverride?.let {
+            return it
+        }
         val userHome = System.getProperty(PROPERTY_USER_HOME)
         return File(userHome, VAADIN_FOLDER_NAME)
     }
@@ -70,15 +79,12 @@ object VaadinHomeUtil {
      */
     fun updateOrInstallHotSwapJar(): String? {
         try {
-            val bundledHotswap =
-                this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)
-                    ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found")
             if (!hotSwapAgentJarFile.exists()) {
                 try {
                     check(FileUtil.createParentDirs(hotSwapAgentJarFile)) {
                         "Unable to create directory for hotswap-agent.jar"
                     }
-                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
+                    copyBundledHotswapAgentJar()
                     val version = getHotswapAgentVersion(hotSwapAgentJarFile)
                     LOG.info("Installed hotswap-agent.jar version: $version")
                     return version
@@ -90,7 +96,7 @@ object VaadinHomeUtil {
                 }
             } else if (isBundledVersionNewer()) {
                 try {
-                    FileUtil.copy(bundledHotswap.openStream(), hotSwapAgentJarFile.outputStream())
+                    copyBundledHotswapAgentJar()
                     val version = getHotswapAgentVersion(hotSwapAgentJarFile)
                     LOG.info("Updated hotswap-agent.jar to version $version")
                     return version
@@ -99,7 +105,7 @@ object VaadinHomeUtil {
                 }
             } else {
                 val version = getHotswapAgentVersion(hotSwapAgentJarFile)
-                LOG.info("Using existing hotswap-agent.jar version " + getHotswapAgentVersion(hotSwapAgentJarFile))
+                LOG.info("Using existing hotswap-agent.jar version $version")
                 return version
             }
         } catch (e: Exception) {
@@ -117,37 +123,39 @@ object VaadinHomeUtil {
         return false
     }
 
-    private fun getBundledHotswapAgentVersion(): String? {
-        var tempFile: File? = null
-        try {
-            tempFile = File.createTempFile("bundled-hotswap-agent", ".jar")
-            FileUtil.copy(
-                this.javaClass.classLoader.getResource(HOTSWAP_AGENT_JAR_FILE_NAME)?.openStream()
-                    ?: throw IllegalStateException("Unable to copy hotswap-agent.jar to temporary file "),
-                tempFile.outputStream(),
-            )
-            return getHotswapAgentVersion(tempFile)
-        } catch (e: IOException) {
-            LOG.error(e.message, e)
-            return null
-        } finally {
-            if (tempFile != null) {
-                FileUtil.asyncDelete(tempFile)
-            }
+    private fun copyBundledHotswapAgentJar() {
+        openBundledHotswapAgentJar().use {
+            Files.copy(it, hotSwapAgentJarFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 
-    private fun getHotswapAgentVersion(file: File): String? {
-        val jarFile = JarFile(file)
-        val entries = jarFile.entries()
-        while (entries.hasMoreElements()) {
-            val entry = entries.nextElement()
+    private fun openBundledHotswapAgentJar(): InputStream =
+        this.javaClass.classLoader.getResourceAsStream(HOTSWAP_AGENT_JAR_FILE_NAME)
+            ?: throw IllegalStateException("The plugin package is broken: no hotswap-agent.jar found")
+
+    @VisibleForTesting
+    internal fun getBundledHotswapAgentVersion(): String? {
+        try {
+            return openBundledHotswapAgentJar().use { readHotswapAgentVersion(it) }
+        } catch (e: IOException) {
+            LOG.error(e.message, e)
+            return null
+        }
+    }
+
+    @VisibleForTesting
+    internal fun getHotswapAgentVersion(file: File): String? = file.inputStream().use { readHotswapAgentVersion(it) }
+
+    private fun readHotswapAgentVersion(jar: InputStream): String? {
+        val jarStream = JarInputStream(jar)
+        var entry = jarStream.nextJarEntry
+        while (entry != null) {
             if (entry.name == "version.properties") {
-                val inputStream = jarFile.getInputStream(entry)
                 val properties = Properties()
-                properties.load(inputStream)
+                properties.load(jarStream)
                 return properties.getProperty("version")
             }
+            entry = jarStream.nextJarEntry
         }
         return null
     }

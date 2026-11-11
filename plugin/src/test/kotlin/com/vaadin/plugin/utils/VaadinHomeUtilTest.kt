@@ -3,9 +3,7 @@ package com.vaadin.plugin.utils
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.Properties
 import java.util.jar.JarEntry
-import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -17,31 +15,46 @@ class VaadinHomeUtilTest {
 
     @TempDir lateinit var home: Path
 
-    private var originalUserHome: String? = null
-
     @BeforeEach
-    fun redirectUserHome() {
-        originalUserHome = System.getProperty("user.home")
-        System.setProperty("user.home", home.toString())
+    fun redirectVaadinHome() {
+        VaadinHomeUtil.vaadinHomeDirectoryOverride = home.toFile()
     }
 
     @AfterEach
-    fun restoreUserHome() {
-        System.setProperty("user.home", originalUserHome!!)
+    fun restoreVaadinHome() {
+        VaadinHomeUtil.vaadinHomeDirectoryOverride = null
     }
 
     @Test
     fun snapshotOfTheBundledVersionIsReplacedByTheRelease() {
-        val installed = installFakeAgent(bundledVersion() + "-SNAPSHOT")
+        assertReplaced(bundledVersion() + "-SNAPSHOT")
+    }
+
+    @Test
+    fun olderSnapshotIsReplaced() {
+        assertReplaced("2.0.4-SNAPSHOT")
+    }
+
+    @Test
+    fun sameVersionIsKept() {
+        assertKept(bundledVersion())
+    }
+
+    @Test
+    fun newerInstalledVersionIsKept() {
+        assertKept("10.0.0")
+    }
+
+    private fun assertReplaced(installedVersion: String) {
+        val installed = installFakeAgent(installedVersion)
 
         VaadinHomeUtil.updateOrInstallHotSwapJar()
 
         assertArrayEquals(bundledJar(), Files.readAllBytes(installed.toPath()))
     }
 
-    @Test
-    fun newerInstalledVersionIsKept() {
-        val installed = installFakeAgent("10.0.0")
+    private fun assertKept(installedVersion: String) {
+        val installed = installFakeAgent(installedVersion)
         val before = Files.readAllBytes(installed.toPath())
 
         VaadinHomeUtil.updateOrInstallHotSwapJar()
@@ -50,7 +63,7 @@ class VaadinHomeUtilTest {
     }
 
     private fun installFakeAgent(version: String): File {
-        val jar = VaadinHomeUtil.getHotSwapAgentJar()
+        val jar = File(home.toFile(), "intellij-plugin/hotswap-agent.jar")
         jar.parentFile.mkdirs()
         JarOutputStream(jar.outputStream()).use {
             it.putNextEntry(JarEntry("version.properties"))
@@ -63,12 +76,5 @@ class VaadinHomeUtilTest {
     private fun bundledJar(): ByteArray =
         javaClass.classLoader.getResourceAsStream("hotswap-agent.jar")!!.use { it.readAllBytes() }
 
-    private fun bundledVersion(): String {
-        val copy = Files.write(home.resolve("bundled.jar"), bundledJar())
-        return JarFile(copy.toFile()).use { jar ->
-            val properties = Properties()
-            jar.getInputStream(jar.getEntry("version.properties")).use { properties.load(it) }
-            properties.getProperty("version")
-        }
-    }
+    private fun bundledVersion(): String = VaadinHomeUtil.getBundledHotswapAgentVersion()!!
 }
