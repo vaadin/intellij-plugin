@@ -1,0 +1,4 @@
+<idea-plugin>
+    <!-- Intentionally empty: the dependency only puts the plugin's classes on our class path in 2026.3+.
+         See the comment on the <depends> in plugin.xml. -->
+</idea-plugin>
